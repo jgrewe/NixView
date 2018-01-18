@@ -1,6 +1,7 @@
 #include "eventplotter.h"
 #include "ui_eventplotter.h"
 
+
 EventPlotter::EventPlotter(QWidget *parent, int numOfPoints) :
   QWidget(parent), ui(new Ui::EventPlotter), thread() {
     ui->setupUi(this);
@@ -32,11 +33,9 @@ EventPlotter::~EventPlotter() {
     delete ui;
 }
 
-
 PlotterType EventPlotter::plotter_type() const {
     return PlotterType::Event;
 }
-
 
 void EventPlotter::set_label(const std::string &label) {
     //ui->label->setText(QString::fromStdString(label));

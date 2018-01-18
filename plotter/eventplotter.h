@@ -33,7 +33,6 @@ public:
     void set_xlabel(const std::string &label);
 
     void add_events(const QVector<double> &x_data, const QVector<double> &y_data, const QString &name, bool y_scale) override;
-
     void add_segments(const QVector<double> &positions, const QVector<double> &extents, const QString &name) override;
 
     PlotterType plotter_type() const override;
@@ -67,7 +66,9 @@ public slots:
     void changeXAxisSize(double ratio);
     void resetView();
 
-    /*void selection_changed();
+
+/*
+    void selection_changed();
     void mouse_wheel();
     void mouse_press();
     void show_legend();
@@ -87,7 +88,9 @@ public slots:
     void marker_circle();
     void marker_cross();
     void marker_dot();
-    void marker_plus();*/
+*/
+
+
 };
 
 #endif // EVENTPLOTTER_H
