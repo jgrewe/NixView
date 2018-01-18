@@ -64,8 +64,8 @@ SOURCES += main.cpp\
     db/projectindex.cpp \
     plotter/eventplotter.cpp \
     utils/tagcontainer.cpp \
-    utils/loadthread.cpp
-
+    utils/loadthread.cpp \
+    views/TagViewListed.cpp
 
 HEADERS  += MainWindow.hpp \
     nixview.h \
@@ -113,8 +113,8 @@ HEADERS  += MainWindow.hpp \
     db/projectindex.hpp \
     plotter/eventplotter.h \
     utils/tagcontainer.h \
-    utils/loadthread.h
-
+    utils/loadthread.h \
+    views/TagViewListed.h
 
 FORMS    += MainWindow.ui \
     dialogs/aboutdialog.ui \
@@ -142,7 +142,9 @@ FORMS    += MainWindow.ui \
     dialogs/filepropertiesdialog.ui \
     searchform.ui \
     views/projectnavigator.ui \
-    plotter/eventplotter.ui
+    plotter/eventplotter.ui \
+    views/TagViewListed.ui
+
 
 #standard windows folder?
 #win32:CONFIG(release, debug|release): LIBS += /usr/local/lib/release/ -lnix
