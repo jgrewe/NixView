@@ -64,10 +64,6 @@ private:
     void deleteWidgetsFromLayout();
     void processItem();
 
-    void draw1D(const nix::DataArray &array);
-    void draw2D(const nix::DataArray &array);
-    void drawMultiLine(const nix::DataArray &array);
-
     int sliderMapToValue(QCPRange current, QCPRange complete);
 };
 
