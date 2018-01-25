@@ -4,6 +4,7 @@
 #include <QToolBar>
 #include <QMenu>
 #include <QInputDialog>
+#include "views/TagViewListed.h"
 
 
 PlotDialog::PlotDialog(QWidget *parent) :
@@ -19,8 +20,8 @@ PlotDialog::PlotDialog(QWidget *parent) :
 
 void PlotDialog::set_entity(QVariant var) {
     if (var.canConvert<nix::Tag>() || var.canConvert<nix::MultiTag>()) {
-        ui->tag_view->setEntity(var);
-        ui->stackedWidget->setCurrentIndex(1);
+        ui->tagViewListed->setEntity(var);
+        ui->stackedWidget->setCurrentIndex(2);
         resize(800, 650);
     } else {
         ui->plot->setEntity(var);

@@ -30,7 +30,8 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <widget class="PlotWidget" name="plot"/>
-     <widget class="TagView" name="tag_view"/>
+     <widget class="TagView" name="tagView"/>
+     <widget class="TagViewListed" name="tagViewListed"/>
     </widget>
    </item>
    <item>
@@ -65,6 +66,12 @@
    <class>TagView</class>
    <extends>QWidget</extends>
    <header>views/TagView.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TagViewListed</class>
+   <extends>QWidget</extends>
+   <header>views/TagViewListed.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
