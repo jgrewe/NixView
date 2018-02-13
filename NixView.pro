@@ -142,8 +142,8 @@ FORMS    += MainWindow.ui \
     dialogs/filepropertiesdialog.ui \
     searchform.ui \
     views/projectnavigator.ui \
-    plotter/eventplotter.ui \
-    views/TagViewListed.ui
+    views/TagViewListed.ui \
+    plotter/eventplotter.ui
 
 
 #standard windows folder?
