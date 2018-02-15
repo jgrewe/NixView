@@ -5,31 +5,11 @@
 #include "model/NixModelItem.hpp"
 #include "utils/entitydescriptor.h"
 #include <nix.hpp>
+#include "utils/tagcontainer.h"
 
 namespace Ui {
 class TagViewListed;
 }
-
-class TagContainerTemp {
-public:
-    TagContainerTemp();
-    TagContainerTemp(QVariant entity);
-
-private:
-    QVariant entity;
-
-public:
-    QVariant getEntity();
-    std::string name();
-    std::string type();
-    std::vector<nix::DataArray> references();
-    std::vector<nix::Feature> features();
-    std::string description();
-    QVector<QVector<double>> positions();
-    bool hasExtents();
-    QVector<QVector<double>> extents();
-    QVector<QVector<QString>> completeDescription();
-};
 
 class TagViewListed : public QWidget
 {
@@ -48,7 +28,7 @@ public slots:
 private:
     Ui::TagViewListed *ui;
 
-    TagContainerTemp tag;
+    TagContainer tag;
 
     void processTag();
     void plotData();

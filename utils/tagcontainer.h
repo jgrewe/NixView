@@ -19,6 +19,7 @@ public:
     std::string type();
     std::vector<nix::DataArray> references();
     std::vector<nix::Feature> features();
+
     QVector<double> positions(unsigned int index);
     bool hasExtents();
     QVector<double> extents(unsigned int index);
@@ -31,5 +32,6 @@ public:
     unsigned int refCount();
     unsigned int tagCount();
     unsigned int featureCount();
+
 };
 #endif // TAGCONTAINER_H
