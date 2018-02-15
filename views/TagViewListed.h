@@ -28,6 +28,7 @@ public:
     QVector<QVector<double>> positions();
     bool hasExtents();
     QVector<QVector<double>> extents();
+    QVector<QVector<QString>> completeDescription();
 };
 
 class TagViewListed : public QWidget

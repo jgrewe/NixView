@@ -7,7 +7,14 @@
 
 /****** TagContainerTemp ******/
 // Copy from TagView: added positions(), extents() hasExtents()
-TagContainerTemp::TagContainerTemp(QVariant entity):entity(entity) {}
+TagContainerTemp::TagContainerTemp(QVariant entity) {
+    if (entity.canConvert<nix::Tag>() ||entity.canConvert<nix::MultiTag>()) {
+        this->entity = entity;
+    } else {
+        std::cerr << "TagContainerTemp() - Exeption: None tag entity in TagContainerTemp." << std::endl;
+        this->entity = entity;
+    }
+}
 
 TagContainerTemp::TagContainerTemp(){}
 
@@ -40,19 +47,38 @@ QVector<QVector<double>> TagContainerTemp::positions() {
 
     } else if (entity.canConvert<nix::MultiTag>()) {
         nix::DataArray array = entity.value<nix::MultiTag>().positions();
-        if(array.dataExtent().size() == 1) {
-            std::vector<double> pos = std::vector<double>(array.dataExtent()[0]);
-            array.getDataDirect(array.dataType(), pos.data(), {array.dataExtent()[0]}, {0});
-            positions.append(QVector<double>::fromStdVector(pos));
-        } else if(array.dataExtent().size() == 2 ) {
-            for (unsigned int i = 0; i < array.dataExtent()[0]; i++) {
-                std::vector<double> pos = std::vector<double>(array.dataExtent()[1]);
-                array.getDataDirect(array.dataType(), pos.data(), {array.dataExtent()[1]}, {(int) i, 0});
-                positions.append(QVector<double>::fromStdVector(pos));
-            }
-        } else {
-            std::cerr << "TagContainerTemp::positions cannot handle more than 2 dimensions." << std::endl;
-        }
+
+        //USE ARRAY_TO_QVECTOR FROM PLOTTER.H (fix it first)
+
+//        if(array.dimensionCount() == 1) {
+//            nix::Dimension d = array.getDimension(1);
+//            if(d.dimensionType() == nix::DimensionType::Range) {
+//                QVector<double> pos = QVector<double>::fromStdVector(d.asRangeDimension().axis(array.dataExtent()[0]));
+//                return positions.append(pos);
+//            } else if(d.dimensionType() == nix::DimensionType::Set) {
+//                QVector<double> pos = QVector<double>::fromStdVector(d.asSetDimension().)
+//            }
+//        } else if (array.dimensionCount() == 2) {
+
+//        } else {
+//            std::cerr << "TagContainerTemp::positions cannot handle more than 2 dimensions." << std::endl;
+//            return positions;
+//        }
+
+//        nix::DataArray array = entity.value<nix::MultiTag>().positions();
+//        if(array.dataExtent().size() == 1) {
+//            std::vector<double> pos = std::vector<double>(array.dataExtent()[0]);
+//            array.getDataDirect(array.dataType(), pos.data(), {array.dataExtent()[0]}, {0});
+//            positions.append(QVector<double>::fromStdVector(pos));
+//        } else if(array.dataExtent().size() == 2 ) {
+//            for (unsigned int i = 0; i < array.dataExtent()[0]; i++) {
+//                std::vector<double> pos = std::vector<double>(array.dataExtent()[1]);
+//                array.getDataDirect(array.dataType(), pos.data(), {array.dataExtent()[1]}, {(int) i, 0});
+//                positions.append(QVector<double>::fromStdVector(pos));
+//            }
+//        } else {
+//            std::cerr << "TagContainerTemp::positions cannot handle more than 2 dimensions." << std::endl;
+//        }
 
     }
     return positions;
@@ -125,6 +151,37 @@ std::string TagContainerTemp::description() {
     return description;
 }
 
+/**
+ * returns a nested QVector<QVector<QString>> to be able to describe everything of the tag in the plotter.
+ *
+ * ********unfinished********what else is needed
+ *
+ * index: 0 = normal description of the tag: name, type, description.
+ * index: 1 = referenced array labels
+ *
+ * @brief TagContainerTemp::completeDescription returns
+ * @return
+ */
+QVector<QVector<QString>> TagContainerTemp::completeDescription() {
+    QVector<QVector<QString>> desc;
+
+    QVector<QString> tagDesc;
+    tagDesc.append(QString::fromStdString(this->name()));
+    tagDesc.append(QString::fromStdString(this->type()));
+    tagDesc.append(QString::fromStdString(this->description()));
+
+    desc.append(tagDesc);
+
+    if (entity.canConvert<nix::Tag>()) {
+
+    } else if (entity.canConvert<nix::MultiTag>()) {
+
+    }
+
+    return desc;
+
+}
+
 
 QVariant TagContainerTemp::getEntity() {
     return this->entity;
@@ -163,7 +220,6 @@ void TagViewListed::clear() {
 }
 
 void TagViewListed::processTag() {
-    std::cerr << "processTag():" << std::endl;
     clear();
     ui->tagLabel->setText(QString::fromStdString(tag.name() + " - " +tag.type()));
     ui->tagLabel->setToolTip(tag.description().c_str());
@@ -179,14 +235,13 @@ void TagViewListed::processTag() {
     }
 
     //plot Tags
-
     EventPlotter* ep = new EventPlotter(this);
     ui->plotWidget->layout()->addWidget(ep);
 
     if(tag.hasExtents()) {
-        ep->draw(tag.positions(), tag.extents());
+        ep->draw(tag.positions(), tag.extents(), tag.completeDescription());
     } else {
-        ep->draw(tag.positions());
+        ep->draw(tag.positions(), tag.completeDescription());
     }
 
 
