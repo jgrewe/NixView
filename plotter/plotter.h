@@ -109,7 +109,7 @@ public:
     static QVector<double> get_data_line(const nix::DataArray &array, nix::ndsize_t index, nix::ndsize_t dim) {
         std::vector<double> data;
         nix::NDSize shape = array.dataExtent();
-        if (shape.size() > 2) {
+        if (shape.size() != 2) {
             std::cerr << "Plotter::get_data_line: Method works only for 2D data!" << std::endl;
             return QVector<double>::fromStdVector(data);
         }
