@@ -33,7 +33,8 @@ void TagViewListed::setEntity(QVariant var) {
 void TagViewListed::clear() {
     ui->tagLabel->setText("");
     ui->tagLabel->setToolTip("");
-    //clear all plotters/features/labels and lines from the plotwidget!
+
+    //TODO: clear all plotters/features/labels and lines from the plotwidget!
 }
 
 void TagViewListed::processTag() {
@@ -52,14 +53,25 @@ void TagViewListed::processTag() {
     }
 
     //plot Tags
-    EventPlotter* ep = new EventPlotter(this);
-    ui->plotWidget->layout()->addWidget(ep);
+    for (unsigned int i = 0; i < tag.tagCount(); i++) {
+        EventPlotter* ep = new EventPlotter(this);
+        ui->plotWidget->layout()->addWidget(ep);
 
-    if(tag.hasExtents()) {
-        ep->draw(tag.positions(), tag.extents(), tag.completeDescription());
-    } else {
-        ep->draw(tag.positions(), tag.completeDescription());
+        if(tag.hasExtents()) {
+            QString yLabel;
+            QVector<QString> xLabels;
+            tag.tagLabels(yLabel, xLabels, i);
+            ep->draw(tag.positions(i), tag.extents(i), yLabel, xLabels);
+
+        } else {
+            QString yLabel;
+            QVector<QString> xLabels;
+            tag.tagLabels(yLabel, xLabels, i);
+            ep->draw(tag.positions(i), yLabel, xLabels);
+
+        }
     }
+
 
 
     //plot Features
