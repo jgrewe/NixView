@@ -148,7 +148,7 @@ void EventPlotter::draw(const QVector<double> &positions, const QString &ylabel,
     set_ylabel(ylabel);
 
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
-    this->totalRange.expand(QCPRange(positions.first(), positions.last()));
+    this->totalRange.expand( QCPRange(positions.first(), positions.last()) );
     ui->plot->xAxis->setRange(positions.first(), positions.last());
 
     plot(positions);
@@ -224,11 +224,11 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     //assumption has exactly one graph.
     emit xAxisChanged(newRange, totalRange); // signal for scrollbar and zoom.
 
-    QCPGraph *graph = ui->plot->graph();
-
-    if(graph->dataCount() == 0) {
+    if(ui->plot->graphCount() == 0 || array.isNone()) {
         return;
     }
+
+    QCPGraph *graph = ui->plot->graph();
 
     double max = graph->dataMainKey(graph->dataCount()-1);
     double min = graph->dataMainKey(0);
