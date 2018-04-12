@@ -36,12 +36,13 @@ public:
     void set_xlabel(const std::string &label);
 
     void add_events(const QVector<double> &x_data, const QVector<double> &y_data, const QString &name, bool y_scale) override;
-
     void add_events(const QVector<double> &x_data, const QString &name, bool y_scale);
-
     void add_segments(const QVector<double> &positions, const QVector<double> &extents, const QString &name) override;
 
     PlotterType plotter_type() const override;
+
+    QCPRange getCurrentxRange();
+    QCPRange getTotalxRange();
 
     void save(QString filename) {}
 
@@ -56,7 +57,6 @@ private:
     QVector<int> working;
 
     void draw_1d(const nix::DataArray &array);
-
     void draw_2d(const nix::DataArray &array);
 
     QCustomPlot* get_plot() override;
@@ -64,8 +64,6 @@ private:
     void setXRange(QVector<double> xData);
     void expandYRange(QVector<double> yData);
     void setYRange(QVector<double> yData);
-    //void calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize& extent_size, int xDim);
-    //bool checkForMoreData(int arrayIndex, double currentExtreme, bool higher);
 
 signals:
     void xAxisChanged(QCPRange xNow, QCPRange xComplete);
@@ -75,7 +73,6 @@ public slots:
     void drawThreadData(const QVector<double> &data, const QVector<double> &axis, int graphIndex);
     void testThreads(QCPRange range);
     void printProgress(double progress);
-    //void checkGraphsPerArray(QCPRange range);
     void resetView();
 
     void xAxisNewRange(QCPRange newRange);
@@ -84,6 +81,7 @@ public slots:
     void changeXAxisPosition(double newCenter);
     void changeYAxisPosition(double newCenter);
     void changeXAxisSize(double ratio);
+    void setxAxisrange(QCPRange range);
 
 
     void selection_changed();

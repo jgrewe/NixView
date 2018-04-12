@@ -317,6 +317,17 @@ QCustomPlot* LinePlotter::get_plot() {
     return ui->plot;
 }
 
+
+QCPRange LinePlotter::getCurrentxRange() {
+    return ui->plot->xAxis->range();
+}
+
+QCPRange LinePlotter::getTotalxRange() {
+    return totalXRange;
+}
+
+
+
 void LinePlotter::expandXRange(const nix::DataArray &array, int xDim) {
     int dimI = xDim-1;
 
@@ -359,6 +370,12 @@ void LinePlotter::expandYRange(QVector<double> yData) {
         yMin = yMax-1;
 
     totalYRange.expand(QCPRange(yMin, yMax));
+}
+
+void LinePlotter::setxAxisrange(QCPRange range) {
+    ui->plot->xAxis->setRange(range);
+    testThreads(range);
+    ui->plot->replot();
 }
 
 
