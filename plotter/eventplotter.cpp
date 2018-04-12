@@ -23,7 +23,7 @@ EventPlotter::EventPlotter(QWidget *parent, int numOfPoints) :
 
     qRegisterMetaType<QVector<double>>();
 
-    ui->plot->yAxis->setRange(-0.05,1.05);
+    ui->plot->yAxis->setRange(0,1.05);
     this->numOfPoints = numOfPoints;
     thread.setChuncksize(static_cast<unsigned int>(numOfPoints));
 }
@@ -148,7 +148,7 @@ void EventPlotter::draw(const QVector<double> &positions, const QString &ylabel,
     set_ylabel(ylabel);
 
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
-    this->totalRange.expand( QCPRange(positions.first(), positions.last()) );
+    expandTotalRange(positions.first(), positions.last());
     ui->plot->xAxis->setRange(positions.first(), positions.last());
 
     plot(positions);
@@ -178,7 +178,7 @@ void EventPlotter::draw(const QVector<double> &positions, const QVector<double> 
     set_ylabel(ylabel);
 
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
-    this->totalRange.expand(QCPRange(positions.first(), positions.last()+extents.last()));
+    expandTotalRange(positions.first(), positions.last()+extents.last());
     ui->plot->xAxis->setRange(positions.first(), positions.last()+extents.last());
 
     plot(positions, extents);
@@ -207,6 +207,7 @@ void EventPlotter::plot(const QVector<double> &positions, const QVector<double> 
 
     ui->plot->graph()->addData(xValues, yValues, true);
     ui->plot->xAxis->setRange(xValues[0], xValues.last());
+    expandTotalRange(xValues[0], xValues.last());
     ui->plot->replot();
 }
 
@@ -229,6 +230,11 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     }
 
     QCPGraph *graph = ui->plot->graph();
+
+    if(graph->dataCount() == 0) {
+       thread.startLoadingIfNeeded(newRange,1, newRange.center(), newRange.center(), 0);
+       return;
+    }
 
     double max = graph->dataMainKey(graph->dataCount()-1);
     double min = graph->dataMainKey(0);
