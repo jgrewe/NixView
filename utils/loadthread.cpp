@@ -282,6 +282,10 @@ void LoadThread::startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, 
     nix::DataArray array = this->array;
     mutex.unlock();
 
+    if(array.isNone()) {
+        return;
+    }
+
     if(dataMin == dataMax) {
         nix::NDSize start, extent;
 
