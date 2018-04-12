@@ -253,6 +253,33 @@ void EventPlotter::changeXAxisSize(double ratio) {
     }
 }
 
+
+void EventPlotter::expandTotalRange(double lower, double upper) {
+    if(totalRange == QCPRange()) {
+        totalRange = QCPRange(lower, upper);
+    } else {
+        totalRange.expand(QCPRange(lower, upper));
+    }
+}
+
+
+void EventPlotter::setxAxisrange(QCPRange range) {
+    ui->plot->xAxis->setRange(range);
+    xRangeChanged(range);
+    ui->plot->replot();
+}
+
+
+QCPRange EventPlotter::getCurrentxAxisRange() {
+    return ui->plot->xAxis->range();
+}
+
+
+QCPRange EventPlotter::getTotalxAxisRange() {
+    return totalRange;
+}
+
+
 void EventPlotter::resetView() {
     QCPDataContainer<QCPGraphData> data = *ui->plot->graph()->data().data();
 

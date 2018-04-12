@@ -41,6 +41,9 @@ public:
 
     QCustomPlot* get_plot() override;
 
+    QCPRange getCurrentxAxisRange();
+    QCPRange getTotalxAxisRange();
+
 private:
     Ui::EventPlotter *ui;
     ColorMap cmap;
@@ -54,6 +57,8 @@ private:
     void plot(const QVector<double> &positions);
     void plot(const QVector<double> &positions, const QVector<double> &extends);
 
+    void expandTotalRange(double lower, double upper);
+
 signals:
     void xAxisChanged(QCPRange xNow, QCPRange total);
 
@@ -64,6 +69,7 @@ public slots:
 
     void changeXAxisPosition(double newCenter); // react to signals from plotwidget.
     void changeXAxisSize(double ratio);
+    void setxAxisrange(QCPRange range);
     void resetView();
 
 
