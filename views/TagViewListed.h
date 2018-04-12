@@ -6,6 +6,7 @@
 #include "utils/entitydescriptor.h"
 #include <nix.hpp>
 #include "utils/tagcontainer.h"
+#include "../plotter/plotter.h"
 
 namespace Ui {
 class TagViewListed;
@@ -24,11 +25,21 @@ public:
 
 public slots:
     //void show_tag_info();
+    void setAllPlotRanges(QCPRange range);
+
+    void hScrollBarPosChanged(int value);
+    void changeHScrollBarValue(QCPRange newRange, QCPRange completeRange);
+
+signals:
+    void hScrollBarToPlot(double); // signals for the plotter.
 
 private:
     Ui::TagViewListed *ui;
-
     TagContainer tag;
+    QVector<Plotter*> plots;
+    QCPRange tagRange;
+    QCPRange refRange;
+    double scrollFactor;
 
     void processTag();
     void plotData();
