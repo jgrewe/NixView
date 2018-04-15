@@ -64,7 +64,6 @@ void LoadThread::run() {
 
 
 void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, unsigned int chunksize, int graphIndex) {
-
     int dataLength = extent[0];
     unsigned int offset = start[0];
     int totalChunks = (dataLength / chunksize) + 1;
@@ -111,7 +110,6 @@ void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
 
 
 void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, unsigned int xDim, std::vector<int> index2D, unsigned int chunksize, int graphIndex) {
-
     unsigned int xDimIndex = xDim-1;
     unsigned int dataLength = extent[xDimIndex];
     unsigned int offset = start[xDimIndex];
@@ -124,7 +122,7 @@ void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
     }
 
     extent[xDimIndex] = chunksize;
-    QVector<double> chunkdata(chunksize);
+    std::vector<double> chunkdata(chunksize);
 
     //if index2D is empty do all.
     if(index2D.size() == 0) {
@@ -166,8 +164,8 @@ void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
             }
             start[xDimIndex] = offset + i * chunksize;
 
-            array.getData(array.dataType(),chunkdata.data(),extent, start);
-
+            //array.getData(array.dataType(),chunkdata.data(),extent, start);
+            array.getData(chunkdata, extent, start);
             loadedData.insert(loadedData.end(), chunkdata.begin(), chunkdata.end());
             }
 
@@ -198,7 +196,6 @@ void LoadThread::getAxis(nix::Dimension dim, QVector<double> &axis, unsigned int
 
 
 void LoadThread::setVariables(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, std::vector<int> index2D, unsigned int dimNumber, int graphIndex) {
-
     if(! testInput(array, start, extent)) {
         std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
         return;
@@ -262,7 +259,6 @@ void LoadThread::setChuncksize(unsigned int size) {
 
 
 void LoadThread::restartThread(nix::NDSize start, nix::NDSize extent) {
-
     QMutexLocker locker(&mutex);
 
     this->start = start;
