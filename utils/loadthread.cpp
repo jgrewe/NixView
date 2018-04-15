@@ -37,9 +37,8 @@ void LoadThread::run() {
         unsigned int chunksize = this->chunksize;
         int graphIndex = this->graphIndex;
         nix::Dimension dim = this->dim;
+        int dimCount = this->array.dataExtent().size();;
         mutex.unlock();
-
-        int dimCount = array.dataExtent().size();;
 
         if(dimCount == 1) {
             load1D(array, start, extent, dim, chunksize, graphIndex);
