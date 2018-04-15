@@ -425,35 +425,25 @@ void LinePlotter::testThreads(QCPRange range) {
     if(ui->plot->graphCount() == 0) {
         return;
     }
-
     int graphIndex = 0;
+
     for(int i=0; i<arrays.size(); i++) {
         int xDim = guess_best_xdim(arrays[i]);
         QCPGraph *graph = ui->plot->graph(graphIndex);
-
-        if(graph->dataCount() == 0) {
-            // with setVariables ?
-            //loaders[i]->setVariables();
-
-            if(arrays[i].dataExtent().size() == 1) {
-                graphIndex += 1;
-            } else if(arrays[i].dataExtent().size() == 2) {
-                graphIndex += arrays[i].dataExtent()[2-xDim];
-            }
-            continue;
-        }
-
-        double max = graph->dataMainKey(graph->dataCount()-1);
-        double min = graph->dataMainKey(0);
-        double mean = graph->dataCount() / (max-min);
-
-        loaders[i]->startLoadingIfNeeded(range, xDim, min, max, mean);
 
         if(arrays[i].dataExtent().size() == 1) {
             graphIndex += 1;
         } else if(arrays[i].dataExtent().size() == 2) {
             graphIndex += arrays[i].dataExtent()[2-xDim];
         }
+        if(graph->dataCount() == 0) {
+            continue;
+        }
+
+        double max = graph->dataMainKey(graph->dataCount()-1);
+        double min = graph->dataMainKey(0);
+        double mean = graph->dataCount() / (max-min);
+        loaders[i]->startLoadingIfNeeded(range, xDim, min, max, mean);
     }
 }
 
