@@ -268,22 +268,24 @@ std::string EntityDescriptor::describe(const nix::Feature &f) {
 
 std::string EntityDescriptor::describe(const nix::Dimension &d) {
     EntityDescriptor desc;
-    desc.name("Dimension descriptor");
     desc.addInfo("Index", nix::util::numToStr(d.index()));
     desc.addInfo("Type", nix::util::dimTypeToStr(d.dimensionType()));
     if (d.dimensionType() == nix::DimensionType::Sample) {
         nix::SampledDimension sam = d.asSampledDimension();
-        desc.addInfo("Label", (sam.label() ? *sam.label() : ""));
-        desc.addInfo("Sampling interval", nix::util::numToStr(d.asSampledDimension().samplingInterval()));
-        desc.addInfo("Offset", (sam.offset() ? nix::util::numToStr(*sam.offset()) : "0.0"));
-        desc.addInfo("Unit", (sam.unit() ? *sam.unit() : ""));
+        desc.name((sam.label() ? *sam.label() : "") + (sam.label() ? "-dimension" : "Dimension"));
+        desc.addInfo("Sampling interval", nix::util::numToStr(d.asSampledDimension().samplingInterval()) +
+                     (sam.unit() ? *sam.unit() : ""));
+        desc.addInfo("Offset", (sam.offset() ? nix::util::numToStr(*sam.offset()) : "0.0") + (sam.unit() ? *sam.unit() : ""));
     } else if (d.dimensionType() == nix::DimensionType::Range) {
         nix::RangeDimension rdim = d.asRangeDimension();
-        std::vector<double> ticks = rdim.ticks();
-        desc.addInfo("Label", (rdim.label() ? *rdim.label() : ""));
-        desc.addInfo("Ticks", nix::util::numToStr(ticks.size()) + "("+ nix::util::numToStr(ticks[0]) +
-                     " ... " + nix::util::numToStr(ticks.back()) + ")");
+        desc.name((rdim.label() ? *rdim.label() : "") + (rdim.label() ? "-dimension" : "Dimension"));
+        // std::vector<double> ticks = rdim.ticks();
+        // desc.addInfo("Label", (rdim.label() ? *rdim.label() : ""));
+        //desc.addInfo("Ticks", nix::util::numToStr(ticks.size()) + "("+ nix::util::numToStr(ticks[0]) +
+        //             " ... " + nix::util::numToStr(ticks.back()) + ")");
         desc.addInfo("Unit", (rdim.unit() ? *rdim.unit() : ""));
+    } else {
+        desc.name("Set Dimension");
     }
     return desc.toHtml();
 }
