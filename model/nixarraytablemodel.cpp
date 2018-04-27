@@ -85,7 +85,6 @@ QVariant NixArrayTableModel::data(const QModelIndex &index, int role) const {
         return QVariant();
     }
     if (role == Qt::DisplayRole) {
-        double d = 0.0;
         nix::NDSize count(shape.size(), 1);
         if ((index.row() < rows) && (index.column() < cols)) {
             nix::NDSize offset(shape.size(), 0);
@@ -96,8 +95,19 @@ QVariant NixArrayTableModel::data(const QModelIndex &index, int role) const {
             if (shape.size() > 2) {
                 offset[2] = page;
             }
-            array.getData(nix::DataType::Double, &d, count, offset);
-            return QVariant(d);
+            if (array.dataType() == nix::DataType::String) {
+                std::string str;
+                array.getData(nix::DataType::String, &str, count, offset);
+                return QVariant(QString::fromStdString(str));
+            } else if (array.dataType() == nix::DataType::Bool)  {
+                bool b;
+                array.getData(nix::DataType::Bool, &b, count, offset);
+                return QVariant(b ? "true" : "false");
+            } else {
+                double d = 0.0;
+                array.getData(nix::DataType::Double, &d, count, offset);
+                return QVariant(d);
+            }
         }
     } else if (role == Qt::ToolTipRole) {
         std::string label = (array.label() ? *array.label() : "") +
