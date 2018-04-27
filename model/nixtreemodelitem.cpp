@@ -265,11 +265,14 @@ NixTreeModelItem* NixTreeModelItem::parentItem() {
 
 QVariant NixTreeModelItem::getValue(const nix::Property &p) {
     std::string vals;
+    int count = 0;
     if (p.valueCount() > 1) {
-        vals = "[ ";
+        vals = "[";
     }
     for (nix::Value v : p.values()) {
+        vals = vals + (count > 0 ? "; " : "");
         vals = vals + EntityDescriptor::value_to_str(v, p.dataType());
+        count ++;
     }
     if (p.valueCount() > 1) {
         vals = vals + "]";
