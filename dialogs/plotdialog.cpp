@@ -18,16 +18,16 @@ PlotDialog::PlotDialog(QWidget *parent) :
     QObject::connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 }
 
-void PlotDialog::set_entity(QVariant var) {
-    if (var.canConvert<nix::Tag>() || var.canConvert<nix::MultiTag>()) {
-        ui->tagViewListed->setEntity(var);
+void PlotDialog::set_entity(QVariant toPlot, QVariant block) {
+    if (toPlot.canConvert<nix::Tag>() || toPlot.canConvert<nix::MultiTag>()) {
+        ui->tagViewListed->setEntity(toPlot);
         ui->stackedWidget->setCurrentIndex(2);
 
         //ui->tagView->setEntity(var);
         //ui->stackedWidget->setCurrentIndex(1);
         resize(800, 650);
     } else {
-        ui->plot->setEntity(var);
+        ui->plot->setEntity(toPlot);
         ui->stackedWidget->setCurrentIndex(0);
         resize(640, 240);
     }

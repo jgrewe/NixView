@@ -115,6 +115,7 @@ void MainWindow::searchResultSelected() {
 
 void MainWindow::item_selected(QModelIndex qml) {
     NixTreeModelItem *item = static_cast<NixTreeModelItem*>(qml.internalPointer());
+    selected_qml = qml;
     item_selected(item->itemData());
 }
 
@@ -142,7 +143,11 @@ void MainWindow::show_about() {
 
 void MainWindow::show_plot() {
     PlotDialog d(this);
-    d.set_entity(selected_item);
+
+    NixTreeModelItem *item = static_cast<NixTreeModelItem*>(selected_qml.parent().internalPointer());
+    QVariant block = item->itemData();
+
+    d.set_entity(selected_item, block);
     d.exec();
 }
 
