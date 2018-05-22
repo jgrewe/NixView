@@ -39,6 +39,7 @@ void TagViewListed::clear() {
     //TODO: clear all plotters/features/labels and lines from the plotwidget!
 }
 
+
 void TagViewListed::processTag() {
     clear();
     ui->tagLabel->setText(QString::fromStdString(tag.name() + " - " +tag.type()));
@@ -62,31 +63,31 @@ void TagViewListed::processTag() {
         ui->plotWidget->layout()->addWidget(ep);
 
         plots.append(ep);
+        QString yLabel;
+        QVector<QString> xLabels;
+        tag.tagLabels(yLabel, xLabels, i);
 
         if(tag.hasExtents()) {
-            QString yLabel;
-            QVector<QString> xLabels;
-            tag.tagLabels(yLabel, xLabels, i);
-
             ep->draw(tag.positions(i), tag.extents(i), yLabel, xLabels);
         } else {
-            QString yLabel;
-            QVector<QString> xLabels;
-            tag.tagLabels(yLabel, xLabels, i);
-
             ep->draw(tag.positions(i), yLabel, xLabels);
         }
+
         tagRange = ep->getTotalxAxisRange();
     }
 
     //plot Features
+    // TODO
 
+
+
+    // connect all plots
     for (Plotter* p : plots) {
         if(p->plotter_type() == PlotterType::Line) {
-            //LinePlotter *lp = static_cast<LinePlotter*>(p);
+            LinePlotter *lp = static_cast<LinePlotter*>(p);
 
-            //connect(lp,   SIGNAL(xAxisChanged(QCPRange, QCPRange)), this, SLOT(changeHScrollBarValue(QCPRange, QCPRange)) );
-            //connect(this, SIGNAL(hScrollBarToPlot(double)), lp, SLOT(changeXAxisPosition(double)));
+            connect(lp,   SIGNAL(xAxisChanged(QCPRange, QCPRange)), this, SLOT(changeHScrollBarValue(QCPRange, QCPRange)) );
+            connect(this, SIGNAL(hScrollBarToPlot(double)), lp, SLOT(changeXAxisPosition(double)));
 
         } else if( p->plotter_type() == PlotterType::Event) {
             EventPlotter *ep = static_cast<EventPlotter*>(p);
@@ -124,12 +125,7 @@ void TagViewListed::setAllPlotRanges(QCPRange range) {
 
 
 void TagViewListed::hScrollBarPosChanged(int value) {
-
-    //std::cerr << "scroll min: " << ui->hScrollBar->minimum() << std::endl;
-    //std::cerr << "scroll max: " << ui->hScrollBar->maximum() << std::endl;
-    //std::cerr << "position: " << value << std::endl;
     double pageStep = ui->hScrollBar->pageStep();
-
     double size = pageStep / scrollFactor;
     double center = static_cast<double>(value) / scrollFactor;
 
@@ -137,13 +133,13 @@ void TagViewListed::hScrollBarPosChanged(int value) {
     setAllPlotRanges(newRange);
 }
 
-void TagViewListed::changeHScrollBarValue(QCPRange newRange, QCPRange completeRange) {
-    // ignore completeRange use tagRange
 
-    //Umrechnung von QCPRange to int und verschieben der ScrollBar!
+void TagViewListed::changeHScrollBarValue(QCPRange newRange, QCPRange completeRange) {
+    // ignore completeRange use member tagRange
+
+    //Calculation from QCPRange to int and moving the scrollBar to the new position if needed!
     int currentMin = ui->hScrollBar->minimum();
     int currentMax = ui->hScrollBar->maximum();
-    //change range if needed:
     if( (currentMax != std::round(tagRange.upper*scrollFactor)) | (currentMin != std::round(tagRange.lower*scrollFactor)) ) {
         ui->hScrollBar->setRange(std::round(tagRange.lower*scrollFactor), std::round(tagRange.upper*scrollFactor));
     }
@@ -156,7 +152,4 @@ void TagViewListed::changeHScrollBarValue(QCPRange newRange, QCPRange completeRa
     if(ui->hScrollBar->value() != std::round(newRange.center()*scrollFactor)) {
         ui->hScrollBar->setValue(std::round(newRange.center()*scrollFactor));
     }
-
 }
-
-
