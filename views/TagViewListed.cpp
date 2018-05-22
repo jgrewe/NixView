@@ -94,18 +94,13 @@ void TagViewListed::processTag() {
             connect(this, SIGNAL(hScrollBarToPlot(double)), ep, SLOT(changeXAxisPosition(double)));
         }
     }
-
-    //std::cerr << "min:" << tagRange.lower << std::endl;
-    //std::cerr << "max:" << tagRange.upper << std::endl;
-
     int currentMin = ui->hScrollBar->minimum();
     int currentMax = ui->hScrollBar->maximum();
 
     if( (currentMax != std::round(tagRange.upper*scrollFactor)) | (currentMin != std::round(tagRange.lower*scrollFactor)) ) {
         ui->hScrollBar->setRange(std::round(tagRange.lower*scrollFactor), std::round(tagRange.upper*scrollFactor));
     }
-
-    setAllPlotRanges(tagRange);
+    setAllPlotRanges(QCPRange(tagRange.lower - tagRange.size()*0.025, tagRange.upper + tagRange.size()*0.025));
 }
 
 

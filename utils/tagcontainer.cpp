@@ -166,7 +166,7 @@ void TagContainer::tagLabels(QString &ylabel, QVector<QString> &xlabels, unsigne
         return;
     }
     refLabels(ylabel, xlabels, 0); // get xlabels from the first ref.
-    ylabel = QString::fromStdString("Tag: " + name() + " " + std::to_string(index));
+    ylabel = QString::fromStdString("Tag " + std::to_string(index+1) + ": " + name());
 }
 
 
