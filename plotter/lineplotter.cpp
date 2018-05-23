@@ -438,6 +438,7 @@ void LinePlotter::testThreads(QCPRange range) {
             graphIndex += arrays[i].dataExtent()[2-xDim];
         }
         if(graph->dataCount() == 0) {
+            loaders[i]->startLoadingIfNeeded(range, xDim, 0, 0, 0);
             continue;
         }
 
