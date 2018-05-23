@@ -147,6 +147,11 @@ void MainWindow::show_plot() {
     NixTreeModelItem *item = static_cast<NixTreeModelItem*>(selected_qml.parent().internalPointer());
     QVariant block = item->itemData();
 
+    if(! block.canConvert<nix::Block>()) {
+        //can this happen? for tags: can they have references(/DataArrays) out of it's own block ?
+        std::cerr << "ERROR - MainWindow::show_plot() - Parent of the item to plot is not a block!" << std::endl;
+    }
+
     d.set_entity(selected_item, block);
     d.exec();
 }

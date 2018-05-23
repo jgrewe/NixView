@@ -71,7 +71,7 @@ void LinePlotter::set_ylabel(const QString &label){
 }
 
 
-void LinePlotter::draw(const nix::DataArray &array) {
+void LinePlotter::draw(const nix::DataArray &array, const nix::Block &block) {
     if (!Plotter::check_plottable_dtype(array)) {
         std::cerr << "LinePlotter::draw cannot handle data type " << array.dataType() << std::endl;
         return;
@@ -82,6 +82,7 @@ void LinePlotter::draw(const nix::DataArray &array) {
     }
 
     arrays.append(array);
+    blocks.append(block);
     loaders.append(new LoadThread());
 
     LoadThread *loader = loaders.last();
@@ -133,7 +134,7 @@ void LinePlotter::draw_1d(const nix::DataArray &array) {
         nix::NDSize extent(1);
         extent[0] = length;
 
-        loaders.last()->setVariables1D(array, start, extent, array.getDimension(1), newGraphIndex);
+        loaders.last()->setVariables1D(array, blocks.last(), start, extent, newGraphIndex);
 
         // open loading dialog ? too fast for small amounts (TODO: general loading Dialog)
     }
@@ -183,7 +184,7 @@ void LinePlotter::draw_2d(const nix::DataArray &array) {
     extent[best_dim-1] = length;
     extent[2-best_dim] = 1;
 
-    loaders.last()->setVariables(array, start, extent, array.getDimension(best_dim), std::vector<int>(), best_dim, firstGraphIndex);
+    loaders.last()->setVariables(array, blocks.last(), start, extent, std::vector<int>(), best_dim, firstGraphIndex);
 }
 
 

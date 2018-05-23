@@ -18,7 +18,7 @@ public:
     explicit EventPlotter(QWidget *parent = 0, int numOfPoints=100000);
     ~EventPlotter();
 
-    void draw(const nix::DataArray &array);
+    void draw(const nix::DataArray &array, const nix::Block &block);
     void draw(const QVector<double> &positions, const QString &ylabel, const QVector<QString> &xlabels);
     void draw(const QVector<double> &positions, const QVector<double> &extents, const QString &ylabel, const QVector<QString> &xlabels);
 
@@ -47,6 +47,7 @@ public:
 private:
     Ui::EventPlotter *ui;
     ColorMap cmap;
+    nix::Block block;
     nix::DataArray array;
     LoadThread thread;
     QCPRange totalRange;

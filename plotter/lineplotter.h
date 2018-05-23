@@ -19,7 +19,7 @@ public:
     explicit LinePlotter(QWidget *parent = 0, int numofPoints = 100000);
     ~LinePlotter();
 
-    void draw(const nix::DataArray &array);
+    void draw(const nix::DataArray &array, const nix::Block &block);
 
     bool check_dimensions(const nix::DataArray &array) const;
 
@@ -52,6 +52,7 @@ private:
     int numOfPoints;
     QCPRange totalXRange;
     QCPRange totalYRange;
+    QVector<nix::Block> blocks;
     QVector<nix::DataArray> arrays;
     QVector<LoadThread*> loaders;
     QVector<int> working;

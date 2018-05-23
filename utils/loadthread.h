@@ -34,7 +34,7 @@ public:
      * @param Index: An Index that will be givenin the signals to be able to use multiple threads at the same time.
      *          For 2D Arrays the Index is increassed by the index in second dimension of the loaded data.
      */
-    void setVariables(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, std::vector<int> index2D, unsigned int dimNumber, int Index);
+    void setVariables(const nix::DataArray &array, const nix::Block &block, nix::NDSize start, nix::NDSize extent, std::vector<int> index2D, unsigned int dimNumber, int Index);
 
     /**
      * @brief setVariables1D: A smaller setVariables for 1D Arrays that don't need all members. Also starts the thread.
@@ -44,7 +44,7 @@ public:
      * @param dim: the nix dimension  that describes the xAxis.
      * @param graphIndex: An index that will be returned in the Signals to be able to use multiple threads at once.
      */
-    void setVariables1D(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, int graphIndex);
+    void setVariables1D(const nix::DataArray &array, const nix::Block &block, nix::NDSize start, nix::NDSize extent, int graphIndex);
 
     /**
      * @brief setChuncksize: sets the chunksize of the thread. Defines the size of the parts the thread will split the work.
@@ -85,7 +85,6 @@ private:
     nix::NDSize start;
     nix::NDSize extent;
     unsigned int chunksize;
-    nix::Dimension dim;
     unsigned int dimNumber;
     std::vector<int> index2D;
     int graphIndex;

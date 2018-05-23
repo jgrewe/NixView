@@ -30,13 +30,12 @@ void LoadThread::run() {
             restart=false;
             continue;
         }
-
         nix::DataArray array = this->array;
         nix::NDSize start = this->start;
         nix::NDSize extent = this->extent;
         unsigned int chunksize = this->chunksize;
         int graphIndex = this->graphIndex;
-        nix::Dimension dim = this->dim;
+        nix::Dimension dim = array.getDimension(dimNumber+1);
         int dimCount = this->array.dataExtent().size();;
         mutex.unlock();
 
@@ -102,7 +101,6 @@ void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
     if(! brokenData) {
         QVector<double> axis(0);
         getAxis(dim, axis, dataLength, offset);
-
         emit dataReady(QVector<double>::fromStdVector(loadedData), axis, graphIndex);
     }
 }
@@ -194,7 +192,7 @@ void LoadThread::getAxis(nix::Dimension dim, QVector<double> &axis, unsigned int
 }
 
 
-void LoadThread::setVariables(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, std::vector<int> index2D, unsigned int dimNumber, int graphIndex) {
+void LoadThread::setVariables(const nix::DataArray &array, const nix::Block &block, nix::NDSize start, nix::NDSize extent, std::vector<int> index2D, unsigned int dimNumber, int graphIndex) {
     if(! testInput(array, start, extent)) {
         std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
         return;
@@ -202,13 +200,12 @@ void LoadThread::setVariables(const nix::DataArray &array, nix::NDSize start, ni
 
     QMutexLocker locker(&mutex); // locks the members and unlocks them when it goes out of scope.
 
-    this->array = nix::DataArray(array);
+    this->array = block.getDataArray(array.id());
     this->start = start;
     this->extent = extent;
     this->graphIndex = graphIndex;
     this->index2D = index2D;
     this->dimNumber = dimNumber;
-    this->dim = dim;
 
     if(! isRunning()) {
         QThread::start(LowPriority);
@@ -218,7 +215,7 @@ void LoadThread::setVariables(const nix::DataArray &array, nix::NDSize start, ni
     }
 }
 
-void LoadThread::setVariables1D(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, int graphIndex) {
+void LoadThread::setVariables1D(const nix::DataArray &array, const nix::Block &block, nix::NDSize start, nix::NDSize extent, int graphIndex) {
 
     if(array.dataExtent().size() != 1) {
         std::cerr << "LoadThread::setVariables1D() given array has more than 1 dimension." << std::endl;
@@ -231,10 +228,9 @@ void LoadThread::setVariables1D(const nix::DataArray &array, nix::NDSize start, 
 
     QMutexLocker locker(&mutex);
 
-    this->array = nix::DataArray(array);
+    this->array = block.getDataArray(array.id());
     this->start = start;
     this->extent = extent;
-    this->dim = dim;
     this->graphIndex = graphIndex;
 
     if(! isRunning()) {

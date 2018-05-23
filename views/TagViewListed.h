@@ -20,7 +20,7 @@ public:
     explicit TagViewListed(QWidget *parent = 0);
     ~TagViewListed();
 
-    void setEntity(QVariant var);
+    void setEntity(QVariant var, QVariant block);
     void clear();
 
 public slots:
@@ -36,6 +36,7 @@ signals:
 private:
     Ui::TagViewListed *ui;
     TagContainer tag;
+    nix::Block block;
     QVector<Plotter*> plots;
     QCPRange tagRange;
     QCPRange refRange;

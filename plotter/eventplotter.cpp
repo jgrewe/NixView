@@ -80,11 +80,12 @@ QCustomPlot* EventPlotter::get_plot() {
 }
 
 
-void EventPlotter::draw(const nix::DataArray &array) {
+void EventPlotter::draw(const nix::DataArray &array, const nix::Block & block) {
     if(! testArray(array)) {
         return;
     }
 
+    this->block = block;
     this->array = array;
 
     ui->plot->addGraph();
@@ -110,7 +111,7 @@ void EventPlotter::draw(const nix::DataArray &array) {
     ui->plot->xAxis->setRange(QCPRange(d.asRangeDimension().axis(1,0)[0],d.asRangeDimension().axis(1,length-1)[0]));
 
     connect(&thread, SIGNAL(dataReady(const QVector<double> &, const QVector<double> &, int)), this, SLOT(drawThreadData(const QVector<double> &, const QVector<double> &, int)));
-    thread.setVariables1D(array, start, extent, array.getDimension(1), 0 );
+    thread.setVariables1D(array, block, start, extent, 0 );
 
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
 }

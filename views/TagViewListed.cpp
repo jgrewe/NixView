@@ -22,12 +22,14 @@ TagViewListed::~TagViewListed()
 }
 
 
-void TagViewListed::setEntity(QVariant var) {
+void TagViewListed::setEntity(QVariant var, QVariant block) {
     if(var.canConvert<nix::Tag>() | var.canConvert<nix::MultiTag>()) {
         this->tag = TagContainer(var);
     } else {
         return;
     }
+    this->block = block.value<nix::Block>();
+
     processTag();
 }
 
@@ -51,7 +53,7 @@ void TagViewListed::processTag() {
         if(plotType == PlotterType::Line) {
             LinePlotter* lp = new LinePlotter(this);
             ui->plotWidget->layout()->addWidget(lp);
-            lp->draw(array);
+            lp->draw(array, block);
 
             plots.append(lp);
         }

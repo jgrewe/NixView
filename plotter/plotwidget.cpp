@@ -73,6 +73,8 @@ void PlotWidget::deleteWidgetsFromLayout() {
 Plotter* PlotWidget::process(const nix::DataArray &array) {
     this->text = QString::fromStdString(EntityDescriptor::describe(array));
     PlotterType suggestion = Plotter::suggested_plotter(array);
+    nix::Block b = block.value<nix::Block>();
+
     if (suggestion == PlotterType::Line) {
         deleteWidgetsFromLayout();
         LinePlotter *lp = new LinePlotter();
@@ -94,8 +96,7 @@ Plotter* PlotWidget::process(const nix::DataArray &array) {
         connect(this, SIGNAL(hScrollBarToPlot(double)), lp,   SLOT(changeXAxisPosition(double)) );
         connect(this, SIGNAL(vScrollBarToPlot(double)), lp,   SLOT(changeYAxisPosition(double)) );
 
-
-        lp->draw(array);
+        lp->draw(array, b);
         plot = lp;
 
     } else if (suggestion == PlotterType::Category) {
@@ -128,7 +129,7 @@ Plotter* PlotWidget::process(const nix::DataArray &array) {
         connect(ep,   SIGNAL(xAxisChanged(QCPRange, QCPRange)), this, SLOT(changeHScrollBarValue(QCPRange, QCPRange)) );
         connect(this, SIGNAL(hScrollBarToPlot(double)), ep, SLOT(changeXAxisPosition(double)) );
 
-        ep->draw(array);
+        ep->draw(array, b);
         plot = ep;
     }
     return plot;
@@ -254,8 +255,9 @@ void PlotWidget::process(const nix::MultiTag &mtag, nix::ndsize_t ref) {
 }
 
 
-void PlotWidget::setEntity(QVariant var) {
+void PlotWidget::setEntity(QVariant var, QVariant block) {
     this->item = var;
+    this->block = block;
     if (canDraw()) {
         processItem();
     }

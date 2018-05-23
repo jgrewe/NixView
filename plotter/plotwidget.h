@@ -22,7 +22,7 @@ public:
     ~PlotWidget();
 
     bool canDraw() const;
-    void setEntity(QVariant item);
+    void setEntity(QVariant item, QVariant block);
 
     void clear();
 
@@ -54,7 +54,7 @@ signals:
 
 private:
     Ui::PlotWidget *ui;
-    QVariant item;
+    QVariant item, block;
     Plotter *plot;
     QString text;
     double scrollFaktor;

@@ -20,14 +20,14 @@ PlotDialog::PlotDialog(QWidget *parent) :
 
 void PlotDialog::set_entity(QVariant toPlot, QVariant block) {
     if (toPlot.canConvert<nix::Tag>() || toPlot.canConvert<nix::MultiTag>()) {
-        ui->tagViewListed->setEntity(toPlot);
+        ui->tagViewListed->setEntity(toPlot, block);
         ui->stackedWidget->setCurrentIndex(2);
 
         //ui->tagView->setEntity(var);
         //ui->stackedWidget->setCurrentIndex(1);
         resize(800, 650);
     } else {
-        ui->plot->setEntity(toPlot);
+        ui->plot->setEntity(toPlot, block);
         ui->stackedWidget->setCurrentIndex(0);
         resize(640, 240);
     }
