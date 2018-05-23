@@ -35,19 +35,18 @@ void LoadThread::run() {
         nix::NDSize extent = this->extent;
         unsigned int chunksize = this->chunksize;
         int graphIndex = this->graphIndex;
-        nix::Dimension dim = array.getDimension(dimNumber+1);
-        int dimCount = this->array.dataExtent().size();;
+        int dimCount = array.dataExtent().size();;
         mutex.unlock();
 
         if(dimCount == 1) {
-            load1D(array, start, extent, dim, chunksize, graphIndex);
+            load1D(array, start, extent, chunksize, graphIndex);
         } else if(dimCount == 2) {
             mutex.lock();
             unsigned int dimNumber = this->dimNumber;
             std::vector<int> index2D = this->index2D;
             mutex.unlock();
 
-            load2D(array, start, extent, dim, dimNumber, index2D, chunksize, graphIndex);
+            load2D(array, start, extent, dimNumber, index2D, chunksize, graphIndex);
         }
 
         mutex.lock();
@@ -61,7 +60,7 @@ void LoadThread::run() {
 }
 
 
-void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, unsigned int chunksize, int graphIndex) {
+void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, unsigned int chunksize, int graphIndex) {
     int dataLength = extent[0];
     unsigned int offset = start[0];
     int totalChunks = (dataLength / chunksize) + 1;
@@ -100,13 +99,13 @@ void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
 
     if(! brokenData) {
         QVector<double> axis(0);
-        getAxis(dim, axis, dataLength, offset);
+        getAxis(array.getDimension(1), axis, dataLength, offset);
         emit dataReady(QVector<double>::fromStdVector(loadedData), axis, graphIndex);
     }
 }
 
 
-void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, nix::Dimension dim, unsigned int xDim, std::vector<int> index2D, unsigned int chunksize, int graphIndex) {
+void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, unsigned int xDim, std::vector<int> index2D, unsigned int chunksize, int graphIndex) {
     unsigned int xDimIndex = xDim-1;
     unsigned int dataLength = extent[xDimIndex];
     unsigned int offset = start[xDimIndex];
@@ -168,7 +167,7 @@ void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
 
         if(! brokenData) {
             QVector<double> axis(0);
-            getAxis(dim, axis, dataLength, offset);
+            getAxis(array.getDimension(xDim), axis, dataLength, offset);
 
             emit dataReady(QVector<double>::fromStdVector(loadedData), axis, graphIndex + index2D[j]);
         }
