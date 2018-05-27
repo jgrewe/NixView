@@ -266,16 +266,12 @@ void LoadThread::restartThread(nix::NDSize start, nix::NDSize extent) {
 }
 
 
-void LoadThread::startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, double dataMax, double meanPoints) {
-    mutex.lock();
-    nix::DataArray array = this->array;
-    mutex.unlock();
-
-    if(array.isNone()) {
+void LoadThread::startLoadingIfNeeded(const nix::DataArray &array, QCPRange range, int xDim, double dataMin, double dataMax, double meanPoints) {
+    if (array.isNone()) {
         return;
     }
 
-    if(dataMin == dataMax) {
+    if (dataMin == dataMax) {
         nix::NDSize start, extent;
 
         calcStartExtent(array, start, extent, range, xDim);
@@ -285,15 +281,15 @@ void LoadThread::startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, 
 
     double numOfPoints = static_cast<double>(chunksize) / 3;
 
-    if((range.lower - dataMin)*meanPoints < numOfPoints/4) {
-        if(checkForMoreData(array, dataMin, false, xDim)) {
+    if ((range.lower - dataMin)*meanPoints < numOfPoints/4) {
+        if (checkForMoreData(array, dataMin, false, xDim)) {
             nix::NDSize start, extent;
             calcStartExtent(array, start, extent, range, xDim);
             restartThread(start, extent);
         }
     }
-    if((dataMax - range.upper) * meanPoints < numOfPoints / 4) {
-        if(checkForMoreData(array, dataMax, true, xDim)) {
+    if ((dataMax - range.upper) * meanPoints < numOfPoints / 4) {
+        if (checkForMoreData(array, dataMax, true, xDim)) {
             nix::NDSize start, extent;
             calcStartExtent(array, start, extent, range, xDim);
             restartThread(start, extent);

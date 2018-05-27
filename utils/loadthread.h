@@ -53,7 +53,7 @@ public:
     void setChuncksize(unsigned int size);
 
     void restartThread(nix::NDSize start, nix::NDSize extent);
-    void startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, double dataMax, double meanPoints);
+    void startLoadingIfNeeded(const nix::DataArray &array, QCPRange range, int xDim, double dataMin, double dataMax, double meanPoints);
     void calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize& extent_size, QCPRange curRange, int xDim);
     bool checkForMoreData(const nix::DataArray &array, double currentExtreme, bool higher, int xDim);
 
