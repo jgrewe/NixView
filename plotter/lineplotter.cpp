@@ -134,7 +134,7 @@ void LinePlotter::draw_1d(const nix::DataArray &array) {
         nix::NDSize extent(1);
         extent[0] = length;
 
-        loaders.last()->setVariables1D(array, blocks.last(), start, extent, newGraphIndex);
+        loaders.last()->setVariables1D(array.id(), blocks.last(), start, extent, newGraphIndex);
 
         // open loading dialog ? too fast for small amounts (TODO: general loading Dialog)
     }
@@ -184,7 +184,7 @@ void LinePlotter::draw_2d(const nix::DataArray &array) {
     extent[best_dim-1] = length;
     extent[2-best_dim] = 1;
 
-    loaders.last()->setVariables(array, blocks.last(), start, extent, std::vector<int>(), best_dim, firstGraphIndex);
+    loaders.last()->setVariables(array.id(), blocks.last(), start, extent, std::vector<int>(), best_dim, firstGraphIndex);
 }
 
 
@@ -438,14 +438,14 @@ void LinePlotter::testThreads(QCPRange range) {
             graphIndex += arrays[i].dataExtent()[2-xDim];
         }
         if(graph->dataCount() == 0) {
-            loaders[i]->startLoadingIfNeeded(range, xDim, 0, 0, 0);
+            loaders[i]->startLoadingIfNeeded(arrays[i], range, xDim, 0, 0, 0);
             continue;
         }
 
         double max = graph->dataMainKey(graph->dataCount()-1);
         double min = graph->dataMainKey(0);
         double mean = graph->dataCount() / (max-min);
-        loaders[i]->startLoadingIfNeeded(range, xDim, min, max, mean);
+        loaders[i]->startLoadingIfNeeded(arrays[i], range, xDim, min, max, mean);
     }
 }
 

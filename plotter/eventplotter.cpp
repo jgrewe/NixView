@@ -111,7 +111,7 @@ void EventPlotter::draw(const nix::DataArray &array, const nix::Block & block) {
     ui->plot->xAxis->setRange(QCPRange(d.asRangeDimension().axis(1,0)[0],d.asRangeDimension().axis(1,length-1)[0]));
 
     connect(&thread, SIGNAL(dataReady(const QVector<double> &, const QVector<double> &, int)), this, SLOT(drawThreadData(const QVector<double> &, const QVector<double> &, int)));
-    thread.setVariables1D(array, block, start, extent, 0 );
+    thread.setVariables1D(array.id(), block, start, extent, 0 );
 
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
 }
@@ -233,7 +233,7 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     QCPGraph *graph = ui->plot->graph();
 
     if(graph->dataCount() == 0) {
-       thread.startLoadingIfNeeded(newRange,1, newRange.center(), newRange.center(), 0);
+       thread.startLoadingIfNeeded(array, newRange, 1, newRange.center(), newRange.center(), 0);
        return;
     }
 
@@ -241,7 +241,7 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     double min = graph->dataMainKey(0);
     double meanPoints = graph->dataCount() / (max-min);
 
-    thread.startLoadingIfNeeded(newRange,1, min, max, meanPoints);
+    thread.startLoadingIfNeeded(array, newRange, 1, min, max, meanPoints);
 }
 
 void EventPlotter::changeXAxisPosition(double newCenter) {
