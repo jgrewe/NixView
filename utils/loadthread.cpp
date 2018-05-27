@@ -60,7 +60,7 @@ void LoadThread::run() {
 }
 
 
-void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, unsigned int chunksize, int graphIndex) {
+void LoadThread::load1D(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, unsigned int chunksize, int graphIndex) {
     int dataLength = extent[0];
     unsigned int offset = start[0];
     int totalChunks = (dataLength / chunksize) + 1;
@@ -90,7 +90,7 @@ void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
             chunkdata.resize((dataLength - (totalChunks-1) * chunksize));
         }
         start[0] = offset + i * chunksize;
-        array.getData(chunkdata,extent, start);
+        array.getData(chunkdata, extent, start);
 
         loadedData.insert(loadedData.end(), chunkdata.begin(), chunkdata.end());
 
@@ -105,7 +105,7 @@ void LoadThread::load1D(nix::DataArray array, nix::NDSize start, nix::NDSize ext
 }
 
 
-void LoadThread::load2D(nix::DataArray array, nix::NDSize start, nix::NDSize extent, unsigned int xDim, std::vector<int> index2D, unsigned int chunksize, int graphIndex) {
+void LoadThread::load2D(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, unsigned int xDim, std::vector<int> index2D, unsigned int chunksize, int graphIndex) {
     unsigned int xDimIndex = xDim-1;
     unsigned int dataLength = extent[xDimIndex];
     unsigned int offset = start[xDimIndex];
