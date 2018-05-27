@@ -191,15 +191,15 @@ void LoadThread::getAxis(nix::Dimension dim, QVector<double> &axis, unsigned int
 }
 
 
-void LoadThread::setVariables(const nix::DataArray &array, const nix::Block &block, nix::NDSize start, nix::NDSize extent, std::vector<int> index2D, unsigned int dimNumber, int graphIndex) {
     if(! testInput(array, start, extent)) {
         std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
         return;
     }
 
+void LoadThread::setVariables(const std::string &arrayId, const nix::Block &block, nix::NDSize start, nix::NDSize extent, std::vector<int> index2D, unsigned int dimNumber, int graphIndex) {
     QMutexLocker locker(&mutex); // locks the members and unlocks them when it goes out of scope.
 
-    this->array = block.getDataArray(array.id());
+    this->array = block.getDataArray(arrayId);
     this->start = start;
     this->extent = extent;
     this->graphIndex = graphIndex;
@@ -214,7 +214,13 @@ void LoadThread::setVariables(const nix::DataArray &array, const nix::Block &blo
     }
 }
 
-void LoadThread::setVariables1D(const nix::DataArray &array, const nix::Block &block, nix::NDSize start, nix::NDSize extent, int graphIndex) {
+void LoadThread::setVariables1D(const std::string &arrayId, const nix::Block &block, nix::NDSize start, nix::NDSize extent, int graphIndex) {
+    QMutexLocker locker(&mutex);
+
+    this->array = block.getDataArray(arrayId);
+    this->start = start;
+    this->extent = extent;
+    this->graphIndex = graphIndex;
 
     if(array.dataExtent().size() != 1) {
         std::cerr << "LoadThread::setVariables1D() given array has more than 1 dimension." << std::endl;
@@ -224,13 +230,6 @@ void LoadThread::setVariables1D(const nix::DataArray &array, const nix::Block &b
         std::cerr << "LoadThread::setVariables1D(): Input not correct." << std::endl;
         return;
     }
-
-    QMutexLocker locker(&mutex);
-
-    this->array = block.getDataArray(array.id());
-    this->start = start;
-    this->extent = extent;
-    this->graphIndex = graphIndex;
 
     if(! isRunning()) {
         QThread::start(LowPriority);
