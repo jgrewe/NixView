@@ -22,41 +22,39 @@ LoadThread::~LoadThread() {
 
 
 void LoadThread::run() {
-    while(! abort) {
-
-        mutex.lock();
-        if(restart) {
-            mutex.unlock();
-            restart=false;
+    mutex.lock();
+    restart = true;
+    while (!abort) {
+        if (restart) {
+            restart = false;
+        } else {
+            condition.wait(&mutex);
             continue;
         }
+        // loading stuff because of restart == true
         nix::DataArray array = this->array;
         nix::NDSize start = this->start;
         nix::NDSize extent = this->extent;
         unsigned int chunksize = this->chunksize;
         int graphIndex = this->graphIndex;
-        int dimCount = array.dataExtent().size();;
+        int dimCount = array.dataExtent().size();
+        unsigned int dimNumber;
+        std::vector<int> index2D;
+
+        if (dimCount > 1) {
+            dimNumber = this->dimNumber;
+            index2D = this->index2D;
+        }
         mutex.unlock();
 
         if(dimCount == 1) {
             load1D(array, start, extent, chunksize, graphIndex);
         } else if(dimCount == 2) {
-            mutex.lock();
-            unsigned int dimNumber = this->dimNumber;
-            std::vector<int> index2D = this->index2D;
-            mutex.unlock();
-
             load2D(array, start, extent, dimNumber, index2D, chunksize, graphIndex);
         }
-
         mutex.lock();
-        if(! restart) {
-            condition.wait(&mutex);
-        } else {
-            restart = false;
-        }
-        mutex.unlock();
     }
+    mutex.unlock();
 }
 
 
@@ -191,11 +189,6 @@ void LoadThread::getAxis(nix::Dimension dim, QVector<double> &axis, unsigned int
 }
 
 
-    if(! testInput(array, start, extent)) {
-        std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
-        return;
-    }
-
 void LoadThread::setVariables(const std::string &arrayId, const nix::Block &block, nix::NDSize start, nix::NDSize extent, std::vector<int> index2D, unsigned int dimNumber, int graphIndex) {
     QMutexLocker locker(&mutex); // locks the members and unlocks them when it goes out of scope.
 
@@ -206,6 +199,10 @@ void LoadThread::setVariables(const std::string &arrayId, const nix::Block &bloc
     this->index2D = index2D;
     this->dimNumber = dimNumber;
 
+    if(! testInput(array, start, extent)) {
+        std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
+        return;
+    }
     if(! isRunning()) {
         QThread::start(LowPriority);
     } else {
