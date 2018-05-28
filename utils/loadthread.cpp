@@ -199,11 +199,11 @@ void LoadThread::setVariables(const std::string &arrayId, const nix::Block &bloc
     this->index2D = index2D;
     this->dimNumber = dimNumber;
 
-    if(! testInput(array, start, extent)) {
+    if (!testInput(array, start, extent)) {
         std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
         return;
     }
-    if(! isRunning()) {
+    if (!isRunning()) {
         QThread::start(LowPriority);
     } else {
         this->restart = true;
@@ -219,16 +219,16 @@ void LoadThread::setVariables1D(const std::string &arrayId, const nix::Block &bl
     this->extent = extent;
     this->graphIndex = graphIndex;
 
-    if(array.dataExtent().size() != 1) {
+    if (array.dataExtent().size() != 1) {
         std::cerr << "LoadThread::setVariables1D() given array has more than 1 dimension." << std::endl;
     }
 
-    if(! testInput(array, start, extent)) {
+    if (!testInput(array, start, extent)) {
         std::cerr << "LoadThread::setVariables1D(): Input not correct." << std::endl;
         return;
     }
 
-    if(! isRunning()) {
+    if (!isRunning()) {
         QThread::start(LowPriority);
     } else {
         this->restart = true;
@@ -254,7 +254,7 @@ void LoadThread::restartThread(nix::NDSize start, nix::NDSize extent) {
     this->start = start;
     this->extent = extent;
 
-    if(! isRunning()) {
+    if (!isRunning()) {
         std::cerr << "You have to call Loadthread::setVariables[1D]() first to set all needed members." << std::endl;
     } else {
         this->restart = true;
@@ -263,31 +263,31 @@ void LoadThread::restartThread(nix::NDSize start, nix::NDSize extent) {
 }
 
 
-void LoadThread::startLoadingIfNeeded(const nix::DataArray &array, QCPRange range, int xDim, double dataMin, double dataMax, double meanPoints) {
+void LoadThread::startLoadingIfNeeded(const nix::DataArray &array, QCPRange range, int xDim, double dataMin, double dataMax, double samplerate) {
     if (array.isNone()) {
         return;
     }
+    mutex.lock();
+    double numOfPoints = static_cast<double>(this->chunksize) / 3;
+    mutex.unlock();
 
+    nix::NDSize start, extent;
     if (dataMin == dataMax) {
-        nix::NDSize start, extent;
-
         calcStartExtent(array, start, extent, range, xDim);
+        std::cerr << "Restarting 0\n";
+
         restartThread(start, extent);
         return;
     }
 
-    double numOfPoints = static_cast<double>(chunksize) / 3;
-
-    if ((range.lower - dataMin)*meanPoints < numOfPoints/4) {
+    if ((range.lower - dataMin) * samplerate < numOfPoints/4) {
         if (checkForMoreData(array, dataMin, false, xDim)) {
-            nix::NDSize start, extent;
             calcStartExtent(array, start, extent, range, xDim);
             restartThread(start, extent);
         }
     }
-    if ((dataMax - range.upper) * meanPoints < numOfPoints / 4) {
+    if ((dataMax - range.upper) * samplerate < numOfPoints / 4) {
         if (checkForMoreData(array, dataMax, true, xDim)) {
-            nix::NDSize start, extent;
             calcStartExtent(array, start, extent, range, xDim);
             restartThread(start, extent);
         }
@@ -300,14 +300,14 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
 
     double start, extent;
 
-    if( d.dimensionType() == nix::DimensionType::Set) {
+    if (d.dimensionType() == nix::DimensionType::Set) {
         start = 0;
         extent = array.dataExtent()[xDim-1];
     } else {
         double pInRange;
         double startIndex;
 
-        if( d.dimensionType() == nix::DimensionType::Sample) {
+        if (d.dimensionType() == nix::DimensionType::Sample) {
             nix::SampledDimension spd = d.asSampledDimension();
             double samplingIntervall = spd.samplingInterval();
             double offset = 0;
@@ -327,7 +327,7 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
 
         double numOfPoints = static_cast<double>(chunksize) / 3;
 
-        if(pInRange <= numOfPoints) {
+        if (pInRange <= numOfPoints) {
             start  = startIndex - numOfPoints;
             extent =  numOfPoints + pInRange + numOfPoints;
 
@@ -343,17 +343,17 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
     start = std::floor(start);
     extent = std::ceil(extent);
 
-    if(start < 0) {
+    if (start < 0) {
         start = 0;
     }
 
-    if(extent > array.dataExtent()[xDim-1] - start) {
+    if (extent > array.dataExtent()[xDim-1] - start) {
         extent = array.dataExtent()[xDim-1] - start;
     } else if(extent < 1) {
         extent = 1;
     }
 
-    if(array.dataExtent().size() == 1) {
+    if (array.dataExtent().size() == 1) {
         start_size = nix::NDSize({static_cast<int>(start)});
         extent_size = nix::NDSize({static_cast<int>(extent)});
     } else {
