@@ -81,7 +81,7 @@ QCustomPlot* EventPlotter::get_plot() {
 
 
 void EventPlotter::draw(const nix::DataArray &array, const nix::Block & block) {
-    if(! testArray(array)) {
+    if (!testArray(array)) {
         return;
     }
 
@@ -102,17 +102,14 @@ void EventPlotter::draw(const nix::DataArray &array, const nix::Block & block) {
     if(array.dataExtent()[0] < length) {
         length = array.dataExtent()[0];
     }
-        extent[0] = length;
+    extent[0] = length;
 
     nix::Dimension d = array.getDimension(1);
-
-    connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
     this->totalRange.expand(QCPRange(d.asRangeDimension().axis(1,0)[0], d.asRangeDimension().axis(1,array.dataExtent()[0]-1)[0]));
     ui->plot->xAxis->setRange(QCPRange(d.asRangeDimension().axis(1,0)[0],d.asRangeDimension().axis(1,length-1)[0]));
 
     connect(&thread, SIGNAL(dataReady(const QVector<double> &, const QVector<double> &, int)), this, SLOT(drawThreadData(const QVector<double> &, const QVector<double> &, int)));
     thread.setVariables1D(array.id(), block, start, extent, 0 );
-
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
 }
 
@@ -142,7 +139,7 @@ bool EventPlotter::testArray(const nix::DataArray &array) {
 
 
 void EventPlotter::draw(const QVector<double> &positions, const QString &ylabel, const QVector<QString> &xlabels) {
-    if(positions.size() == 0) {
+    if (positions.size() == 0) {
         return;
     }
     set_xlabel(xlabels[0]);
@@ -172,7 +169,7 @@ void EventPlotter::plot(const QVector<double> &positions) {
 }
 
 void EventPlotter::draw(const QVector<double> &positions, const QVector<double> &extents, const QString &ylabel, const QVector<QString> &xlabels) {
-    if(positions.size() == 0) {
+    if (positions.size() == 0) {
         return;
     }
     set_xlabel(xlabels[0]);
@@ -194,7 +191,7 @@ void EventPlotter::plot(const QVector<double> &positions, const QVector<double> 
     QVector<double> xValues = QVector<double>(4*positions.size());
     QVector<double> yValues = QVector<double>(4*positions.size());
 
-    for(int i = 0; i < positions.size(); i++) {
+    for (int i = 0; i < positions.size(); i++) {
         xValues[4*i]   = positions[i]-(1.0/80000);
         xValues[4*i+1] = positions[i];
         xValues[4*i+2] = positions[i] + extends[i];
@@ -226,26 +223,19 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     //assumption has exactly one graph.
     emit xAxisChanged(newRange, totalRange); // signal for scrollbar and zoom.
 
-    if(ui->plot->graphCount() == 0 || array.isNone()) {
+    if (ui->plot->graphCount() == 0 || array.isNone()) {
         return;
     }
 
     QCPGraph *graph = ui->plot->graph();
-
-    if(graph->dataCount() == 0) {
-       thread.startLoadingIfNeeded(array, newRange, 1, newRange.center(), newRange.center(), 0);
-       return;
-    }
-
-    double max = graph->dataMainKey(graph->dataCount()-1);
-    double min = graph->dataMainKey(0);
-    double meanPoints = graph->dataCount() / (max-min);
-
+    double max = graph->dataCount() == 0 ? newRange.center() : graph->dataMainKey(graph->dataCount()-1);
+    double min = graph->dataCount() == 0 ? newRange.center() : graph->dataMainKey(0);
+    double meanPoints = graph->dataCount() == 0 ? 0 : graph->dataCount() / (max-min);
     thread.startLoadingIfNeeded(array, newRange, 1, min, max, meanPoints);
 }
 
 void EventPlotter::changeXAxisPosition(double newCenter) {
-    if(ui->plot->xAxis->range().center() != newCenter) {
+    if (ui->plot->xAxis->range().center() != newCenter) {
         ui->plot->xAxis->setRange(newCenter, ui->plot->xAxis->range().size(), Qt::AlignCenter);
         ui->plot->replot();
     }
