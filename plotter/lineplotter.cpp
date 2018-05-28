@@ -35,7 +35,6 @@ LinePlotter::~LinePlotter()
     }
 
     delete ui;
-
 }
 
 
@@ -135,7 +134,6 @@ void LinePlotter::draw_1d(const nix::DataArray &array) {
         extent[0] = length;
 
         loaders.last()->setVariables1D(array.id(), blocks.last(), start, extent, newGraphIndex);
-
         // open loading dialog ? too fast for small amounts (TODO: general loading Dialog)
     }
 }
@@ -444,8 +442,8 @@ void LinePlotter::testThreads(QCPRange range) {
 
         double max = graph->dataMainKey(graph->dataCount()-1);
         double min = graph->dataMainKey(0);
-        double mean = graph->dataCount() / (max-min);
-        loaders[i]->startLoadingIfNeeded(arrays[i], range, xDim, min, max, mean);
+        double samplerate = graph->dataCount() / (max-min);
+        loaders[i]->startLoadingIfNeeded(arrays[i], range, xDim, min, max, samplerate);
     }
 }
 
