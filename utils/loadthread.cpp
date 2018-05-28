@@ -368,20 +368,22 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
 bool LoadThread::checkForMoreData(const nix::DataArray &array, double currentExtreme, bool higher, int xDim) {
     nix::Dimension d = array.getDimension(xDim);
 
-    if(d.dimensionType() == nix::DimensionType::Set) {
+    if (d.dimensionType() == nix::DimensionType::Set) {
         std::cerr << "LoadThread::CheckForMoreData(): check set dim... no! Not yet." << std::endl;
         return false;
-    } else if(d.dimensionType() == nix::DimensionType::Sample) {
-        if(higher) {
-            return (d.asSampledDimension().axis(1,array.dataExtent()[xDim-1]-1)[0] > currentExtreme);
+    } else if (d.dimensionType() == nix::DimensionType::Sample) {
+        nix::SampledDimension sdim = d.asSampledDimension();
+        if (higher) {
+            return (sdim.axis(1, array.dataExtent()[xDim-1]-1)[0] > currentExtreme);
         } else {
-            return (d.asSampledDimension().axis(1,0)[0] < currentExtreme);
+            return (sdim.axis(1, 0)[0] < currentExtreme);
         }
-    } else if(d.dimensionType() == nix::DimensionType::Range) {
-        if(higher) {
-            return (d.asRangeDimension().axis(1,array.dataExtent()[xDim-1]-1)[0] > currentExtreme);
+    } else if (d.dimensionType() == nix::DimensionType::Range) {
+        nix::RangeDimension rdim = d.asRangeDimension();
+        if (higher) {
+            return (rdim.axis(1, array.dataExtent()[xDim-1]-1)[0] > currentExtreme);
         } else {
-            return (d.asRangeDimension().axis(1,0)[0] < currentExtreme);
+            return (rdim.axis(1, 0)[0] < currentExtreme);
         }
     } else {
         std::cerr << "LoadThread::CheckForMoreData(): unsupported dimension type." << std::endl;
