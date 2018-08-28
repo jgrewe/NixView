@@ -391,28 +391,31 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
 bool LoadThread::checkForMoreData(const nix::DataArray &array, double currentExtreme, bool higher, int xDim) {
     nix::Dimension d = array.getDimension(xDim);
     mutex.lock();
+    nix::Dimension d = this->xDimension;
     nix::NDSize dataExtent = this->dataExtent;
+    nix::DimensionType dimType = this->dimType;
+    double samplingInterval = this->samplingInterval;
+    double offset = this->offset;
+    std::vector<double> ticks = this->ticks;
     mutex.unlock();
 
-    if (d.dimensionType() == nix::DimensionType::Set) {
+    if (dimType == nix::DimensionType::Set) {
         std::cerr << "LoadThread::CheckForMoreData(): check set dim... no! Not yet." << std::endl;
         return false;
-    } else if (d.dimensionType() == nix::DimensionType::Sample) {
-        nix::SampledDimension sdim = d.asSampledDimension();
+    } else if (dimType == nix::DimensionType::Sample) {
         if (higher) {
-            return (sdim.axis(1, array.dataExtent()[xDim-1]-1)[0] > currentExtreme);
+            return (dataExtent[xDim-1] - 1 * samplingInterval - offset > currentExtreme);
         } else {
-            return (sdim.axis(1, 0)[0] < currentExtreme);
+            return (offset < currentExtreme);
         }
-    } else if (d.dimensionType() == nix::DimensionType::Range) {
-        nix::RangeDimension rdim = d.asRangeDimension();
+    } else if (dimType == nix::DimensionType::Range) {
         if (higher) {
-            return (rdim.axis(1, array.dataExtent()[xDim-1]-1)[0] > currentExtreme);
+            return (ticks.back() > currentExtreme);
         } else {
-            return (rdim.axis(1, 0)[0] < currentExtreme);
+            return (ticks.front() < currentExtreme);
         }
     } else {
-        std::cerr << "LoadThread::CheckForMoreData(): unsupported dimension type." << std::endl;
+        std::cerr << "LoadThread::CheckForMoreData(): unsupported dimension type.\t" << dimType << std::endl;
         return false;
     }
 }
