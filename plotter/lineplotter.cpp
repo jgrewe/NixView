@@ -436,14 +436,14 @@ void LinePlotter::testThreads(QCPRange range) {
             graphIndex += arrays[i].dataExtent()[2-xDim];
         }
         if(graph->dataCount() == 0) {
-            loaders[i]->startLoadingIfNeeded(arrays[i], range, xDim, 0, 0, 0);
+            loaders[i]->startLoadingIfNeeded(range, xDim, 0, 0, 0);
             continue;
         }
 
         double max = graph->dataMainKey(graph->dataCount()-1);
         double min = graph->dataMainKey(0);
         double samplerate = graph->dataCount() / (max-min);
-        loaders[i]->startLoadingIfNeeded(arrays[i], range, xDim, min, max, samplerate);
+        loaders[i]->startLoadingIfNeeded(range, xDim, min, max, samplerate);
     }
 }
 

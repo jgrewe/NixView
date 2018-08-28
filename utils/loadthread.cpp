@@ -288,10 +288,7 @@ void LoadThread::restartThread(nix::NDSize start, nix::NDSize extent) {
 }
 
 
-void LoadThread::startLoadingIfNeeded(const nix::DataArray &array, QCPRange range, int xDim, double dataMin, double dataMax, double samplerate) {
-    if (array.isNone()) {
-        return;
-    }
+void LoadThread::startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, double dataMax, double samplerate) {
     mutex.lock();
     double numOfPoints = static_cast<double>(this->chunksize) / 3;
     mutex.unlock();
