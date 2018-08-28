@@ -211,7 +211,7 @@ void LoadThread::setVariables(const std::string &arrayId, const nix::Block &bloc
     this->index2D = index2D;
     this->dimNumber = dimNumber;
 
-    if (!testInput(array, start, extent)) {
+    if (!testInput(start, extent)) {
         std::cerr << "LoadThread::setVariables(): Input not correct." << std::endl;
         return;
     }
@@ -248,7 +248,7 @@ void LoadThread::setVariables1D(const std::string &arrayId, const nix::Block &bl
         std::cerr << "LoadThread::setVariables1D() given array has more than 1 dimension." << std::endl;
     }
 
-    if (!testInput(array, start, extent)) {
+    if (!testInput(start, extent)) {
         std::cerr << "LoadThread::setVariables1D(): Input not correct." << std::endl;
         return;
     }
@@ -417,9 +417,7 @@ bool LoadThread::checkForMoreData(const nix::DataArray &array, double currentExt
     }
 }
 
-bool LoadThread::testInput(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent) {
-    nix::NDSize size = array.dataExtent();
-    if( ! (size.size() == start.size() && size.size() == extent.size())) {
+bool LoadThread::testInput(const nix::NDSize &start, const nix::NDSize &extent) {
     size_t rank = dataExtent.size();
     if( ! (rank == start.size() && rank == extent.size())) {
         std::cerr << "DataThread::testInput(): start and/or extent don't have the same dimensionality as the array." << std::endl;

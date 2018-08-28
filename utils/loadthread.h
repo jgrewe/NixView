@@ -59,7 +59,7 @@ public:
 
 private:
     void getAxis(nix::Dimension dim, QVector<double> &axis, unsigned int count, unsigned int offset);
-    bool testInput(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent);
+    bool testInput(const nix::NDSize &start, const nix::NDSize &extent);
     void load1D(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, unsigned int chunksize, int graphIndex);
     void load2D(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent, unsigned int dimNumber, std::vector<int> index2D, unsigned int chunksize, int Index);
 
