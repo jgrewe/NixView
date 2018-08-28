@@ -85,6 +85,7 @@ private:
 
     nix::NDSize start;
     nix::NDSize extent;
+    nix::NDSize dataExtent;
     unsigned int chunksize;
     unsigned int dimNumber;
     std::vector<int> index2D;

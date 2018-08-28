@@ -37,7 +37,7 @@ void LoadThread::run() {
         nix::NDSize extent = this->extent;
         unsigned int chunksize = this->chunksize;
         int graphIndex = this->graphIndex;
-        int dimCount = array.dataExtent().size();
+        int dimCount = this->dataExtent.size();
         unsigned int dimNumber;
         std::vector<int> index2D;
 
@@ -193,6 +193,7 @@ void LoadThread::setVariables(const std::string &arrayId, const nix::Block &bloc
     QMutexLocker locker(&mutex); // locks the members and unlocks them when it goes out of scope.
 
     this->array = block.getDataArray(arrayId);
+    this->dataExtent = this->array.dataExtent();
     this->start = start;
     this->extent = extent;
     this->graphIndex = graphIndex;
@@ -215,11 +216,12 @@ void LoadThread::setVariables1D(const std::string &arrayId, const nix::Block &bl
     QMutexLocker locker(&mutex);
 
     this->array = block.getDataArray(arrayId);
+    this->dataExtent = this->array.dataExtent();
     this->start = start;
     this->extent = extent;
     this->graphIndex = graphIndex;
 
-    if (array.dataExtent().size() != 1) {
+    if (dataExtent.size() != 1) {
         std::cerr << "LoadThread::setVariables1D() given array has more than 1 dimension." << std::endl;
     }
 
@@ -297,12 +299,14 @@ void LoadThread::startLoadingIfNeeded(const nix::DataArray &array, QCPRange rang
 
 void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize &extent_size, QCPRange curRange, int xDim) {
     nix::Dimension d = array.getDimension(xDim);
+    mutex.lock();
+    nix::NDSize tempDataExtent = this->dataExtent;
+    mutex.unlock();
 
     double start, extent;
-
     if (d.dimensionType() == nix::DimensionType::Set) {
         start = 0;
-        extent = array.dataExtent()[xDim-1];
+        extent = tempDataExtent[xDim-1];
     } else {
         double pInRange;
         double startIndex;
@@ -347,13 +351,13 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
         start = 0;
     }
 
-    if (extent > array.dataExtent()[xDim-1] - start) {
-        extent = array.dataExtent()[xDim-1] - start;
+    if (extent > dataExtent[xDim-1] - start) {
+        extent = dataExtent[xDim-1] - start;
     } else if(extent < 1) {
         extent = 1;
     }
 
-    if (array.dataExtent().size() == 1) {
+    if (dataExtent.size() == 1) {
         start_size = nix::NDSize({static_cast<int>(start)});
         extent_size = nix::NDSize({static_cast<int>(extent)});
     } else {
@@ -367,6 +371,9 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
 
 bool LoadThread::checkForMoreData(const nix::DataArray &array, double currentExtreme, bool higher, int xDim) {
     nix::Dimension d = array.getDimension(xDim);
+    mutex.lock();
+    nix::NDSize dataExtent = this->dataExtent;
+    mutex.unlock();
 
     if (d.dimensionType() == nix::DimensionType::Set) {
         std::cerr << "LoadThread::CheckForMoreData(): check set dim... no! Not yet." << std::endl;
@@ -394,13 +401,15 @@ bool LoadThread::checkForMoreData(const nix::DataArray &array, double currentExt
 bool LoadThread::testInput(const nix::DataArray &array, nix::NDSize start, nix::NDSize extent) {
     nix::NDSize size = array.dataExtent();
     if( ! (size.size() == start.size() && size.size() == extent.size())) {
+    size_t rank = dataExtent.size();
+    if( ! (rank == start.size() && rank == extent.size())) {
         std::cerr << "DataThread::testInput(): start and/or extent don't have the same dimensionality as the array." << std::endl;
         return false;
     }
 
     bool Dataload1d = false;
-    for(uint i=0; i<size.size(); i++) {
-        if(size[i] < start[i]+extent[i]) {
+    for(size_t i = 0; i < rank; ++i) {
+        if(dataExtent[i] < start[i] + extent[i]) {
             std::cerr << "DataThread::testInput(): start + extent bigger than length of array in dimension " << i << std::endl;
             return false;
         }
@@ -417,6 +426,5 @@ bool LoadThread::testInput(const nix::DataArray &array, nix::NDSize start, nix::
     if(! Dataload1d) {
         std::cerr << "DataThread::testInput(): using DataThread to load a single datum." << std::endl;
     }
-
     return true;
 }
