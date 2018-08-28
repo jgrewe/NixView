@@ -54,6 +54,8 @@ private:
     QCPRange totalYRange;
     QVector<nix::Block> blocks;
     QVector<nix::DataArray> arrays;
+    QVector<nix::ndsize_t> bestXDims;
+    QVector<nix::NDSize> dataExtents;
     QVector<LoadThread*> loaders;
     QVector<int> working;
 

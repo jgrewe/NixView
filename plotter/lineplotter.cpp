@@ -83,6 +83,8 @@ void LinePlotter::draw(const nix::DataArray &array, const nix::Block &block) {
     arrays.append(array);
     blocks.append(block);
     loaders.append(new LoadThread());
+    dataExtents.append(array.dataExtent());
+    bestXDims.append(guess_best_xdim(arrays.size() - 1));
 
     LoadThread *loader = loaders.last();
 
