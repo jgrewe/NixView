@@ -53,9 +53,9 @@ public:
     void setChuncksize(unsigned int size);
 
     void restartThread(nix::NDSize start, nix::NDSize extent);
-    void calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize& extent_size, QCPRange curRange, int xDim);
-    bool checkForMoreData(const nix::DataArray &array, double currentExtreme, bool higher, int xDim);
     void startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, double dataMax, double meanPoints);
+    void calcStartExtent(nix::NDSize &start_size, nix::NDSize& extent_size, QCPRange curRange, int xDim);
+    bool checkForMoreData(double currentExtreme, bool higher, int xDim);
 
 private:
     void getAxis(nix::Dimension dim, QVector<double> &axis, unsigned int count, unsigned int offset);

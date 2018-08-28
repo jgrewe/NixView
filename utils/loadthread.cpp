@@ -295,7 +295,7 @@ void LoadThread::startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, 
 
     nix::NDSize start, extent;
     if (dataMin == dataMax) {
-        calcStartExtent(array, start, extent, range, xDim);
+        calcStartExtent(start, extent, range, xDim);
         std::cerr << "Restarting 0\n";
 
         restartThread(start, extent);
@@ -303,22 +303,21 @@ void LoadThread::startLoadingIfNeeded(QCPRange range, int xDim, double dataMin, 
     }
 
     if ((range.lower - dataMin) * samplerate < numOfPoints/4) {
-        if (checkForMoreData(array, dataMin, false, xDim)) {
-            calcStartExtent(array, start, extent, range, xDim);
+        if (checkForMoreData(dataMin, false, xDim)) {
+            calcStartExtent(start, extent, range, xDim);
             restartThread(start, extent);
         }
     }
     if ((dataMax - range.upper) * samplerate < numOfPoints / 4) {
-        if (checkForMoreData(array, dataMax, true, xDim)) {
-            calcStartExtent(array, start, extent, range, xDim);
+        if (checkForMoreData(dataMax, true, xDim)) {
+            calcStartExtent(start, extent, range, xDim);
             restartThread(start, extent);
         }
     }
 }
 
 
-void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize &extent_size, QCPRange curRange, int xDim) {
-    nix::Dimension d = array.getDimension(xDim);
+void LoadThread::calcStartExtent(nix::NDSize &start_size, nix::NDSize &extent_size, QCPRange curRange, int xDim) {
     mutex.lock();
     nix::NDSize tempDataExtent = this->dataExtent;
     nix::DataArray a = this->array;
@@ -385,8 +384,7 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
 }
 
 
-bool LoadThread::checkForMoreData(const nix::DataArray &array, double currentExtreme, bool higher, int xDim) {
-    nix::Dimension d = array.getDimension(xDim);
+bool LoadThread::checkForMoreData(double currentExtreme, bool higher, int xDim) {
     mutex.lock();
     nix::Dimension d = this->xDimension;
     nix::NDSize dataExtent = this->dataExtent;
