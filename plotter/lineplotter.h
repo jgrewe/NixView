@@ -23,7 +23,7 @@ public:
 
     bool check_dimensions(const nix::DataArray &array) const;
 
-    int guess_best_xdim(const nix::DataArray &array) const; //tries to find the best x-dimension needs to be optional at some point...
+    int guess_best_xdim(size_t index) const; //tries to find the best x-dimension needs to be optional at some point...
 
     void set_label(const std::string &label) override;
 
@@ -59,11 +59,11 @@ private:
     QVector<LoadThread*> loaders;
     QVector<int> working;
 
-    void draw_1d(const nix::DataArray &array);
-    void draw_2d(const nix::DataArray &array);
+    void draw_1d(size_t index);
+    void draw_2d(size_t index);
 
     QCustomPlot* get_plot() override;
-    void expandXRange(const nix::DataArray &array, int xDim);
+    void expandXRange(size_t index);
     void setXRange(QVector<double> xData);
     void expandYRange(QVector<double> yData);
     void setYRange(QVector<double> yData);
