@@ -324,6 +324,12 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
     nix::Dimension d = array.getDimension(xDim);
     mutex.lock();
     nix::NDSize tempDataExtent = this->dataExtent;
+    nix::DataArray a = this->array;
+    nix::Dimension d = this->xDimension;
+    double samplingInterval = this->samplingInterval;
+    double offset = this->offset;
+    nix::DimensionType dimType = this->dimType;
+    std::vector<double> ticks = this->ticks;
     mutex.unlock();
 
     double start, extent;
@@ -334,20 +340,10 @@ void LoadThread::calcStartExtent(const nix::DataArray &array, nix::NDSize &start
         double pInRange;
         double startIndex;
 
-        if (d.dimensionType() == nix::DimensionType::Sample) {
-            nix::SampledDimension spd = d.asSampledDimension();
-            double samplingIntervall = spd.samplingInterval();
-            double offset = 0;
-            if(spd.offset()) {
-                offset = spd.offset().get();
-            }
-
-            startIndex = (curRange.lower - offset) / samplingIntervall;
-            pInRange = curRange.size() / samplingIntervall;
-
+        if (dimType == nix::DimensionType::Sample) {
+            startIndex = (curRange.lower - offset) / samplingInterval;
+            pInRange = curRange.size() / samplingInterval; // number of data points in the x_range
         } else { // rangeDimension
-            nix::RangeDimension rd = d.asRangeDimension();
-            std::vector<double> ticks = rd.ticks();
             startIndex = std::distance(ticks.cbegin(), std::lower_bound(ticks.cbegin(), ticks.cend(), curRange.lower));
             pInRange   = std::distance(ticks.cbegin(), std::upper_bound(ticks.cbegin(), ticks.cend(), curRange.upper)) - startIndex;
         }
