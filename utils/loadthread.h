@@ -86,6 +86,12 @@ private:
     nix::NDSize start;
     nix::NDSize extent;
     nix::NDSize dataExtent;
+    nix::Dimension xDimension;
+    nix::DimensionType dimType;
+    std::vector<double> ticks;
+    double offset;
+    double samplingInterval;
+
     unsigned int chunksize;
     unsigned int dimNumber;
     std::vector<int> index2D;

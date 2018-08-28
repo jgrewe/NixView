@@ -194,6 +194,17 @@ void LoadThread::setVariables(const std::string &arrayId, const nix::Block &bloc
 
     this->array = block.getDataArray(arrayId);
     this->dataExtent = this->array.dataExtent();
+    this->xDimension = this->array.getDimension(dimNumber);
+    this->dimType = this->xDimension.dimensionType();
+    if (this->dimType == nix::DimensionType::Range) {
+        this->ticks = xDimension.asRangeDimension().ticks();
+    }
+    if (this->dimType == nix::DimensionType::Sample) {
+        nix::SampledDimension sd = xDimension.asSampledDimension();
+        this->offset = sd.offset() ? *sd.offset() : 0.0;
+        this->samplingInterval = sd.samplingInterval();
+    }
+
     this->start = start;
     this->extent = extent;
     this->graphIndex = graphIndex;
@@ -217,6 +228,18 @@ void LoadThread::setVariables1D(const std::string &arrayId, const nix::Block &bl
 
     this->array = block.getDataArray(arrayId);
     this->dataExtent = this->array.dataExtent();
+    this->xDimension = this->array.getDimension(1);
+    this->dimType = this->xDimension.dimensionType();
+
+    if (this->dimType == nix::DimensionType::Range) {
+        this->ticks = xDimension.asRangeDimension().ticks();
+    }
+    if (this->dimType == nix::DimensionType::Sample) {
+        nix::SampledDimension sd = xDimension.asSampledDimension();
+        this->offset = sd.offset() ? *sd.offset() : 0.0;
+        this->samplingInterval = sd.samplingInterval();
+    }
+
     this->start = start;
     this->extent = extent;
     this->graphIndex = graphIndex;
