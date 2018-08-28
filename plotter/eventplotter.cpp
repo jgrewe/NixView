@@ -231,7 +231,7 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     double max = graph->dataCount() == 0 ? newRange.center() : graph->dataMainKey(graph->dataCount()-1);
     double min = graph->dataCount() == 0 ? newRange.center() : graph->dataMainKey(0);
     double meanPoints = graph->dataCount() == 0 ? 0 : graph->dataCount() / (max-min);
-    thread.startLoadingIfNeeded(array, newRange, 1, min, max, meanPoints);
+    thread.startLoadingIfNeeded(newRange, 1, min, max, meanPoints);
 }
 
 void EventPlotter::changeXAxisPosition(double newCenter) {
