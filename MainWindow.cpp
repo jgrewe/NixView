@@ -12,7 +12,6 @@
 #include "dialogs/filepropertiesdialog.hpp"
 #include <QSettings>
 #include "utils/utils.hpp"
-#include "db/projectmanager.hpp"
 #include <QInputDialog>
 #include <QDebug>
 
@@ -37,12 +36,9 @@ MainWindow::MainWindow(QWidget *parent, QApplication *app) : QMainWindow(parent)
     ui->actionFile_properties->setEnabled(false);
     QObject::connect(app, SIGNAL(invalid_file_error()), this, SLOT(invalid_file_error()));
     ui->recent_file_list->setAttribute(Qt::WA_MacShowFocusRect, false);
-    ui->recent_projects_list->setAttribute(Qt::WA_MacShowFocusRect, false);
     ui->menuFind->addAction(ui->actionFind);
     connect_widgets();
     get_recent_files();
-    get_recent_projects();
-    //populate_recent_projects();
 }
 
 
@@ -75,21 +71,6 @@ void MainWindow::get_recent_files() {
     delete settings;
 }
 
-void MainWindow::get_recent_projects() {
-    QSettings *settings = new QSettings();
-    settings->beginGroup(RECENT_PROJECTS_GROUP);
-    settings->beginGroup(RECENT_PROJECTS_LIST);
-    QStringList keys = settings->childKeys();
-    recent_projects.clear();
-    for (QString k: keys) {
-        recent_projects.push_back(settings->value(k).toString());
-    }
-    nixview::util::remove_duplicates(recent_projects);
-    populate_recent_projects_menu();
-    settings->endGroup();
-    settings->endGroup();
-    delete settings;
-}
 
 MainWindow::~MainWindow() {
     delete ui;
@@ -254,46 +235,6 @@ void MainWindow::open_file() {
 }
 
 
-void MainWindow::open_project() {   
-    QFileDialog fd(this);
-    fd.setAcceptMode(QFileDialog::AcceptOpen);
-    fd.setFileMode(QFileDialog::ExistingFile);
-    fd.setNameFilter(tr("nixview project index file (*.npi, *.db)"));
-    fd.setViewMode(QFileDialog::Detail);
-    QStringList fileNames;
-    if (fd.exec())
-        fileNames = fd.selectedFiles();
-    if (fileNames.size() == 0)
-        return;
-
-    close_file();
-    close_project();
-    open_project(fileNames.front());
-}
-
-
-void MainWindow::open_project(const QString &project) {
-    if (ui->main_view->set_project(project)) {
-        set_current_project(project);
-        toggle_project_controls(true);
-        ui->main_view->show_project_navigator(true);
-        ui->stackedWidget->setCurrentIndex(0);
-    }
-}
-
-
-void MainWindow::new_project() {
-    ui->main_view->new_project();
-}
-
-
-void MainWindow::close_project() {
-    toggle_project_controls(false);
-    set_current_project("");
-    close_file();
-}
-
-
 void MainWindow::close_file() {
     ui->stackedWidget->setCurrentIndex(2);
     ui->main_view->clear();
@@ -389,73 +330,12 @@ void MainWindow::populate_recent_file_menu() {
 }
 
 
-void MainWindow::save_recent_projects(QStringList &projects) {
-    nixview::util::remove_duplicates(projects);
-    QSettings *settings = new QSettings;
-    settings->beginGroup(RECENT_PROJECTS_GROUP);
-    int max_count = settings->value(RECENT_PROJECTS_COUNT, 5).toInt();
-    settings->beginGroup(RECENT_PROJECTS_LIST);
-    settings->remove("");
-    for (int i = 0; i < projects.size(); i ++) {
-        if (i >= max_count) {
-            break;
-        }
-        QString key = QString::fromStdString(nix::util::numToStr(i));
-        settings->setValue(key, projects[i]);
-    }
-    while (projects.size() > max_count) {
-        projects.removeLast();
-    }
-    settings->endGroup();
-    settings->endGroup();
-    delete settings;
-}
-
-
-void MainWindow::update_recent_projects_list(QString project) {
-    QSettings *settings = new QSettings();
-    settings->beginGroup(RECENT_PROJECTS_GROUP);
-    settings->beginGroup(RECENT_PROJECTS_LIST);
-    QStringList projects;
-    QStringList keys = settings->childKeys();
-    for (QString k : keys) {
-        projects.push_back(settings->value(k).toString());
-    }
-    projects.insert(0, project);
-    settings->endGroup();
-    settings->endGroup();
-    delete settings;
-    recent_project_update(projects);
-}
-
-void MainWindow::populate_recent_projects_menu() {
-    ui->recent_projects_list->clear();
-    QList<QAction*> actions = ui->menu_open_recent_project->actions();
-    for (QAction* a : actions) {
-        ui->menu_open_recent_project->removeAction(a);
-        delete a;
-    }
-    for (QString s : recent_projects) {
-        ui->menu_open_recent_project->addAction(s);
-        QListWidgetItem *item = new QListWidgetItem(s);
-        item->setToolTip(s);
-        ui->recent_projects_list->addItem(item);
-    }
-    ui->menu_open_recent_project->setEnabled(ui->menu_open_recent_project->actions().count() != 0);
-}
-
-
 void MainWindow::recent_file_update(QStringList files) {
     save_recent_files(files);
     this->recent_files = files;
     populate_recent_file_menu();
 }
 
-void MainWindow::recent_project_update(QStringList projects) {
-    save_recent_projects(projects);
-    this->recent_projects = projects;
-    populate_recent_projects_menu();
-}
 
 void MainWindow::visible_columns_update(QString who, QString column, bool state) {
     if (who == MAIN_TREE_VIEW) {
@@ -476,11 +356,6 @@ void MainWindow::recent_file_selected(QListWidgetItem *item) {
 }
 
 
-void MainWindow::recent_project_selected(QListWidgetItem *item) {
-    open_project(item->text());
-}
-
-
 void MainWindow::new_file_update(QString filename) {
     set_current_file(filename);
     toggle_file_controls(true);
@@ -493,12 +368,6 @@ void MainWindow::set_current_file(const QString &filename) {
 }
 
 
-void MainWindow::set_current_project(const QString &project) {
-    qDebug() << ("[DEBUG] Set project from " + this->currentProject + " to ") << project;
-    this->currentProject = project;
-}
-
-
 void MainWindow::toggle_file_controls(bool enabled) {
     //qDebug() << ("[DEBUG] Toggle file controls from " + ui->actionCloseFile->isEnabled() + " to ") << enabled;
     std::cerr << "[DEBUG] Toggle file controls from " << ui->actionCloseFile->isEnabled() << " to " <<  enabled << std::endl;
@@ -508,15 +377,6 @@ void MainWindow::toggle_file_controls(bool enabled) {
     ui->actionAddCurrentFileToProject->setEnabled(enabled && !currentProject.isEmpty());
 }
 
-void MainWindow::toggle_project_controls(bool enabled) {
-    //qDebug() << ("[Info] Toggle project controls from " + ui->actionCloseFile->isEnabled() + " to ") << enabled;
-    std::cerr << "[DEBUG] Toggle project controls from " << ui->actionClose_project->isEnabled() << " to " <<  enabled << std::endl;
-
-    ui->actionClose_project->setEnabled(enabled);
-    ui->actionAddCurrentFileToProject->setEnabled(enabled && !currentFile.isEmpty());
-    ui->actionProjectAdd_file->setEnabled(enabled);
-    ui->actionProjectRemove_file->setEnabled(enabled);
-}
 
 void MainWindow::exportToCsv() {
 

@@ -216,38 +216,13 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="label_3">
-                  <property name="font">
-                   <font>
-                    <pointsize>10</pointsize>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(115, 115, 115);</string>
-                  </property>
-                  <property name="text">
-                   <string>recently opened projects:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QListWidget" name="recent_projects_list">
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background-color: white;
-border-color: rgb(235, 235, 235);
-color: rgb(150,150, 150);</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QLabel" name="label_2">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="font">
                    <font>
                     <pointsize>10</pointsize>
@@ -277,7 +252,7 @@ color: rgb(150,150, 150);</string>
                   <property name="maximumSize">
                    <size>
                     <width>16777215</width>
-                    <height>120</height>
+                    <height>240</height>
                    </size>
                   </property>
                   <property name="font">
@@ -395,7 +370,7 @@ color: rgb(150,150, 150);</string>
      <x>0</x>
      <y>0</y>
      <width>1400</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -456,19 +431,6 @@ color: rgb(150,150, 150);</string>
      <string>Find</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuProject">
-    <property name="title">
-     <string>Project</string>
-    </property>
-    <addaction name="actionProjectAdd_file"/>
-    <addaction name="actionProjectRemove_file"/>
-    <addaction name="separator"/>
-    <addaction name="actionProjectIndex_files"/>
-    <addaction name="separator"/>
-    <addaction name="actionExport"/>
-    <addaction name="separator"/>
-    <addaction name="actionProject_edit"/>
-   </widget>
    <widget class="QMenu" name="menuExport">
     <property name="title">
      <string>Export</string>
@@ -476,7 +438,6 @@ color: rgb(150,150, 150);</string>
     <addaction name="actionToCSV"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuProject"/>
    <addaction name="menuView"/>
    <addaction name="menuPlot"/>
    <addaction name="menuFind"/>
@@ -530,10 +491,6 @@ color: rgb(150,150, 150);</string>
    </attribute>
    <addaction name="actionOpenFile"/>
    <addaction name="actionCloseFile"/>
-   <addaction name="separator"/>
-   <addaction name="actionOpenProject"/>
-   <addaction name="actionNew_project"/>
-   <addaction name="actionClose_project"/>
    <addaction name="separator"/>
    <addaction name="actionFind"/>
    <addaction name="actionPlot"/>
@@ -1083,102 +1040,6 @@ color: rgb(150,150, 150);</string>
     <hint type="destinationlabel">
      <x>699</x>
      <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOpenProject</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>open_project()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>699</x>
-     <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionNew_project</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>new_project()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>699</x>
-     <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionClose_project</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close_project()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>699</x>
-     <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>recent_projects_list</sender>
-   <signal>itemClicked(QListWidgetItem*)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recent_project_selected(QListWidgetItem*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>699</x>
-     <y>526</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>699</x>
-     <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionProjectAdd_file</sender>
-   <signal>triggered()</signal>
-   <receiver>main_view</receiver>
-   <slot>project_add_file()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>63</x>
-     <y>98</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionProjectRemove_file</sender>
-   <signal>triggered()</signal>
-   <receiver>main_view</receiver>
-   <slot>project_remove_file()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>355</x>
-     <y>418</y>
     </hint>
    </hints>
   </connection>
