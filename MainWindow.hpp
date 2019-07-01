@@ -23,7 +23,7 @@ public:
     MainWindow(QWidget *parent, QApplication *app);
     ~MainWindow();
 
-    void read_nix_file(QString filename);
+    void open_nix_file(QString filename);
 
 public slots:
     void on_actionTree_triggered();
@@ -64,9 +64,8 @@ private:
     QVariant selected_item;
     QLabel* file_label;
     QProgressBar* file_progress;
-    QStringList recent_files, recent_projects;
+    QStringList recent_files;
     QString currentFile;
-    QString currentProject;
     int previous_page;
     void get_recent_files();
     void populate_recent_file_menu();

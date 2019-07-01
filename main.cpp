@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
     w.show();
     if (args.length() > 0) {
-        w.read_nix_file(args[0]);
+        w.open_nix_file(args[0]);
     }
     return a.exec();
 }

@@ -20,12 +20,10 @@
 
 
 MainWindow::MainWindow(QWidget *parent, QApplication *app) : QMainWindow(parent),
-    ui(new Ui::MainWindow), currentFile(""), currentProject("") {
-
+    ui(new Ui::MainWindow), currentFile("") {
     QCoreApplication::setOrganizationName("g-node");
     QCoreApplication::setApplicationName("nixview");
     QCoreApplication::setApplicationVersion("0.9");
-
     ui->setupUi(this);
     file_label = new QLabel(this);
     file_progress = new QProgressBar(this);
@@ -145,7 +143,6 @@ void MainWindow::show_options() {
 
 void MainWindow::find() {
     previous_page = ui->stackedWidget->currentIndex();
-    ui->searchForm->setNixFile(ui->main_view->get_nix_file());
     ui->stackedWidget->setCurrentIndex(1);
     ui->searchForm->receiveFocus();
 }
@@ -231,7 +228,6 @@ void MainWindow::open_file() {
         fileNames = fd.selectedFiles();
     if (fileNames.size() == 0)
         return;
-    read_nix_file(fileNames.front());
 }
 
 
@@ -244,24 +240,17 @@ void MainWindow::close_file() {
 }
 
 
-void MainWindow::read_nix_file(QString filename) {
-    std::string file_path = filename.toStdString();
+void MainWindow::open_nix_file(QString filename) {
     QFile f(filename);
     if (!f.exists()) {
         QMessageBox::information(this, "File not found!", "File " + filename + " does not exist!", QMessageBox::Ok);
         return;
     }
-    file_label->setText(file_path.c_str());
-    file_progress->setVisible(true);
-
-    if (ui->main_view->set_nix_file(file_path)) {
         file_progress->setVisible(false);
         ui->stackedWidget->setCurrentIndex(0);
         toggle_file_controls(true);
         update_recent_file_list(filename);
         set_current_file(filename);
-        qDebug() << "[Info] current project.count " << currentProject.count();
-        ui->main_view->show_project_navigator(currentProject.count() > 0);
     }
 }
 
@@ -347,12 +336,12 @@ void MainWindow::visible_columns_update(QString who, QString column, bool state)
 
 
 void MainWindow::open_recent_file(QAction *a) {
-    read_nix_file(a->text());
+    open_nix_file(a->text());
 }
 
 
 void MainWindow::recent_file_selected(QListWidgetItem *item) {
-    read_nix_file(item->text());
+    open_nix_file(item->text());
 }
 
 
@@ -374,7 +363,6 @@ void MainWindow::toggle_file_controls(bool enabled) {
     ui->actionCloseFile->setEnabled(enabled);
     ui->actionFile_properties->setEnabled(enabled);
     ui->actionFind->setEnabled(enabled);
-    ui->actionAddCurrentFileToProject->setEnabled(enabled && !currentProject.isEmpty());
 }
 
 
