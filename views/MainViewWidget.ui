@@ -15,93 +15,16 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QSplitter" name="splitter">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QStackedWidget" name="data_stacked_Widget">
+     <property name="currentIndex">
+      <number>-1</number>
      </property>
-     <widget class="ProjectNavigator" name="project_navigator" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>175</width>
-        <height>16777215</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QStackedWidget" name="data_stacked_Widget">
-         <property name="currentIndex">
-          <number>-1</number>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ProjectNavigator</class>
-   <extends>QWidget</extends>
-   <header>views/projectnavigator.hpp</header>
-   <container>1</container>
-   <slots>
-    <signal>file_selected(QString)</signal>
-    <signal>close_file()</signal>
-    <slot>update_nix_file(QString)</slot>
-   </slots>
-  </customwidget>
- </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>project_navigator</sender>
-   <signal>file_selected(QString)</signal>
-   <receiver>MainViewWidget</receiver>
-   <slot>update_nix_file(QString)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>161</x>
-     <y>233</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>387</x>
-     <y>233</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>project_navigator</sender>
-   <signal>close_file()</signal>
-   <receiver>MainViewWidget</receiver>
-   <slot>close_nix_file()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>99</x>
-     <y>233</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>387</x>
-     <y>233</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <signal>close_file()</signal>
   <slot>toggle_find()</slot>
