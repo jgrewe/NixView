@@ -2,7 +2,6 @@
 #define MAINVIEWWIDGET_HPP
 
 #include <QWidget>
-#include <nix.hpp>
 #include <QtGui>
 #include <infowidget/InfoWidget.hpp>
 #include <boost/optional.hpp>
@@ -27,16 +26,13 @@ private:
 
 public:
     explicit MainViewWidget(QWidget *parent = 0);
-    explicit MainViewWidget(const std::string &nix_file_path, QWidget *parent = 0);
     ~MainViewWidget();
 
-    bool set_nix_file(const QString &nix_file_path);
-    bool set_nix_file(const std::string &nix_file_path);
-    nix::File get_nix_file() const;
     ColumnView *get_cv();
     LazyLoadView* getTreeView();
     static NixTreeModel* get_current_model() {return CURRENT_MODEL; }
     int get_scan_progress();
+    bool refresh();
     void clear();
 
 public slots:
@@ -45,7 +41,6 @@ public slots:
     void emit_current_qml_worker_slot(QModelIndex qml);
     void emit_current_qml_worker_slot(QModelIndex qml, QModelIndex prev);
     void scan_progress();
-    void update_nix_file(const QString &nix_file_path);
     void close_nix_file();
 
 signals:
@@ -57,7 +52,6 @@ signals:
 
 private:
     Ui::MainViewWidget *ui;
-    nix::File nix_file;
     NixTreeModel *nix_model;
     //QSortFilterProxyModel *nix_proxy_model;
     //NixDataModel *nix_model;
