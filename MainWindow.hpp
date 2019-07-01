@@ -8,6 +8,7 @@
 #include <QProgressBar>
 #include <nix.hpp>
 #include "views/MainViewWidget.hpp"
+#include "utils/datacontroller.h"
 
 class QVariant;
 
@@ -66,6 +67,7 @@ private:
     QProgressBar* file_progress;
     QStringList recent_files;
     QString currentFile;
+    DataController& data_controller = DataController::instance();
     int previous_page;
     void get_recent_files();
     void populate_recent_file_menu();

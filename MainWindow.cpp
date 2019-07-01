@@ -3,7 +3,7 @@
 #include "dialogs/aboutdialog.h"
 #include "dialogs/plotdialog.h"
 #include "views/RawTreeView.hpp"
-#include "nix.hpp"
+//#include "nix.hpp"
 #include "common/Common.hpp"
 #include "model/nixtreemodel.h"
 #include "model/nixtreemodelitem.h"
@@ -71,7 +71,7 @@ void MainWindow::get_recent_files() {
 
 
 MainWindow::~MainWindow() {
-    delete ui;
+     delete ui;
 }
 
 // slots
@@ -190,6 +190,7 @@ void MainWindow::newSearchResults(std::vector<QVariant> results) {
 
 
 void MainWindow::checkToolTip(QListWidgetItem *item) {
+    std::cerr << "cehckToolTip!!! accesses the item!" << std::endl;
     if (item->toolTip().size() == 0) {
         item->setToolTip(QString::fromStdString(EntityDescriptor::describe(item->data(Qt::UserRole))));
     }
@@ -199,7 +200,7 @@ void MainWindow::checkToolTip(QListWidgetItem *item) {
 void MainWindow::show_file_properties() {
     FilePropertiesDialog d(this);
     boost::filesystem::path p(file_label->text().toStdString());
-    d.set_file(ui->main_view->get_nix_file(), p);
+    d.refresh();
     d.exec();
 }
 
@@ -228,10 +229,12 @@ void MainWindow::open_file() {
         fileNames = fd.selectedFiles();
     if (fileNames.size() == 0)
         return;
+    open_nix_file(fileNames.front());
 }
 
 
 void MainWindow::close_file() {
+    data_controller.close();
     ui->stackedWidget->setCurrentIndex(2);
     ui->main_view->clear();
     toggle_file_controls(false);
@@ -246,6 +249,12 @@ void MainWindow::open_nix_file(QString filename) {
         QMessageBox::information(this, "File not found!", "File " + filename + " does not exist!", QMessageBox::Ok);
         return;
     }
+    bool open_success = data_controller.nix_file(filename);
+    if (open_success) {
+        file_label->setText(filename);
+        file_progress->setVisible(true);
+    }
+    if (ui->main_view->refresh()) {
         file_progress->setVisible(false);
         ui->stackedWidget->setCurrentIndex(0);
         toggle_file_controls(true);
