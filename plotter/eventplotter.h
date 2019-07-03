@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "plotter.h"
-#include "../utils/loadthread.h"
+//#include "../utils/loadthread.h"
 #include <nix.hpp>
 #include "colormap.hpp"
 
@@ -45,8 +45,8 @@ public:
 private:
     Ui::EventPlotter *ui;
     ColorMap cmap;
-    nix::DataArray array;
-    LoadThread thread;
+    //nix::DataArray array;
+    //LoadThread thread;
     QCPRange totalRange;
     int numOfPoints;
 

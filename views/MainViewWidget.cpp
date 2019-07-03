@@ -32,7 +32,7 @@ bool MainViewWidget::refresh() {
         emit update_file(QString(""));
         return result;
     }
-    nix_model = dc.create_tree_model();
+    nix_model = dc.tree_model();
     nix_proxy_model = new NixProxyModel(this);
     tv->getTreeView()->setModel(nix_proxy_model);
     tv->getTreeView()->setSortingEnabled(true);

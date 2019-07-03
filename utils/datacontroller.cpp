@@ -28,13 +28,18 @@ bool DataController::valid() {
     return !this->file.isNone() && this->file.isOpen();
 }
 
+void create_tree_model_item() {
+
+}
+
 NixTreeModel* DataController::create_tree_model() {
     if (tree_model != nullptr) {
         delete tree_model;
         tree_model = nullptr;
     }
     this->tree_model = new NixTreeModel();
-    this->tree_model->set_entity(this->file);
+    this->tree_model->reset();
+
     return this->tree_model;
 }
 

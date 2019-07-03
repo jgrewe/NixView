@@ -36,7 +36,6 @@ public:
     bool valid();
 
     NixTreeModel* create_tree_model();
-
 private:
    DataController(){}
    DataController(const DataController&);
@@ -45,5 +44,7 @@ private:
    QString filename;
    nix::File file;
    NixTreeModel *tree_model;
+
+   void create_tree_model_item();
 };
 #endif // DATACONTROLLER_H

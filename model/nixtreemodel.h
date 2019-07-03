@@ -15,7 +15,7 @@ public:
 
     ~NixTreeModel();
 
-    void set_entity(const nix::File &nixfile);
+    void reset();
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -34,13 +34,12 @@ public:
     void fetchMore(const QModelIndex &parent) override;
 
 private:
-    nix::File file;
     NixTreeModelItem *root_item;
     NixTreeModelItem *data_node;
     NixTreeModelItem *metadata_node;
 
-    void fetchL1Blocks(const nix::File &file);
-    void fetchL1Sections(const nix::File &file);
+    void fetchL1Blocks();
+    void fetchL1Sections();
     int checkForKids(NixTreeModelItem *item) const;
     void append_groups(const std::vector<nix::Group> &groups, NixTreeModelItem *parent);
     void append_tags(const std::vector<nix::Tag> &tags, NixTreeModelItem *parent);

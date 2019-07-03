@@ -43,7 +43,7 @@ public:
 
 private:
     QList<NixTreeModelItem*> children;
-    QVariant item_data;
+    QVariant item_data; // we need to avoid this, store the path within the file?
     NixTreeModelItem *parent_item;
     NixType nix_type;
     QVariant created_at, updated_at, name, dtype, id, store_type, type, value;

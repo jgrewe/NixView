@@ -1,9 +1,10 @@
 #include "nixtreemodel.h"
+#include "utils/datacontroller.h"
 #include <common/Common.hpp>
 
 NixTreeModel::NixTreeModel(QObject *parent)
     : QAbstractItemModel(parent) {
-    root_item = new NixTreeModelItem("");
+   reset();
 }
 
 
@@ -14,22 +15,23 @@ NixTreeModel::~NixTreeModel() {
 }
 
 
-void NixTreeModel::set_entity(const nix::File &file) {
-    this->file = file;
+void NixTreeModel::reset() {
     if (root_item != nullptr) {
         delete root_item;
     }
     root_item = new NixTreeModelItem("Root");
+    DataController &dc = DataController::instance();
+
     data_node = new NixTreeModelItem("Data", root_item);
     metadata_node = new NixTreeModelItem("Metadata", root_item);
     root_item->appendChild(data_node);
     root_item->appendChild(metadata_node);
-    fetchL1Blocks(file);
-    fetchL1Sections(file);
+    fetchL1Blocks();
+    fetchL1Sections();
 }
 
 
-void NixTreeModel::fetchL1Blocks(const nix::File &file) {
+void NixTreeModel::fetchL1Blocks() {
     for (nix::Block b: file.blocks()) {
         NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(b), data_node);
         data_node->appendChild(itm);
@@ -37,7 +39,7 @@ void NixTreeModel::fetchL1Blocks(const nix::File &file) {
 }
 
 
-void NixTreeModel::fetchL1Sections(const nix::File &file) {
+void NixTreeModel::fetchL1Sections() {
     for (nix::Section s: file.sections()) {
         NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(s), metadata_node);
         metadata_node->appendChild(itm);

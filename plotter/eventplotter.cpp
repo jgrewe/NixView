@@ -2,7 +2,7 @@
 #include "ui_eventplotter.h"
 
 EventPlotter::EventPlotter(QWidget *parent, int numOfPoints) :
-  QWidget(parent), ui(new Ui::EventPlotter), thread() {
+  QWidget(parent), ui(new Ui::EventPlotter) {
     ui->setupUi(this);
     // connect slot that ties some axis selections together (especially opposite axes):
     //connect(ui->plot, SIGNAL(selectionChangedByUser()), this, SLOT(selection_changed()));
@@ -24,7 +24,7 @@ EventPlotter::EventPlotter(QWidget *parent, int numOfPoints) :
 
     ui->plot->yAxis->setRange(-0.05,1.05);
     this->numOfPoints = numOfPoints;
-    thread.setChuncksize(static_cast<unsigned int>(numOfPoints));
+    //thread.setChuncksize(static_cast<unsigned int>(numOfPoints));
 }
 
 
@@ -85,9 +85,6 @@ void EventPlotter::draw(const nix::DataArray &array) {
     if(! testArray(array)) {
         return;
     }
-
-    this->array = array;
-
     ui->plot->addGraph();
     QPen pen;
     pen.setColor(cmap.next());
@@ -110,8 +107,8 @@ void EventPlotter::draw(const nix::DataArray &array) {
     this->totalRange.expand(QCPRange(d.asRangeDimension().axis(1,0)[0], d.asRangeDimension().axis(1,array.dataExtent()[0]-1)[0]));
     ui->plot->xAxis->setRange(QCPRange(d.asRangeDimension().axis(1,0)[0],d.asRangeDimension().axis(1,length-1)[0]));
 
-    connect(&thread, SIGNAL(dataReady(const QVector<double> &, const QVector<double> &, int)), this, SLOT(drawThreadData(const QVector<double> &, const QVector<double> &, int)));
-    thread.setVariables1D(array, start, extent, array.getDimension(1), 0 );
+    // connect(&thread, SIGNAL(dataReady(const QVector<double> &, const QVector<double> &, int)), this, SLOT(drawThreadData(const QVector<double> &, const QVector<double> &, int)));
+    // thread.setVariables1D(array, start, extent, array.getDimension(1), 0 );
 
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
 }
@@ -235,7 +232,7 @@ void EventPlotter::xRangeChanged(QCPRange newRange) {
     double min = graph->dataMainKey(0);
     double meanPoints = graph->dataCount() / (max-min);
 
-    thread.startLoadingIfNeeded(newRange,1, min, max, meanPoints);
+    //thread.startLoadingIfNeeded(newRange,1, min, max, meanPoints);
 }
 
 void EventPlotter::changeXAxisPosition(double newCenter) {
