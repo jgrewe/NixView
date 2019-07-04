@@ -1,10 +1,11 @@
 #include "nixtreemodel.h"
-#include "utils/datacontroller.h"
 #include <common/Common.hpp>
+#include "utils/datacontroller.h"
+
 
 NixTreeModel::NixTreeModel(QObject *parent)
     : QAbstractItemModel(parent) {
-   reset();
+    reset();
 }
 
 
@@ -20,30 +21,34 @@ void NixTreeModel::reset() {
         delete root_item;
     }
     root_item = new NixTreeModelItem("Root");
-    DataController &dc = DataController::instance();
 
     data_node = new NixTreeModelItem("Data", root_item);
     metadata_node = new NixTreeModelItem("Metadata", root_item);
     root_item->appendChild(data_node);
     root_item->appendChild(metadata_node);
-    fetchL1Blocks();
+    DataController& dc = DataController::instance();
+    dc.blocks_to_items(data_node);
+    dc.sections_to_items(metadata_node);
+    //fetchL1Blocks();
     fetchL1Sections();
 }
 
 
 void NixTreeModel::fetchL1Blocks() {
-    for (nix::Block b: file.blocks()) {
-        NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(b), data_node);
-        data_node->appendChild(itm);
-    }
+    //for (nix::Block b: file.blocks()) {
+    //    NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(b), data_node);
+    //    data_node->appendChild(itm);
+    //}
 }
 
 
 void NixTreeModel::fetchL1Sections() {
+    /*
     for (nix::Section s: file.sections()) {
         NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(s), metadata_node);
         metadata_node->appendChild(itm);
     }
+    */
 }
 
 

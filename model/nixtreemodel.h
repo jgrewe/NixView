@@ -5,15 +5,14 @@
 #include <nix.hpp>
 #include "nixtreemodelitem.h"
 
-
 class NixTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    explicit NixTreeModel(QObject *parent = 0);
+    explicit NixTreeModel(QObject *parent = nullptr);
 
-    ~NixTreeModel();
+    ~NixTreeModel() override;
 
     void reset();
 
