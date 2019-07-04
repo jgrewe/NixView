@@ -1,11 +1,23 @@
 #include "nixtreemodelitem.h"
-#include "common/Common.hpp"
 #include "utils/entitydescriptor.h"
-
+#include "common/Common.hpp"
 
 const QVector<QString> NixTreeModelItem::columns = {MODEL_HEADER_NAME, MODEL_HEADER_NIXTYPE, MODEL_HEADER_STORAGETYPE,
                                                     MODEL_HEADER_DATATYPE, MODEL_HEADER_ID, MODEL_HEADER_VALUE,
                                                     MODEL_HEADER_CREATEDAT, MODEL_HEADER_UPDATEDAT};
+
+const std::map<NixType, QVariant> type_name_map = {
+    { NixType::NIX_BLOCK, QVariant(NIX_STRING_BLOCK) },
+    { NixType::NIX_DATA_ARRAY, QVariant(NIX_STRING_DATAARRAY) },
+    { NixType::NIX_GROUP, QVariant(NIX_STRING_GROUP) },
+    { NixType::NIX_FEAT, QVariant(NIX_STRING_FEATURE) },
+    { NixType::NIX_TAG, QVariant(NIX_STRING_TAG) },
+    { NixType::NIX_MTAG, QVariant(NIX_STRING_MULTITAG) },
+    { NixType::NIX_SOURCE, QVariant(NIX_STRING_SOURCE) },
+    { NixType::NIX_SECTION, QVariant(NIX_STRING_SECTION) },
+    { NixType::NIX_PROPERTY, QVariant(NIX_STRING_PROPERTY) }
+};
+
 
 NixTreeModelItem::NixTreeModelItem(const QVariant &data, NixTreeModelItem *parent) {
     this->parent_item = parent;

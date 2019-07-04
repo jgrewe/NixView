@@ -28,6 +28,7 @@ public:
     ~NixTreeModelItem();
 
     static const QVector<QString> columns;
+    static const std::map<NixType, QVariant> type_name_map;
 
     void appendChild(NixTreeModelItem *child);
     NixTreeModelItem *child(int row);
