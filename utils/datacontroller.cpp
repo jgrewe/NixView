@@ -43,47 +43,12 @@ NixTreeModel* DataController::create_tree_model() {
     return this->tree_model;
 }
 
-int count_sections(nix::Section s) {
-   int count = s.sectionCount();
-   for (nix::Section subsec : s.sections()) {
-       count += count_sections(subsec);
-   }
-   return count;
-}
 
 FileInfo DataController::file_info() {
-    FileInfo fi;
-    if (!this->valid())
+    if (!this->valid()) {
+        FileInfo fi;
         return fi;
-    fi.file_name = this->filename;
-    fi.file_format = QString::fromStdString(this->file.format());
-    QString version;
-    for (int i : file.version())
-        version.append(QString::fromStdString(nix::util::numToStr(i)) + ".");
-    fi.format_version = version;
-
-    fi.created_at = QString::fromStdString(nix::util::timeToStr(this->file.createdAt()));
-    fi.updated_at = QString::fromStdString(nix::util::timeToStr(this->file.updatedAt()));
-
-    fi.block_count = int(this->file.blockCount());
-    fi.array_count = 0;
-    fi.tag_count = 0;
-    fi.group_count = 0;
-    int section_count = 0;
-    for (nix::Block b : this->file.blocks()) {
-        fi.array_count += b.dataArrayCount();
-        fi.tag_count += b.tagCount();
-        fi.tag_count += b.multiTagCount();
-        fi.group_count += b.groupCount();
     }
-    section_count += file.sectionCount();
-    for (nix::Section s : file.sections()) {
-        section_count += count_sections(s);
-    }
-    fi.section_count = section_count;
-    boost::filesystem::path p(this->filename.toStdString());
-    fi.file_size = (int)(boost::filesystem::file_size(p) / 1000000.);
-
-    fi.status = boost::filesystem::status(p);
+    FileInfo fi(this->file, this->filename);
     return fi;
 }
