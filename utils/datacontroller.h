@@ -114,6 +114,9 @@ public:
     bool valid();
 
     NixTreeModel* create_tree_model();
+    void blocks_to_items(NixTreeModelItem *parent);
+    void sections_to_items(NixTreeModelItem *parent);
+
 private:
    DataController(){}
    DataController(const DataController&);

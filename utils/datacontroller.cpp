@@ -28,9 +28,20 @@ bool DataController::valid() {
     return !this->file.isNone() && this->file.isOpen();
 }
 
-void create_tree_model_item() {
+void DataController::blocks_to_items(NixTreeModelItem *parent) {
+    for (nix::Block b : this->file.blocks()) {
+        NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(b.name()), parent);
 
+        parent->appendChild(itm);
+    }
 }
+
+void DataController::sections_to_items(NixTreeModelItem *parent) {
+    for (nix::Section s : this->file.sections()) {
+
+    }
+}
+
 
 NixTreeModel* DataController::create_tree_model() {
     if (tree_model != nullptr) {
@@ -39,7 +50,6 @@ NixTreeModel* DataController::create_tree_model() {
     }
     this->tree_model = new NixTreeModel();
     this->tree_model->reset();
-
     return this->tree_model;
 }
 
