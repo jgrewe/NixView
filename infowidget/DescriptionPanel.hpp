@@ -26,12 +26,6 @@ public slots:
 
 private:
     Ui::DescriptionPanel *ui;
-
-    template <typename T>
-    void update(T arg);
-
-    template <typename T>
-    void update_typeless(T arg);
 };
 
 #endif // DESCRIPTIONPANEL_HPP
