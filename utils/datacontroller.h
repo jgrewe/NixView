@@ -5,9 +5,26 @@
 #include <QString>
 #include <QVariant>
 #include <boost/filesystem.hpp>
-#include "model/nixtreemodel.h"
+#include "utils/entitydescriptor.h"
+
+class NixTreeModelItem;
+class NixTreeModel;
 
 namespace bfs = boost::filesystem;
+
+enum class NixType {
+    NIX_BLOCK,
+    NIX_DATA_ARRAY,
+    NIX_TAG,
+    NIX_MTAG,
+    NIX_GROUP,
+    NIX_FEAT,
+    NIX_SOURCE,
+    NIX_SECTION,
+    NIX_PROPERTY,
+    NIX_DIMENSION,
+    NIX_UNKNOWN
+};
 
 struct FileInfo {
     QString file_name, file_location, file_format, format_version, created_at, updated_at;
@@ -58,41 +75,6 @@ struct FileInfo {
     }
 };
 
-struct EntityInfo {
-
-    QVariant created_at, updated_at, name, dtype, id, store_type, type, value;
-    NixType nix_type;
-
-    EntityInfo(nix::base::INamedEntity &item, const NixType &ntype) {
-        name = QVariant(item.name().c_str());
-        type = QVariant(item.type().c_str());
-        nix_type = ntype;
-        entity_props(item);
-        if (ntype == NixType::NIX_FEAT) {
-            nix::Property &p = dynamic_cast<nix::Property&>(item);
-            dtype = QVariant(nix::data_type_to_string(p.dataType()).c_str());
-        } else if (ntype == NixType::NIX_DATA_ARRAY) {
-            nix::DataArray &da = dynamic_cast<nix::DataArray&>(item);
-            dtype = QVariant(nix::data_type_to_string(da.dataType()).c_str());
-        } else {
-            dtype = QVariant("n.a.");
-        }
-    }
-
-    EntityInfo(nix::Feature &feat) {
-        name = QVariant(feat.data().name().c_str());
-        type = QVariant(feat.data().type().c_str());
-        nix_type = NixType::NIX_FEAT;
-        dtype = QVariant(nix::data_type_to_string(feat.data().dataType()).c_str());
-        entity_props(dynamic_cast<nix::base::IEntity&>(feat));
-    }
-
-    void entity_props(const nix::base::IEntity &ent) {
-        id = QVariant(ent.id().c_str());
-        created_at = QVariant(nix::util::timeToStr(ent.createdAt()).c_str());
-        updated_at = QVariant(nix::util::timeToStr(ent.updatedAt()).c_str());
-    }
-};
 
 class DataController
 {
@@ -103,19 +85,30 @@ public:
       return _instance;
     }
 
-    ~DataController() {
-        delete tree_model;
-    }
+    ~DataController();
 
     bool nix_file(const QString &filename);
     QString nix_file();
     FileInfo file_info();
     void close();
     bool valid();
-
+    nix::ndsize_t block_count();
+    nix::ndsize_t section_count();
     NixTreeModel* create_tree_model();
+
     void blocks_to_items(NixTreeModelItem *parent);
     void sections_to_items(NixTreeModelItem *parent);
+
+    void fetch_block(NixTreeModelItem *parent);
+    void fetch_data_array(NixTreeModelItem *parent);
+    void fetch_tag(NixTreeModelItem* parent);
+    void fetch_mtag(NixTreeModelItem *parent);
+    void fetch_source(NixTreeModelItem *parent);
+    void fetch_group(NixTreeModelItem *parent);
+    void fetch_section(NixTreeModelItem *parent);
+
+    template<typename T>
+    void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path);
 
 private:
    DataController(){}
@@ -128,4 +121,187 @@ private:
 
    void create_tree_model_item();
 };
+
+
+struct EntityInfo {
+    QVariant created_at, updated_at, name, dtype, id, type, value;
+    NixType nix_type;
+    nix::ndsize_t max_child_count;
+    std::vector<std::string> parent_path;
+    std::string description;
+
+
+    EntityInfo(const QString &nam){
+        name = QVariant(nam);
+        parent_path = {};
+        nix_type = NixType::NIX_UNKNOWN;
+
+        DataController &dc = DataController::instance();
+        if (name == "Root")
+            max_child_count = 2;
+        else if (name == "Data") {
+            max_child_count = dc.block_count();
+        } else if (name == "Metadata") {
+            max_child_count = dc.section_count();
+        }
+    }
+
+    EntityInfo(const nix::Section &section, std::vector<std::string> path) {
+        name = QVariant(section.name().c_str());
+        type = QVariant(section.type().c_str());
+        nix_type = NixType::NIX_SECTION;
+        id = QVariant(section.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(section.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(section.updatedAt()).c_str());
+        dtype = QVariant("n.a.");
+        max_child_count = section.sectionCount() + section.propertyCount();
+        description = EntityDescriptor::describe(section);
+        parent_path = path;
+    }
+
+    QVariant getPropertyValue(const nix::Property &p) {
+        std::string vals;
+        if (p.valueCount() > 1) {
+            vals = "[ ";
+        }
+        for (nix::Value v : p.values()) {
+            vals = vals + EntityDescriptor::value_to_str(v, p.dataType());
+        }
+        if (p.valueCount() > 1) {
+            vals = vals + "]";
+        }
+        return QVariant(vals.c_str());
+    }
+
+    EntityInfo(const nix::Property &property, std::vector<std::string> path) {
+        name = QVariant(property.name().c_str());
+        type = QVariant("");
+        nix_type = NixType::NIX_PROPERTY;
+        id = QVariant(property.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(property.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(property.updatedAt()).c_str());
+        dtype = QVariant(nix::data_type_to_string(property.dataType()).c_str());
+        max_child_count = 0;
+        value = getPropertyValue(property);
+        description = EntityDescriptor::describe(property);
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::DataArray &array, std::vector<std::string> path) {
+        name = QVariant(array.name().c_str());
+        type = QVariant(array.type().c_str());
+        nix_type = NixType::NIX_DATA_ARRAY;
+        id = QVariant(array.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(array.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(array.updatedAt()).c_str());
+        dtype = QVariant(nix::data_type_to_string(array.dataType()).c_str());
+        max_child_count = array.dimensionCount();
+        description = EntityDescriptor::describe(array);
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::Block &block, std::vector<std::string> path) {
+        name = QVariant(block.name().c_str());
+        type = QVariant(block.type().c_str());
+        nix_type = NixType::NIX_BLOCK;
+        id = QVariant(block.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(block.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(block.updatedAt()).c_str());
+        dtype = QVariant("n.a.");
+        description = EntityDescriptor::describe(block);
+        max_child_count = block.dataArrayCount() + block.groupCount() + block.tagCount() + block.multiTagCount() +
+                block.sourceCount();
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::Group &group, std::vector<std::string> path) {
+        name = QVariant(group.name().c_str());
+        type = QVariant(group.type().c_str());
+        nix_type = NixType::NIX_GROUP;
+        id = QVariant(group.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(group.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(group.updatedAt()).c_str());
+        dtype = QVariant("n.a.");
+        description = EntityDescriptor::describe(group);
+        max_child_count = group.dataArrayCount() + group.multiTagCount() + group.tagCount() + group.sourceCount();
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::Tag &tag, std::vector<std::string> path) {
+        name = QVariant(tag.name().c_str());
+        type = QVariant(tag.type().c_str());
+        nix_type = NixType::NIX_TAG;
+        id = QVariant(tag.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(tag.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(tag.updatedAt()).c_str());
+        dtype = QVariant("n.a.");
+        max_child_count = tag.referenceCount() + tag.featureCount();
+        description = EntityDescriptor::describe(tag);
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::MultiTag &mtag, std::vector<std::string> path) {
+        name = QVariant(mtag.name().c_str());
+        type = QVariant(mtag.type().c_str());
+        nix_type = NixType::NIX_MTAG;
+        id = QVariant(mtag.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(mtag.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(mtag.updatedAt()).c_str());
+        dtype = QVariant("n.a.");
+        max_child_count = mtag.referenceCount() + mtag.featureCount();
+        description = EntityDescriptor::describe(mtag);
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::Feature &feat, std::vector<std::string> path) {
+        name = QVariant(feat.data().name().c_str());
+        type = QVariant(feat.data().type().c_str());
+        nix_type = NixType::NIX_FEAT;
+        dtype = QVariant(nix::data_type_to_string(feat.data().dataType()).c_str());
+        id = QVariant(feat.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(feat.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(feat.updatedAt()).c_str());
+        description = EntityDescriptor::describe(feat);
+        max_child_count = 0;
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::Dimension &dimension, std::vector<std::string> path) {
+        if (dimension.dimensionType() == nix::DimensionType::Sample) {
+            nix::SampledDimension sdim = dimension.asSampledDimension();
+            name = QVariant(sdim.label() ? sdim.label()->c_str() : "");
+            type = QVariant("Sampled dimension");
+        } else if (dimension.dimensionType() == nix::DimensionType::Range) {
+            nix::RangeDimension rdim = dimension.asRangeDimension();
+            name = QVariant(rdim.label() ? rdim.label()->c_str() : "");
+            type = QVariant("Range dimension");
+        } else {
+            name = QVariant("");
+            type = QVariant("Set dimension");
+        }
+        description = EntityDescriptor::describe(dimension);
+        nix_type = NixType::NIX_DIMENSION;
+        dtype = QVariant("n.a.");
+        id = QVariant("n.a.");
+
+        created_at = QVariant("");
+        updated_at = QVariant("");
+        max_child_count = 0;
+        parent_path = path;
+    }
+
+    EntityInfo(const nix::Source &src, std::vector<std::string> path) {
+        name = QVariant(src.name().c_str());
+        type = QVariant(src.type().c_str());
+        nix_type = NixType::NIX_SOURCE;
+        dtype = QVariant("n.a.");
+        id = QVariant(src.id().c_str());
+        created_at = QVariant(nix::util::timeToStr(src.createdAt()).c_str());
+        updated_at = QVariant(nix::util::timeToStr(src.updatedAt()).c_str());
+        max_child_count = src.sourceCount();
+        description = EntityDescriptor::describe(src);
+        parent_path = path;
+    }
+};
+
 #endif // DATACONTROLLER_H
