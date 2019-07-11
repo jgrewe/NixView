@@ -2,7 +2,8 @@
 #include "ui_MetaDataPanel.h"
 #include "common/Common.hpp"
 #include "model/nixtreemodelitem.h"
-#include "model/nixmetadatatreemodel.h"
+#include "model/nixtreemodel.h"
+#include "utils/datacontroller.h"
 #include <ostream>
 #include <QMenu>
 
@@ -34,14 +35,11 @@ void MetaDataPanel::setProxyModel() {
 
 
 void MetaDataPanel::updateMetadataPanel(QModelIndex qml) {
+    DataController &dc = DataController::instance();
     if (qml.isValid()) {
         NixTreeModelItem *item = static_cast<NixTreeModelItem*>(qml.internalPointer());
-        if (item->nixType() == NixType::NIX_SECTION) {
-            nix::Section metadata = item->itemData().value<nix::Section>();
-            NixMetadataTreeModel *model = new NixMetadataTreeModel();
-            if (metadata) {
-                model->setEntity(metadata);
-            }
+        if (item->entityInfo().has_metadata) {
+            NixTreeModel *model = dc.create_metadata_treemodel(item);
             ui->treeView->setModel(model);
             setColumns();
         }
@@ -62,7 +60,7 @@ void MetaDataPanel::setColumns() {
 
 
 void MetaDataPanel::setColumnState(QString column, bool visible) {
-    NixMetadataTreeModel * model = static_cast<NixMetadataTreeModel*>(ui->treeView->model());
+    NixTreeModel *model = static_cast<NixTreeModel*>(ui->treeView->model());
     if (model == nullptr)
         return;
     for (int i = 0; i < model->columnCount(); i++) {
@@ -90,7 +88,7 @@ void MetaDataPanel::clearMetadataPanel() {
 
 
 void MetaDataPanel::resizeToContent(QModelIndex) {
-    for (int c = 0; c < ui->treeView->model()->columnCount();c++)
+    for (int c = 0; c < ui->treeView->model()->columnCount(); c++)
         ui->treeView->resizeColumnToContents(c);
 }
 
