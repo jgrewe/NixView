@@ -85,29 +85,30 @@ void MainWindow::on_actionColumn_triggered() {
 
 
 void MainWindow::searchResultSelected() {
+    /*
     QList<QListWidgetItem*> items = ui->searchResults->selectedItems();
     if (items.size() > 0) {
         item_selected(items[0]->data(Qt::UserRole));
     }
+    */
 }
 
 
 void MainWindow::item_selected(QModelIndex qml) {
     NixTreeModelItem *item = static_cast<NixTreeModelItem*>(qml.internalPointer());
-    item_selected(item->itemData());
+    item_selected(item);
 }
 
 
-void MainWindow::item_selected(QVariant v) {
-    selected_item = v;
+void MainWindow::item_selected(NixTreeModelItem *item) {
     ui->actionPlot->setEnabled(false);
     ui->actionTable->setEnabled(false);
     ui->actionToCSV->setEnabled(false);
-    if(v.canConvert<nix::DataArray>() | v.canConvert<nix::Feature>()) {
+    if(item->entityInfo().nix_type == NixType::NIX_DATA_ARRAY | item->entityInfo().nix_type == NixType::NIX_FEAT) {
         ui->actionTable->setEnabled(true);
         ui->actionPlot->setEnabled(true);
         ui->actionToCSV->setEnabled(true);
-    } else if (v.canConvert<nix::Tag>() | v.canConvert<nix::MultiTag>()) {
+    } else if (item->entityInfo().nix_type == NixType::NIX_TAG | item->entityInfo().nix_type == NixType::NIX_MTAG) {
         ui->actionPlot->setEnabled(true);
     }
 }

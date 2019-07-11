@@ -11,6 +11,7 @@
 #include "utils/datacontroller.h"
 
 class QVariant;
+class NixTreeModelItem;
 
 namespace Ui {
 class MainWindow;
@@ -30,7 +31,7 @@ public slots:
     void on_actionTree_triggered();
     void on_actionColumn_triggered();
     void item_selected(QModelIndex qml);
-    void item_selected(QVariant v);
+    void item_selected(NixTreeModelItem *item);
     void open_file();
     void close_file();
     void show_about();
