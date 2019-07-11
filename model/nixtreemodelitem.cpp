@@ -88,7 +88,7 @@ QVariant NixTreeModelItem::data(int column) const {
 
 
 QVariant NixTreeModelItem::toolTip() const {
-    return QVariant(QString::fromStdString(getEntityInfo().description));
+    return QVariant(QString::fromStdString(entityInfo().description));
 }
 
 
@@ -102,7 +102,7 @@ NixType NixTreeModelItem::nixType() const {
 }
 
 
-EntityInfo NixTreeModelItem::getEntityInfo() const {
+EntityInfo NixTreeModelItem::entityInfo() const {
     return this->info;
 }
 

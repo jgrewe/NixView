@@ -12,9 +12,9 @@ class NixTreeModel : public QAbstractItemModel
 public:
     explicit NixTreeModel(QObject *parent = nullptr);
 
-    ~NixTreeModel() override;
+    NixTreeModel(NixTreeModelItem *root_item, QObject *parent = nullptr);
 
-    //void reset();
+    ~NixTreeModel() override;
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -33,7 +33,7 @@ public:
     void fetchMore(const QModelIndex &parent) override;
 
 private:
-    NixTreeModelItem *root_item;
+    NixTreeModelItem *root_node;
     NixTreeModelItem *data_node;
     NixTreeModelItem *metadata_node;
 };

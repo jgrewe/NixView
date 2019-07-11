@@ -53,7 +53,7 @@ void DataController::blocks_to_items(NixTreeModelItem *parent) {
 
 
 void DataController::fetch_block(NixTreeModelItem *parent) {
-    nix::Block b = this->file.getBlock(parent->getEntityInfo().name.toString().toStdString());
+    nix::Block b = this->file.getBlock(parent->entityInfo().name.toString().toStdString());
     std::vector<std::string> parent_path = {b.name()};
     append_items(b.dataArrays(), parent, parent_path);
     append_items(b.groups(), parent, parent_path);
@@ -64,9 +64,9 @@ void DataController::fetch_block(NixTreeModelItem *parent) {
 
 
 void DataController::fetch_data_array(NixTreeModelItem *parent) {
-    std::vector<std::string> p = parent->getEntityInfo().parent_path;
+    std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::DataArray da = b.getDataArray(parent->getEntityInfo().name.toString().toStdString());
+    nix::DataArray da = b.getDataArray(parent->entityInfo().name.toString().toStdString());
     p.push_back(da.name());
     for (nix::Dimension d : da.dimensions()) {
         EntityInfo ei(d, p);
@@ -77,9 +77,9 @@ void DataController::fetch_data_array(NixTreeModelItem *parent) {
 
 
 void DataController::fetch_tag(NixTreeModelItem *parent) {
-    std::vector<std::string> p = parent->getEntityInfo().parent_path;
+    std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::Tag tag = b.getTag(parent->getEntityInfo().name.toString().toStdString());
+    nix::Tag tag = b.getTag(parent->entityInfo().name.toString().toStdString());
     p.push_back(tag.name());
     for (nix::DataArray d : tag.references()) {
         EntityInfo ei(d, p);
@@ -95,9 +95,9 @@ void DataController::fetch_tag(NixTreeModelItem *parent) {
 
 
 void DataController::fetch_mtag(NixTreeModelItem *parent) {
-    std::vector<std::string> p = parent->getEntityInfo().parent_path;
+    std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::MultiTag tag = b.getMultiTag(parent->getEntityInfo().name.toString().toStdString());
+    nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name.toString().toStdString());
     p.push_back(tag.name());
     for (nix::DataArray d : tag.references()) {
         EntityInfo ei(d, p);
@@ -112,7 +112,7 @@ void DataController::fetch_mtag(NixTreeModelItem *parent) {
 }
 
 void DataController::fetch_source(NixTreeModelItem *parent) {
-    std::vector<std::string> p = parent->getEntityInfo().parent_path;
+    std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Source s;
     if (p.size() > 1) {
@@ -120,9 +120,9 @@ void DataController::fetch_source(NixTreeModelItem *parent) {
         for (size_t i = 2; i< p.size(); ++i) {
             s = s.getSource(p[i]);
         }
-        s = s.getSource(parent->getEntityInfo().name.toString().toStdString());
+        s = s.getSource(parent->entityInfo().name.toString().toStdString());
     } else {
-       s = b.getSource(parent->getEntityInfo().name.toString().toStdString());
+       s = b.getSource(parent->entityInfo().name.toString().toStdString());
     }
     if (s) {
         EntityInfo si(s, p);
@@ -133,7 +133,7 @@ void DataController::fetch_source(NixTreeModelItem *parent) {
 
 
 void DataController::fetch_group(NixTreeModelItem *parent) {
-    std::vector<std::string> p = parent->getEntityInfo().parent_path;
+    std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Group g = b.getGroup(p[0]);
     for (nix::DataArray d : g.dataArrays()) {
@@ -160,21 +160,19 @@ void DataController::fetch_group(NixTreeModelItem *parent) {
 
 
 void DataController::fetch_section(NixTreeModelItem *parent) {
-    std::vector<std::string> p = parent->getEntityInfo().parent_path;
+    std::vector<std::string> p = parent->entityInfo().parent_path;
 
     nix::Section s;
     if (p.size() > 0) {
-        std::cerr << p[0] << std::endl;
         s = this->file.getSection(p[0]);
         for (size_t i = 1; i < p.size(); ++i) {
-            std::cerr << "\t" << p[i] << std::endl;
             s = s.getSection(p[i]);
         }
-        s = s.getSection(parent->getEntityInfo().name.toString().toStdString());
+        s = s.getSection(parent->entityInfo().name.toString().toStdString());
     } else {
-        s = this->file.getSection(parent->getEntityInfo().name.toString().toStdString());
+        s = this->file.getSection(parent->entityInfo().name.toString().toStdString());
     }
-    p.push_back(parent->getEntityInfo().name.toString().toStdString());
+    p.push_back(parent->entityInfo().name.toString().toStdString());
 
     if (s) {
         for (nix::Section sec : s.sections()) {
@@ -200,13 +198,52 @@ void DataController::sections_to_items(NixTreeModelItem *parent) {
 }
 
 
-NixTreeModel* DataController::create_tree_model() {
+NixTreeModel *DataController::create_tree_model() {
     if (tree_model != nullptr) {
         delete tree_model;
         tree_model = nullptr;
     }
     this->tree_model = new NixTreeModel();
     return this->tree_model;
+}
+
+
+std::vector<std::string> DataController::sectionPath(const nix::Section &s) const {
+    std::vector<std::string> path;
+    while (s.parent() != nix::none) {
+        path.insert(path.begin(), {s.parent().name()});
+    }
+    return path;
+}
+
+
+NixTreeModel *DataController::create_metadata_treemodel(NixTreeModelItem *parent) {
+    if(mdata_tree != nullptr) {
+        delete mdata_tree;
+        mdata_tree = nullptr;
+    }
+    EntityInfo parent_info = parent->entityInfo();
+    if (parent_info.has_metadata) {
+        std::vector<nix::Section> sections = this->file.findSections(nix::util::NameFilter<nix::Section>(parent_info.metadata_name));
+        nix::Section section;
+        if (sections.size() == 1) {
+            section = sections[0];
+        } else {
+            for (nix::Section s : sections) {
+                if(s.id() == parent_info.metadata_id) {
+                    section = s;
+                    break;
+                }
+            }
+        }
+        if (section != nix::none) {
+            std::vector<std::string> path = sectionPath(section);
+            EntityInfo info(section, path);
+            NixTreeModelItem *itm = new NixTreeModelItem(info);
+            mdata_tree = new NixTreeModel(itm, nullptr);
+        }
+    }
+    return mdata_tree;
 }
 
 

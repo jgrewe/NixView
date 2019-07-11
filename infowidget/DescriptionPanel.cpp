@@ -18,7 +18,7 @@ void DescriptionPanel::update_description_panel(QModelIndex qml) {
         return;
     }
     NixTreeModelItem *item = static_cast<NixTreeModelItem*>(qml.internalPointer());
-    ui->info_text_edit->setText(QString::fromStdString(item->getEntityInfo().description));
+    ui->info_text_edit->setText(QString::fromStdString(item->entityInfo().description));
 }
 
 

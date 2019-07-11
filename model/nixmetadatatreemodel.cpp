@@ -1,9 +1,11 @@
 #include "nixmetadatatreemodel.h"
 #include "common/Common.hpp"
+#include "utils/datacontroller.h"
 
 NixMetadataTreeModel::NixMetadataTreeModel(QObject *parent)
     : QAbstractItemModel(parent) {
-    rootItem = new NixTreeModelItem("");
+    EntityInfo info("Root");
+    rootItem = new NixTreeModelItem(info);
 }
 
 
@@ -15,8 +17,10 @@ void NixMetadataTreeModel::setEntity(const nix::Section &section) {
     if (rootItem != nullptr) {
         delete rootItem;
     }
-    rootItem = new NixTreeModelItem("Root");
-    rootItem->appendChild(new NixTreeModelItem(QVariant::fromValue(section), rootItem));
+    EntityInfo info("Root");
+    rootItem = new NixTreeModelItem(info);
+    EntityInfo sec_info(section, {});
+    rootItem->appendChild(new NixTreeModelItem(sec_info, rootItem));
 }
 
 
@@ -115,17 +119,20 @@ bool NixMetadataTreeModel::canFetchMore(const QModelIndex &parent) const {
 
 
 void NixMetadataTreeModel::fetchMore(const QModelIndex &parent) {
+    /*
     if (!parent.isValid()) {
         return;
     }
     NixTreeModelItem *itm = static_cast<NixTreeModelItem*>(parent.internalPointer());
     if (itm->nixType() == NixType::NIX_SECTION) {
-            fetchSection(itm->itemData().value<nix::Section>(), itm);
+        fetchSection(itm->itemData().value<nix::Section>(), itm);
     }
+    */
 }
 
 
 int NixMetadataTreeModel::checkForKids(NixTreeModelItem *item) const {
+    /*
     NixType nix_type = item->nixType();
     if (nix_type == NixType::NIX_DIMENSION || nix_type == NixType::NIX_PROPERTY || nix_type == NixType::NIX_FEAT)
         return 0;
@@ -137,6 +144,8 @@ int NixMetadataTreeModel::checkForKids(NixTreeModelItem *item) const {
         default:
             return 0;
     }
+    */
+    return 0;
 }
 
 void NixMetadataTreeModel::fetchSection(const nix::Section &s, NixTreeModelItem *parent) {
@@ -147,7 +156,9 @@ void NixMetadataTreeModel::fetchSection(const nix::Section &s, NixTreeModelItem 
 
 void NixMetadataTreeModel::appendSections(const std::vector<nix::Section> &sections, NixTreeModelItem *parent) {
     for (nix::Section s : sections) {
-        NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(s), parent);
+        std::vector<std::string> path = parent->entityInfo().parent_path;
+        EntityInfo info(s, path); //FIXME
+        NixTreeModelItem *itm = new NixTreeModelItem(info, parent);
         parent->appendChild(itm);
     }
 }
@@ -155,7 +166,9 @@ void NixMetadataTreeModel::appendSections(const std::vector<nix::Section> &secti
 
 void NixMetadataTreeModel::appendProperties(const std::vector<nix::Property> &props, NixTreeModelItem *parent) {
     for (nix::Property p : props) {
-        NixTreeModelItem *itm = new NixTreeModelItem(QVariant::fromValue(p), parent);
+        std::vector<std::string> path = parent->entityInfo().parent_path;
+        EntityInfo info(p, path);
+        NixTreeModelItem *itm = new NixTreeModelItem(info, parent);
         parent->appendChild(itm);
     }
 }

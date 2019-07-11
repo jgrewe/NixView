@@ -94,7 +94,8 @@ public:
     bool valid();
     nix::ndsize_t block_count();
     nix::ndsize_t section_count();
-    NixTreeModel* create_tree_model();
+    NixTreeModel *create_tree_model();
+    NixTreeModel *create_metadata_treemodel(NixTreeModelItem *parent);
 
     void blocks_to_items(NixTreeModelItem *parent);
     void sections_to_items(NixTreeModelItem *parent);
@@ -117,18 +118,20 @@ private:
 
    QString filename;
    nix::File file;
-   NixTreeModel *tree_model;
+   NixTreeModel *tree_model, *mdata_tree;
 
-   void create_tree_model_item();
+   //void create_tree_model_item();
+   std::vector<std::string> sectionPath(const nix::Section &s) const;
 };
 
 
 struct EntityInfo {
     QVariant created_at, updated_at, name, dtype, id, type, value;
     NixType nix_type;
+    bool has_metadata = false;
     nix::ndsize_t max_child_count;
     std::vector<std::string> parent_path;
-    std::string description;
+    std::string description, metadata_name, metadata_id;
 
 
     EntityInfo(const QString &nam){
@@ -198,6 +201,13 @@ struct EntityInfo {
         max_child_count = array.dimensionCount();
         description = EntityDescriptor::describe(array);
         parent_path = path;
+
+        nix::Section s = array.metadata();
+        has_metadata = s != nix::none;
+        if (has_metadata) {
+            metadata_name = s.name();
+            metadata_id = s.id();
+        }
     }
 
     EntityInfo(const nix::Block &block, std::vector<std::string> path) {
@@ -212,6 +222,12 @@ struct EntityInfo {
         max_child_count = block.dataArrayCount() + block.groupCount() + block.tagCount() + block.multiTagCount() +
                 block.sourceCount();
         parent_path = path;
+        nix::Section s = block.metadata();
+        has_metadata = s != nix::none;
+        if (has_metadata) {
+            metadata_name = s.name();
+            metadata_id = s.id();
+        }
     }
 
     EntityInfo(const nix::Group &group, std::vector<std::string> path) {
@@ -225,6 +241,13 @@ struct EntityInfo {
         description = EntityDescriptor::describe(group);
         max_child_count = group.dataArrayCount() + group.multiTagCount() + group.tagCount() + group.sourceCount();
         parent_path = path;
+
+        nix::Section s = group.metadata();
+        has_metadata = s != nix::none;
+        if (has_metadata) {
+            metadata_id = s.id();
+            metadata_name = s.name();
+        }
     }
 
     EntityInfo(const nix::Tag &tag, std::vector<std::string> path) {
@@ -238,6 +261,13 @@ struct EntityInfo {
         max_child_count = tag.referenceCount() + tag.featureCount();
         description = EntityDescriptor::describe(tag);
         parent_path = path;
+
+        nix::Section s = tag.metadata();
+        has_metadata = s != nix::none;
+        if (has_metadata) {
+            metadata_id = s.id();
+            metadata_name = s.name();
+        }
     }
 
     EntityInfo(const nix::MultiTag &mtag, std::vector<std::string> path) {
@@ -251,6 +281,13 @@ struct EntityInfo {
         max_child_count = mtag.referenceCount() + mtag.featureCount();
         description = EntityDescriptor::describe(mtag);
         parent_path = path;
+
+        nix::Section s = mtag.metadata();
+        has_metadata = s != nix::none;
+        if (has_metadata) {
+            metadata_id = s.id();
+            metadata_name = s.name();
+        }
     }
 
     EntityInfo(const nix::Feature &feat, std::vector<std::string> path) {
@@ -301,6 +338,13 @@ struct EntityInfo {
         max_child_count = src.sourceCount();
         description = EntityDescriptor::describe(src);
         parent_path = path;
+
+        nix::Section s = src.metadata();
+        has_metadata = s != nix::none;
+        if (has_metadata) {
+            metadata_id = s.id();
+            metadata_name = s.name();
+        }
     }
 };
 

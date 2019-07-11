@@ -9,20 +9,30 @@ NixTreeModel::NixTreeModel(QObject *parent)
     EntityInfo dinfo("Data");
     EntityInfo minfo("Metadata");
 
-    root_item = new NixTreeModelItem(rinfo);
-    data_node = new NixTreeModelItem(dinfo, root_item);
-    metadata_node = new NixTreeModelItem(minfo, root_item);
-    root_item->appendChild(data_node);
-    root_item->appendChild(metadata_node);
+    root_node = new NixTreeModelItem(rinfo);
+    data_node = new NixTreeModelItem(dinfo, root_node);
+    metadata_node = new NixTreeModelItem(minfo, root_node);
+    root_node->appendChild(data_node);
+    root_node->appendChild(metadata_node);
     DataController& dc = DataController::instance();
     dc.blocks_to_items(data_node);
     dc.sections_to_items(metadata_node);
 }
 
 
+NixTreeModel::NixTreeModel(NixTreeModelItem *root_item, QObject *parent)
+    :QAbstractItemModel(parent) {
+    EntityInfo rinfo("Root");
+    root_node = new NixTreeModelItem(rinfo);
+    EntityInfo section_info = root_item->entityInfo();
+    NixTreeModelItem *section_node = new NixTreeModelItem(section_info, root_node);
+    root_node->appendChild(section_node);
+}
+
+
 NixTreeModel::~NixTreeModel() {
-    if (root_item != nullptr) {
-        delete root_item;
+    if (root_node != nullptr) {
+        delete root_node;
     }
 }
 
@@ -31,7 +41,7 @@ QVariant NixTreeModel::headerData(int section, Qt::Orientation orientation, int 
     if (role != Qt::DisplayRole)
         return QVariant();
     if (orientation == Qt::Orientation::Horizontal) {
-        return QVariant(this->root_item->getHeader(section));
+        return QVariant(this->root_node->getHeader(section));
     }
     return QVariant("");
 }
@@ -44,7 +54,7 @@ QModelIndex NixTreeModel::index(int row, int column, const QModelIndex &parent) 
     NixTreeModelItem *parentItem;
 
     if (!parent.isValid())
-        parentItem = root_item;
+        parentItem = root_node;
     else
         parentItem = static_cast<NixTreeModelItem*>(parent.internalPointer());
 
@@ -62,7 +72,7 @@ QModelIndex NixTreeModel::parent(const QModelIndex &index) const{
 
     NixTreeModelItem *childItem = static_cast<NixTreeModelItem*>(index.internalPointer());
     NixTreeModelItem *parentItem = childItem->parentItem();
-    if (parentItem == root_item || parentItem == nullptr)
+    if (parentItem == root_node || parentItem == nullptr)
         return QModelIndex();
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -75,7 +85,7 @@ int NixTreeModel::rowCount(const QModelIndex &parent) const {
         return 0;
 
     if (!parent.isValid())
-        parentItem = root_item;
+        parentItem = root_node;
     else
         parentItem = static_cast<NixTreeModelItem*>(parent.internalPointer());
 
@@ -87,7 +97,7 @@ int NixTreeModel::columnCount(const QModelIndex &parent) const {
     if (parent.isValid())
         return static_cast<NixTreeModelItem*>(parent.internalPointer())->columnCount();
     else
-        return root_item->columnCount();
+        return root_node->columnCount();
 }
 
 
@@ -109,7 +119,7 @@ bool NixTreeModel::hasChildren(const QModelIndex &parent) const {
     }
 
     NixTreeModelItem *item = static_cast<NixTreeModelItem*>(parent.internalPointer());
-    return item->getEntityInfo().max_child_count > 0;
+    return item->entityInfo().max_child_count > 0;
 }
 
 
@@ -117,7 +127,7 @@ bool NixTreeModel::canFetchMore(const QModelIndex &parent) const {
     if (!parent.isValid())
         return false;
     NixTreeModelItem *itm = static_cast<NixTreeModelItem*>(parent.internalPointer());
-    return itm->getEntityInfo().max_child_count > rowCount(parent);
+    return itm->entityInfo().max_child_count > rowCount(parent);
 }
 
 

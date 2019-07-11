@@ -27,7 +27,7 @@ public:
     NixType nixType() const;
     QVariant& itemData();
     QVariant toolTip() const;
-    EntityInfo getEntityInfo() const;
+    EntityInfo entityInfo() const;
 
 private:
     NixTreeModelItem *parent_item;
