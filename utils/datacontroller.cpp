@@ -81,15 +81,26 @@ void DataController::fetch_tag(NixTreeModelItem *parent) {
     nix::Block b = this->file.getBlock(p[0]);
     nix::Tag tag = b.getTag(parent->entityInfo().name.toString().toStdString());
     p.push_back(tag.name());
-    for (nix::DataArray d : tag.references()) {
-        EntityInfo ei(d, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(ei, parent);
-        parent->appendChild(itm);
+
+    if (tag.referenceCount() > 0) {
+        EntityInfo rinfo("References");
+        NixTreeModelItem *refs = new NixTreeModelItem(rinfo, parent);
+        parent->appendChild(refs);
+        for (nix::DataArray d : tag.references()) {
+            EntityInfo ei(d, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(ei, refs);
+            refs->appendChild(itm);
+        }
     }
-    for (nix::Feature f : tag.features()) {
-        EntityInfo fi(f, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(fi, parent);
-        parent->appendChild(itm);
+    if (tag.featureCount() > 0) {
+        EntityInfo finfo("Features");
+        NixTreeModelItem *feats = new NixTreeModelItem(finfo, parent);
+        parent->appendChild(feats);
+        for (nix::Feature f : tag.features()) {
+            EntityInfo fi(f, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(fi, feats);
+            feats->appendChild(itm);
+        }
     }
 }
 
@@ -99,15 +110,25 @@ void DataController::fetch_mtag(NixTreeModelItem *parent) {
     nix::Block b = this->file.getBlock(p[0]);
     nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name.toString().toStdString());
     p.push_back(tag.name());
-    for (nix::DataArray d : tag.references()) {
-        EntityInfo ei(d, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(ei, parent);
-        parent->appendChild(itm);
+    if (tag.referenceCount() > 0) {
+        EntityInfo rinfo("References");
+        NixTreeModelItem *refs = new NixTreeModelItem(rinfo, parent);
+        parent->appendChild(refs);
+        for (nix::DataArray d : tag.references()) {
+            EntityInfo ei(d, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(ei, refs);
+            refs->appendChild(itm);
+        }
     }
-    for (nix::Feature f : tag.features()) {
-        EntityInfo fi(f, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(fi, parent);
-        parent->appendChild(itm);
+    if (tag.featureCount() > 0) {
+        EntityInfo finfo("Features");
+        NixTreeModelItem *feats = new NixTreeModelItem(finfo, parent);
+        parent->appendChild(feats);
+        for (nix::Feature f : tag.features()) {
+            EntityInfo fi(f, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(fi, feats);
+            feats->appendChild(itm);
+        }
     }
 }
 

@@ -201,7 +201,12 @@ struct EntityInfo {
         max_child_count = array.dimensionCount();
         description = EntityDescriptor::describe(array);
         parent_path = path;
-
+        QString val = "shape [";
+        nix::NDSize extent = array.dataExtent();
+        for (size_t i = 0; i < extent.size(); ++i)
+            val.append((nix::util::numToStr(extent[i]) + (i < extent.size() - 1 ? ", " : "")).c_str());
+        val.append("]");
+        value = QVariant(val);
         nix::Section s = array.metadata();
         has_metadata = s != nix::none;
         if (has_metadata) {

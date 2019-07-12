@@ -26,20 +26,24 @@ TagPanel::TagPanel(QWidget *parent) :
 // TODO set all labels to "-" if empty item is emitted
 
 void TagPanel::update_tag_panel(QModelIndex qml) {
-    NixTreeModelItem *item = static_cast<NixTreeModelItem*>(qml.internalPointer());
     clear_tag_panel();
     if (!qml.isValid()) {
         return;
     }
-    if(item->nixType() == NixType::NIX_TAG) {
+    NixTreeModelItem *item = static_cast<NixTreeModelItem*>(qml.internalPointer());
+    if(item->entityInfo().nix_type == NixType::NIX_TAG) {
+        /*
         nix::Tag tag = item->itemData().value<nix::Tag>();
         extract_tag_info(tag);
         current_qml = qml;
+        */
     }
-    else if(item->nixType() == NixType::NIX_MTAG) {
+    else if(item->entityInfo().nix_type == NixType::NIX_MTAG) {
+        /*
         nix::MultiTag mtag = item->itemData().value<nix::MultiTag>();
         extract_multitag_info(mtag);
         current_qml = qml;
+        */
     }
     ui->tableWidget->resizeColumnsToContents();
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
