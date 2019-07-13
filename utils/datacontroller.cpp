@@ -157,25 +157,41 @@ void DataController::fetch_group(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Group g = b.getGroup(p[0]);
-    for (nix::DataArray d : g.dataArrays()) {
-        EntityInfo i(d, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(i, parent);
-        parent->appendChild(itm);
+    if ( g.dataArrayCount() > 0) {
+        EntityInfo info("Data arrays");
+        NixTreeModelItem *arrays = new NixTreeModelItem(info, parent);
+        for (nix::DataArray d : g.dataArrays()) {
+            EntityInfo i(d, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(i, arrays);
+            parent->appendChild(itm);
+        }
     }
-    for (nix::Tag t : g.tags()) {
-        EntityInfo i(t, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(i, parent);
-        parent->appendChild(itm);
+    if ( g.tagCount() > 0 ) {
+        EntityInfo info("Tags");
+        NixTreeModelItem *tags = new NixTreeModelItem(info, parent);
+        for (nix::Tag t : g.tags()) {
+            EntityInfo i(t, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(i, tags);
+            parent->appendChild(itm);
+        }
     }
-    for (nix::MultiTag mt : g.multiTags()) {
-        EntityInfo i(mt, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(i, parent);
-        parent->appendChild(itm);
+    if ( g.multiTagCount() > 0 ) {
+        EntityInfo info("MultiTags");
+        NixTreeModelItem *mtags = new NixTreeModelItem(info, parent);
+        for (nix::MultiTag mt : g.multiTags()) {
+            EntityInfo i(mt, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(i, mtags);
+            parent->appendChild(itm);
+        }
     }
-    for (nix::Source s : g.sources()) {
-        EntityInfo i(s, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(i, parent);
-        parent->appendChild(itm);
+    if ( g.sourceCount() > 0 ) {
+        EntityInfo info("Sources");
+        NixTreeModelItem *src = new NixTreeModelItem(info, parent);
+        for (nix::Source s : g.sources()) {
+            EntityInfo i(s, p);
+            NixTreeModelItem *itm = new NixTreeModelItem(i, src);
+            parent->appendChild(itm);
+        }
     }
 }
 
