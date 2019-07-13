@@ -21,7 +21,7 @@ Q_DECLARE_METATYPE(nix::Dimension)
 #define MODEL_HEADER_ID "ID"
 #define MODEL_HEADER_CREATEDAT "Created at"
 #define MODEL_HEADER_UPDATEDAT "Updated at"
-#define MODEL_HEADER_VALUE "Value"
+#define MODEL_HEADER_VALUE "Content"
 #define MODEL_HEADER_UNCERTAINTY "Uncertainty"
 #define MODEL_HEADER_ROOTCHILDLINK "root_child_link"
 
