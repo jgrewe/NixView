@@ -55,11 +55,11 @@ void DataController::blocks_to_items(NixTreeModelItem *parent) {
 void DataController::fetch_block(NixTreeModelItem *parent) {
     nix::Block b = this->file.getBlock(parent->entityInfo().name.toString().toStdString());
     std::vector<std::string> parent_path = {b.name()};
-    append_items(b.dataArrays(), parent, parent_path);
-    append_items(b.groups(), parent, parent_path);
-    append_items(b.tags(), parent, parent_path);
-    append_items(b.multiTags(), parent, parent_path);
-    append_items(b.sources(), parent, parent_path);
+    append_items(b.dataArrays(), parent, parent_path, "DataArrays");
+    append_items(b.groups(), parent, parent_path, "Groups");
+    append_items(b.tags(), parent, parent_path, "Tags");
+    append_items(b.multiTags(), parent, parent_path, "MultiTags");
+    append_items(b.sources(), parent, parent_path, "Sources");
 }
 
 
@@ -295,10 +295,18 @@ FileInfo DataController::file_info() {
 
 
 template<typename T>
-void DataController::append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path) {
+void DataController::append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
+    NixTreeModelItem *p;
+    if (subdir.size() > 0 && entities.size() > 0) {
+        EntityInfo info(subdir);
+        p = new NixTreeModelItem(info, parent);
+        parent->appendChild(p);
+    } else {
+        p = parent;
+    }
     for (T entity : entities) {
         EntityInfo info(entity, parent_path);
-        NixTreeModelItem *itm = new NixTreeModelItem(info, parent);
-        parent->appendChild(itm);
+        NixTreeModelItem *itm = new NixTreeModelItem(info, p);
+        p->appendChild(itm);
     }
 }

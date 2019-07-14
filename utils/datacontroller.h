@@ -109,7 +109,7 @@ public:
     void fetch_section(NixTreeModelItem *parent);
 
     template<typename T>
-    void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path);
+    void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
 
 private:
    DataController(){}
