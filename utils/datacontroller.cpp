@@ -228,31 +228,33 @@ void DataController::fetchSection(NixTreeModelItem *parent) {
 QStringList DataController::dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index, size_t count) {
     QStringList headers;
     nix::DataArray da = getDataArray(info);
-    if(da.getDimension(dim).dimensionType() == nix::DimensionType::Sample) {
+    size_t c = count == 0 ? da.dataExtent()[dim] - start_index : count;
+    if (da.getDimension(dim).dimensionType() == nix::DimensionType::Sample) {
         double si = da.getDimension(dim).asSampledDimension().samplingInterval();
-        for(size_t i=start_index; i<start_index+count; i++) {
+
+        for (size_t i=start_index; i<start_index + c; i++) {
             headers.append(QString::number(i*si));
         }
-    } else if(da.getDimension(dim).dimensionType() == nix::DimensionType::Range) {
+    } else if (da.getDimension(dim).dimensionType() == nix::DimensionType::Range) {
         std::vector<double> ticks = da.getDimension(dim).asRangeDimension().ticks();
-        for(size_t i = start_index; i < start_index + count; i++) {
-            if(i >= ticks.size()){
+        for (size_t i = start_index; i < start_index + c; i++) {
+            if (i >= ticks.size()){
                 break;
             }
             headers.append(QString::number(ticks[i]));
         }
-    } else if(da.getDimension(dim).dimensionType() == nix::DimensionType::Set) {
+    } else if (da.getDimension(dim).dimensionType() == nix::DimensionType::Set) {
         std::vector<std::string> labels = da.getDimension(dim).asSetDimension().labels();
-        for(size_t i = start_index; i < start_index + count; i++) {
-            if(i >= labels.size()) {
+        for (size_t i = start_index; i < start_index + c; i++) {
+            if (i >= labels.size()) {
                 break;
             }
             headers.append(QString::fromStdString(labels[i]));
         }
     }
 
-    if(headers.isEmpty()) {
-        for(size_t i = start_index; i < start_index + count; i++) {
+    if (headers.isEmpty()) {
+        for (size_t i = start_index; i < start_index + c; i++) {
             headers.append(QString::number(i));
         }
     }

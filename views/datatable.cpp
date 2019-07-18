@@ -37,7 +37,7 @@ bool DataTable::canDraw(const EntityInfo &info) const {
 }
 
 
-void DataTable::setDataSource(const EntityInfo &info) {
+void DataTable::dataSource(const EntityInfo &info) {
     data_source = DataSource(info);
     if (data_source.src_info.shape.size() > 2) {
         page_count = data_source.src_info.shape[2];
@@ -99,11 +99,11 @@ QTableView* DataTable::get_table() {
     return ui->table;
 }
 
-/*
-nix::DataArray DataTable::getArray() {
-    return this->array;
+
+EntityInfo DataTable::dataSource() {
+    return this->data_source.src_info;
 }
-*/
+
 /*
 DataSource::DataSource(std::string name, std::string id, nix::NDSize shape)
     : offset(shape.size()), count(shape.size()) {

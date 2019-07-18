@@ -115,7 +115,7 @@ public:
 
     ArrayInfo getArrayInfo(const EntityInfo &src);
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
-    QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index, size_t count);
+    QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index = 0, size_t count = 0);
 
 private:
    DataController(){}

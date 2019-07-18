@@ -35,10 +35,10 @@ public:
     explicit DataTable(QWidget *parent = 0);
     ~DataTable();
 
-    void setDataSource(const EntityInfo &info);
+    void dataSource(const EntityInfo &info);
     bool canDraw(const EntityInfo &info) const;
     QTableView* get_table();
-    //nix::DataArray getArray();
+    EntityInfo dataSource();
     int currentPage();
 
 private:

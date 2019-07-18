@@ -4,11 +4,13 @@
 #include "utils/datacontroller.h"
 
 NixArrayTableModel::NixArrayTableModel(QObject *parent)
-    : QAbstractTableModel(parent), h_labels(), v_labels(), src_info("") {
+    : QAbstractTableModel(parent), h_labels(), v_labels(), src_info(""), array_info() {
 }
 
-void NixArrayTableModel::set_source(const EntityInfo &info, int page) {
+void NixArrayTableModel::set_source(const EntityInfo &info, size_t page) {
     this->src_info = info;
+    DataController &dc = DataController::instance();
+    array_info = dc.getArrayInfo(info);
     this->page = page;
     shape = this->src_info.shape;
     cols = shape.size() > 1 ?  shape[1] : 1;
@@ -16,17 +18,10 @@ void NixArrayTableModel::set_source(const EntityInfo &info, int page) {
 
     this->insertColumns(0, cols);
     this->insertRows(0, rows);
-
-    /*
-    if (array.getDimension(1).dimensionType() == nix::DimensionType::Set) {
-        v_labels = array.getDimension(1).asSetDimension().labels();
-    }
+    v_labels = dc.dimensionLabels(this->src_info, 1);
     if (shape.size() > 1) {
-        if (array.getDimension(2).dimensionType() == nix::DimensionType::Set) {
-            h_labels = array.getDimension(2).asSetDimension().labels();
-        }
+        h_labels = dc.dimensionLabels(this->src_info, 2);
     }
-    */
 }
 
 
@@ -54,6 +49,7 @@ QVariant NixArrayTableModel::headerData(int section, Qt::Orientation orientation
 
 
 QVariant NixArrayTableModel::get_dimension_label(int section, int role, Qt::Orientation orientation, const nix::Dimension &dim) const {
+    /*
     if (dim.dimensionType() == nix::DimensionType::Set) {
         if (orientation == Qt::Orientation::Vertical)
             return (size_t)section < v_labels.size() ? QString::fromStdString(v_labels[section]) :
@@ -74,6 +70,7 @@ QVariant NixArrayTableModel::get_dimension_label(int section, int role, Qt::Orie
         std::string label = (rd.label() ? *rd.label() : "" ) + (rd.unit() ? " [" + *rd.unit() +"]" : "");
         return QString::fromStdString(label);
     }
+    */
     return QString();
 }
 

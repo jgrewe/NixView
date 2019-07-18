@@ -192,7 +192,7 @@ std::string NixDataModel::get_property_value(nix::Property p)
             oss << "NOT READABLE";
             break;
         }
-        if (i < (int)values.size()-1)
+        if (i < values.size()-1)
             oss << ", ";
     }
     return oss.str();
