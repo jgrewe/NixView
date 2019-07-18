@@ -19,7 +19,7 @@ public:
     explicit TableDialog(QWidget *parent = 0);
     ~TableDialog();
 
-    void set_entity(const EntityInfo &info);
+    void dataSource(const EntityInfo &info);
 
 public slots:
     void button_clicked(QAbstractButton *button);
