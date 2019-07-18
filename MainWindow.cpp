@@ -104,11 +104,11 @@ void MainWindow::item_selected(NixTreeModelItem *item) {
     ui->actionPlot->setEnabled(false);
     ui->actionTable->setEnabled(false);
     ui->actionToCSV->setEnabled(false);
-    if(item->entityInfo().nix_type == NixType::NIX_DATA_ARRAY | item->entityInfo().nix_type == NixType::NIX_FEAT) {
+    if ((item->entityInfo().nix_type == NixType::NIX_DATA_ARRAY) || (item->entityInfo().nix_type == NixType::NIX_FEAT)) {
         ui->actionTable->setEnabled(true);
         ui->actionPlot->setEnabled(true);
         ui->actionToCSV->setEnabled(true);
-    } else if (item->entityInfo().nix_type == NixType::NIX_TAG | item->entityInfo().nix_type == NixType::NIX_MTAG) {
+    } else if ((item->entityInfo().nix_type == NixType::NIX_TAG) || (item->entityInfo().nix_type == NixType::NIX_MTAG)) {
         ui->actionPlot->setEnabled(true);
     }
     this->selected_item = item;
@@ -130,7 +130,7 @@ void MainWindow::show_plot() {
 
 void MainWindow::show_table() {
     TableDialog d(this);
-    d.set_entity(selected_item->entityInfo());
+    d.dataSource(selected_item->entityInfo());
     d.exec();
 }
 
@@ -378,15 +378,11 @@ void MainWindow::toggle_file_controls(bool enabled) {
 
 
 void MainWindow::exportToCsv() {
-
     CSVExportDialog dialog(this);
-
-    if (selected_item.canConvert<nix::DataArray>()) {
-        dialog.setArray(selected_item.value<nix::DataArray>());
-    } else if (selected_item.canConvert<nix::Feature>()) {
-        dialog.setArray(selected_item.value<nix::Feature>().data());
+    if (selected_item->nixType() == NixType::NIX_FEAT ||
+            selected_item->nixType() == NixType::NIX_DATA_ARRAY) {
+        dialog.dataSource(selected_item->entityInfo());
     } else {
-        // What kind of error message ? (also shouldn't be possible because the button should be disabled.)
         std::cerr << "Menu export to csv: Cannot export the selected item! (not a DataArray or Feature)" << std::endl;
     }
     dialog.setSelectionStatus(false);
