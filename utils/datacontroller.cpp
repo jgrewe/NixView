@@ -225,10 +225,53 @@ void DataController::fetchSection(NixTreeModelItem *parent) {
     }
 }
 
+QStringList DataController::dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index, size_t count) {
+    QStringList headers;
+    nix::DataArray da = getDataArray(info);
+    if(da.getDimension(dim).dimensionType() == nix::DimensionType::Sample) {
+        double si = da.getDimension(dim).asSampledDimension().samplingInterval();
+        for(size_t i=start_index; i<start_index+count; i++) {
+            headers.append(QString::number(i*si));
+        }
+    } else if(da.getDimension(dim).dimensionType() == nix::DimensionType::Range) {
+        std::vector<double> ticks = da.getDimension(dim).asRangeDimension().ticks();
+        for(size_t i = start_index; i < start_index + count; i++) {
+            if(i >= ticks.size()){
+                break;
+            }
+            headers.append(QString::number(ticks[i]));
+        }
+    } else if(da.getDimension(dim).dimensionType() == nix::DimensionType::Set) {
+        std::vector<std::string> labels = da.getDimension(dim).asSetDimension().labels();
+        for(size_t i = start_index; i < start_index + count; i++) {
+            if(i >= labels.size()) {
+                break;
+            }
+            headers.append(QString::fromStdString(labels[i]));
+        }
+    }
+
+    if(headers.isEmpty()) {
+        for(size_t i = start_index; i < start_index + count; i++) {
+            headers.append(QString::number(i));
+        }
+    }
+    return headers;
+}
+
+
+ArrayInfo DataController::getArrayInfo(const EntityInfo &src) {
+    nix::DataArray da = getDataArray(src);
+    if (da)
+        return ArrayInfo(da);
+    else
+        return ArrayInfo();
+}
+
 
 nix::DataArray DataController::getDataArray(const EntityInfo &info) {
     nix::DataArray da;
-    if (info.nix_type == NixType::NIX_DATA_ARRAY) {
+    if (info.nix_type == NixType::NIX_DATA_ARRAY || info.nix_type == NixType::NIX_FEAT) {
         if (info.parent_path.size() == 1) {
             nix::Block b = this->file.getBlock(info.parent_path[0]);
             da = b.getDataArray(info.name.toString().toStdString());

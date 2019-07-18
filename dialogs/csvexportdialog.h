@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QTextStream>
 #include "nix.hpp"
+#include "model/nixtreemodelitem.h"
+#include "utils/datacontroller.h"
 
 namespace Ui {
 class CSVExportDialog;
@@ -17,15 +19,15 @@ public:
     explicit CSVExportDialog(QWidget *parent = 0);
     ~CSVExportDialog();
 
-    void setArray(nix::DataArray array);
-    void setSelection(nix::NDSize start, nix::NDSize extend);
+    void dataSource(const EntityInfo &info);
+    void setSelection(nix::NDSize start, nix::NDSize extent);
     void setSelectionStatus(bool enabled);
 
 private:
     Ui::CSVExportDialog *ui;
-    nix::DataArray array;
-    nix::NDSize start,extend;
-    unsigned int partLength;
+    EntityInfo data_src;
+    nix::NDSize start, extent;
+    size_t partLength;
 
     void accept();
     void export_csv();
@@ -34,8 +36,7 @@ private:
     void exportCsv2D(QTextStream &outStream, QString &sep);
     void exportCsv3D(QTextStream &outStream, QString &sep);
 
-    QStringList getHeaders(unsigned int dim, unsigned int current, unsigned int length);
-    void export1DHeader(QStringList& vheader, QTextStream&  outStream, QString &sep, unsigned int x_ind);
+    void export1DHeader(QStringList& vheader, QTextStream&  outStream, QString &sep, size_t x_ind);
     void export2DHeader(QStringList& hheader, QTextStream&  outStream, QString &sep);
     void exportData(QTextStream &outStream, nix::NDArray &data, nix::NDSize &yIndex, QString &sep);
     bool testStartExtend();
