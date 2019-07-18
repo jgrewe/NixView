@@ -228,10 +228,9 @@ void DataController::fetchSection(NixTreeModelItem *parent) {
 QStringList DataController::dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index, size_t count) {
     QStringList headers;
     nix::DataArray da = getDataArray(info);
-    size_t c = count == 0 ? da.dataExtent()[dim] - start_index : count;
+    size_t c = count == 0 ? da.dataExtent()[dim-1] - start_index : count;
     if (da.getDimension(dim).dimensionType() == nix::DimensionType::Sample) {
         double si = da.getDimension(dim).asSampledDimension().samplingInterval();
-
         for (size_t i=start_index; i<start_index + c; i++) {
             headers.append(QString::number(i*si));
         }
@@ -262,12 +261,12 @@ QStringList DataController::dimensionLabels(const EntityInfo &info, size_t dim, 
 }
 
 
-ArrayInfo DataController::getArrayInfo(const EntityInfo &src) {
+DataArrayInfo DataController::getArrayInfo(const EntityInfo &src) {
     nix::DataArray da = getDataArray(src);
     if (da)
-        return ArrayInfo(da);
+        return DataArrayInfo(da);
     else
-        return ArrayInfo();
+        return DataArrayInfo();
 }
 
 

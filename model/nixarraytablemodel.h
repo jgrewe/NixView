@@ -23,9 +23,7 @@ private:
     QStringList h_labels, v_labels;
     nix::ndsize_t rows, cols, page;
     EntityInfo src_info;
-    ArrayInfo array_info;
-
-    QVariant get_dimension_label(int section, int role, Qt::Orientation orientation, const nix::Dimension &dim) const;
+    DataArrayInfo array_info;
 };
 
 #endif // NIXARRAYTABLEMODEL_H

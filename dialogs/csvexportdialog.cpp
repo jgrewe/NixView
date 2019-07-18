@@ -93,7 +93,7 @@ void CSVExportDialog::export_csv() {
 void CSVExportDialog::exportCsv1D(QTextStream &outStream, QString &sep) {
     QStringList vheader;
     DataController &dc = DataController::instance();
-    ArrayInfo info = dc.getArrayInfo(this->data_src);
+    DataArrayInfo info = dc.getArrayInfo(this->data_src);
     nix::NDArray data = nix::NDArray(info.dtype, {partLength});
 
     if (ui->export_header->isChecked()) {
@@ -141,7 +141,7 @@ void CSVExportDialog::exportCsv1D(QTextStream &outStream, QString &sep) {
 void CSVExportDialog::exportCsv2D(QTextStream &outStream, QString &sep) {
     QStringList vheader, hheader;
     DataController &dc = DataController::instance();
-    ArrayInfo info = dc.getArrayInfo(this->data_src);
+    DataArrayInfo info = dc.getArrayInfo(this->data_src);
 
     if (! ui->export_selection->isChecked() || ! testStartExtend()) {
         start = nix::NDSize(2,0);
@@ -195,7 +195,7 @@ void CSVExportDialog::exportCsv2D(QTextStream &outStream, QString &sep) {
 void CSVExportDialog::exportCsv3D(QTextStream &outStream, QString &sep) {
     QStringList vheader, hheader, dheader;
     DataController &dc = DataController::instance();
-    ArrayInfo info = dc.getArrayInfo(this->data_src);
+    DataArrayInfo info = dc.getArrayInfo(this->data_src);
 
     if (!ui->export_selection->isChecked() || !testStartExtend()) {
         start = nix::NDSize(3,0);

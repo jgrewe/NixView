@@ -75,7 +75,7 @@ struct FileInfo {
     }
 };
 
-struct ArrayInfo;
+struct DataArrayInfo;
 struct EntityInfo;
 
 class DataController
@@ -113,7 +113,7 @@ public:
     template<typename T>
     void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
 
-    ArrayInfo getArrayInfo(const EntityInfo &src);
+    DataArrayInfo getArrayInfo(const EntityInfo &src);
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
     QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index = 0, size_t count = 0);
 
@@ -131,13 +131,13 @@ private:
    nix::DataArray getDataArray(const EntityInfo &info);
 };
 
-struct ArrayInfo {
+struct DataArrayInfo {
     nix::NDSize shape;
     nix::DataType dtype;
     std::string name, id, unit, label;
 
-    ArrayInfo() {}
-    ArrayInfo(const nix::DataArray &array) {
+    DataArrayInfo() {}
+    DataArrayInfo(const nix::DataArray &array) {
         shape = array.dataExtent();
         dtype = array.dataType();
         name = array.name();
