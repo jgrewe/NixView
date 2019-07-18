@@ -63,7 +63,7 @@ private:
     Ui::MainWindow *ui;
     void connect_widgets();
     QModelIndex selected_qml;
-    QVariant selected_item;
+    NixTreeModelItem *selected_item;
     QLabel* file_label;
     QProgressBar* file_progress;
     QStringList recent_files;

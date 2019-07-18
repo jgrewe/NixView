@@ -3,6 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <nix.hpp>
+#include "utils/datacontroller.h"
 
 class NixArrayTableModel : public QAbstractTableModel
 {
@@ -11,7 +12,7 @@ class NixArrayTableModel : public QAbstractTableModel
 public:
     explicit NixArrayTableModel(QObject *parent = 0);
 
-    void set_source(const nix::DataArray &array, int page = 0);
+    void set_source(const EntityInfo &info, int page = 0);
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -20,8 +21,8 @@ public:
 private:
     nix::NDSize shape;
     std::vector<std::string> h_labels, v_labels;
-    int rows, cols, page;
-    nix::DataArray array;
+    nix::ndsize_t rows, cols, page;
+    EntityInfo src_info;
 
     QVariant get_dimension_label(int section, int role, Qt::Orientation orientation, const nix::Dimension &dim) const;
 };

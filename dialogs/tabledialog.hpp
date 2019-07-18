@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QModelIndex>
 #include <QAbstractButton>
+#include "utils/datacontroller.h"
 
 
 namespace Ui {
@@ -18,7 +19,7 @@ public:
     explicit TableDialog(QWidget *parent = 0);
     ~TableDialog();
 
-    void set_entity(const QVariant var);
+    void set_entity(const EntityInfo &info);
 
 public slots:
     void button_clicked(QAbstractButton *button);

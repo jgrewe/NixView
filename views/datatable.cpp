@@ -4,10 +4,13 @@
 #include "MainViewWidget.hpp"
 #include <vector>
 
+DataSource::DataSource(const EntityInfo &info) {
+    src_info = info;
+}
 
 DataTable::DataTable(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::DataTable), model()
+    ui(new Ui::DataTable), model(), page_count(0)
 {
     ui->setupUi(this);
     ui->navigation_widget->setVisible(false);
@@ -23,38 +26,31 @@ DataTable::~DataTable()
 }
 
 
-bool DataTable::can_draw(const QVariant var) const {
-
-    if (var.canConvert<nix::DataArray>()) {
-        nix::DataArray da = var.value<nix::DataArray>();
-        return nix::data_type_is_numeric(da.dataType()) && da.dimensionCount() < 3;
-    } else if (var.canConvert<nix::Feature>()) {
-        nix::DataArray da = var.value<nix::Feature>().data();
-        return nix::data_type_is_numeric(da.dataType()) && da.dimensionCount() < 3;
-    } else {
+bool DataTable::canDraw(const EntityInfo &info) const {
+    if (info.nix_type != NixType::NIX_DATA_ARRAY || info.nix_type != NixType::NIX_FEAT)
         return false;
-    }
+    if (info.shape.size() > 3)
+        return false;
+    if (!nix::data_type_is_numeric(nix::string_to_data_type(info.dtype.toString().toStdString())))
+        return false;
+    return true;
 }
 
 
-void DataTable::set_entity(const QVariant var) {
-    if (var.canConvert<nix::DataArray>()) {
-        this->array = var.value<nix::DataArray>();
-    } else if (var.canConvert<nix::Feature>()) {
-        this->array = var.value<nix::Feature>().data();
+void DataTable::setDataSource(const EntityInfo &info) {
+    data_source = DataSource(info);
+    if (data_source.src_info.shape.size() > 2) {
+        page_count = data_source.src_info.shape[2];
+        ui->navigation_widget->setVisible(true);
+        ui->total_count_label->setText(QString::fromStdString(nix::util::numToStr(data_source.src_info.shape[2])));
+        ui->current_page->setText(QVariant(1).toString());
+        ui->current_page->setValidator(new QIntValidator(0, (int)data_source.src_info.shape[2]));
+        ui->next_btn->setEnabled(true);
     } else {
-        return;
-    }
-
-    if (array.dataExtent().size() > 2) {
-            ui->navigation_widget->setVisible(true);
-            ui->total_count_label->setText(QString::fromStdString(nix::util::numToStr(array.dataExtent()[2])));
-            ui->current_page->setText(QVariant(1).toString());
-            ui->current_page->setValidator(new QIntValidator(0, (int)array.dataExtent()[2]));
-            ui->next_btn->setEnabled(true);
+        page_count = 1;
     }
     build_model();
-    ui->description->setText(QString::fromStdString(EntityDescriptor::describe(array)));
+    ui->description->setText(QString::fromStdString(info.description));
 }
 
 
@@ -76,7 +72,7 @@ void DataTable::previous_page() {
 
 void DataTable::select_page() {
     int curr_page = QVariant(ui->current_page->text()).toInt();
-    ui->next_btn->setEnabled(curr_page < array.dataExtent()[2]);
+    ui->next_btn->setEnabled(curr_page < page_count);
     ui->back_btn->setEnabled(curr_page > 1);
     build_model(curr_page - 1);
 }
@@ -87,11 +83,13 @@ int DataTable::currentPage() {
 
 
 void DataTable::build_model(int page) {
-    if (this->model != nullptr)
+    if (this->model != nullptr) {
         delete model;
+        model = nullptr;
+    }
 
     model = new NixArrayTableModel(this);
-    model->set_source(array, page);
+    model->set_source(data_source.src_info, page);
     ui->table->setModel(model);
     ui->table->setSelectionMode(QAbstractItemView::ContiguousSelection);
 }
@@ -101,6 +99,16 @@ QTableView* DataTable::get_table() {
     return ui->table;
 }
 
+/*
 nix::DataArray DataTable::getArray() {
     return this->array;
 }
+*/
+/*
+DataSource::DataSource(std::string name, std::string id, nix::NDSize shape)
+    : offset(shape.size()), count(shape.size()) {
+    this->name = name;
+    this->id = id;
+    this->shape = shape;
+}
+*/

@@ -111,6 +111,7 @@ void MainWindow::item_selected(NixTreeModelItem *item) {
     } else if (item->entityInfo().nix_type == NixType::NIX_TAG | item->entityInfo().nix_type == NixType::NIX_MTAG) {
         ui->actionPlot->setEnabled(true);
     }
+    this->selected_item = item;
 }
 
 
@@ -122,14 +123,14 @@ void MainWindow::show_about() {
 
 void MainWindow::show_plot() {
     PlotDialog d(this);
-    d.set_entity(selected_item);
+    //d.set_entity(selected_item);
     d.exec();
 }
 
 
 void MainWindow::show_table() {
     TableDialog d(this);
-    d.set_entity(selected_item);
+    d.set_entity(selected_item->entityInfo());
     d.exec();
 }
 

@@ -159,11 +159,11 @@ void NixTreeModel::fetchMore(const QModelIndex &parent) {
             break;
         }
         case NixType::NIX_GROUP: {
-            dc.fetch_group(itm);
+            dc.fetchGroup(itm);
             break;
         }
         case NixType::NIX_SECTION: {
-            dc.fetch_section(itm);
+            dc.fetchSection(itm);
         }
         default:
             break;

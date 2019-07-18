@@ -14,8 +14,8 @@ TableDialog::~TableDialog()
     delete ui;
 }
 
-void TableDialog::set_entity(const QVariant var) {
-    ui->data_table->set_entity(var);
+void TableDialog::set_entity(const EntityInfo &info) {
+    ui->data_table->setDataSource(info);
 }
 
 
@@ -26,6 +26,7 @@ void TableDialog::button_clicked(QAbstractButton *button) {
 }
 
 void TableDialog::accept() {
+    /*
     CSVExportDialog d(this);
 
     QModelIndexList indexes = ui->data_table->get_table()->selectionModel()->selection().indexes();
@@ -48,4 +49,5 @@ void TableDialog::accept() {
         d.setSelection(start, extend);
     }
     d.exec();
+    */
 }

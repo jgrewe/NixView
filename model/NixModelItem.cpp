@@ -93,7 +93,7 @@ NixModelItem::NixModelItem(const QString &text, QVariant _nix_entity)
 //        setToolTip(QString::fromStdString(tooltip));
     }
 }
-
+/*
 nix::Section NixModelItem::get_entity_metadata()
 {
     if(nix_entity_type == NIX_STRING_BLOCK)
@@ -110,3 +110,4 @@ nix::Section NixModelItem::get_entity_metadata()
         return nix_entity.value<nix::Source>().metadata();
     return nix::Section();
 }
+*/

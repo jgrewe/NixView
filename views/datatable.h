@@ -9,11 +9,23 @@
 #include <QStandardItemModel>
 #include <QStringList>
 #include "utils/entitydescriptor.h"
+#include "utils/datacontroller.h"
 #include <QTableView>
+
 
 namespace Ui {
 class DataTable;
 }
+
+
+struct DataSource {
+    EntityInfo src_info;
+    nix::NDSize offset, count, shape;
+
+    DataSource(){};
+    DataSource(const EntityInfo &info);
+};
+
 
 class DataTable : public QWidget
 {
@@ -23,16 +35,18 @@ public:
     explicit DataTable(QWidget *parent = 0);
     ~DataTable();
 
-    void set_entity(const QVariant var);
-    bool can_draw(const QVariant var) const;
+    void setDataSource(const EntityInfo &info);
+    bool canDraw(const EntityInfo &info) const;
     QTableView* get_table();
-    nix::DataArray getArray();
+    //nix::DataArray getArray();
     int currentPage();
 
 private:
     Ui::DataTable *ui;
-    nix::DataArray array;
     NixArrayTableModel *model;
+    DataSource data_source;
+    nix::ndsize_t page_count;
+    static const int max_points = 5000000;
 
     void build_model(int page = 0);
 

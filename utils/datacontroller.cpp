@@ -153,7 +153,7 @@ void DataController::fetch_source(NixTreeModelItem *parent) {
 }
 
 
-void DataController::fetch_group(NixTreeModelItem *parent) {
+void DataController::fetchGroup(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Group g = b.getGroup(p[0]);
@@ -196,7 +196,7 @@ void DataController::fetch_group(NixTreeModelItem *parent) {
 }
 
 
-void DataController::fetch_section(NixTreeModelItem *parent) {
+void DataController::fetchSection(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
 
     nix::Section s;
@@ -223,6 +223,25 @@ void DataController::fetch_section(NixTreeModelItem *parent) {
             parent->appendChild(itm);
         }
     }
+}
+
+
+nix::DataArray DataController::getDataArray(const EntityInfo &info) {
+    nix::DataArray da;
+    if (info.nix_type == NixType::NIX_DATA_ARRAY) {
+        if (info.parent_path.size() == 1) {
+            nix::Block b = this->file.getBlock(info.parent_path[0]);
+            da = b.getDataArray(info.name.toString().toStdString());
+        }
+    }
+    return da;
+}
+
+
+void DataController::getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset) {
+    nix::DataArray array = getDataArray(src);
+    if (array)
+        array.getData(dtype, buffer, count, offset);
 }
 
 

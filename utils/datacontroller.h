@@ -75,6 +75,7 @@ struct FileInfo {
     }
 };
 
+struct EntityInfo;
 
 class DataController
 {
@@ -105,11 +106,13 @@ public:
     void fetch_tag(NixTreeModelItem* parent);
     void fetch_mtag(NixTreeModelItem *parent);
     void fetch_source(NixTreeModelItem *parent);
-    void fetch_group(NixTreeModelItem *parent);
-    void fetch_section(NixTreeModelItem *parent);
+    void fetchGroup(NixTreeModelItem *parent);
+    void fetchSection(NixTreeModelItem *parent);
 
     template<typename T>
     void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
+
+    void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
 
 private:
    DataController(){}
@@ -122,17 +125,20 @@ private:
 
    //void create_tree_model_item();
    std::vector<std::string> sectionPath(const nix::Section &s) const;
+   nix::DataArray getDataArray(const EntityInfo &info);
 };
 
 
 struct EntityInfo {
     QVariant created_at, updated_at, name, dtype, id, type, value;
+    nix::NDSize shape;
     NixType nix_type;
     bool has_metadata = false;
     nix::ndsize_t max_child_count;
     std::vector<std::string> parent_path;
     std::string description, metadata_name, metadata_id;
 
+    EntityInfo() {}
 
     EntityInfo(const QString &nam){
         name = QVariant(nam);
@@ -202,10 +208,11 @@ struct EntityInfo {
         description = EntityDescriptor::describe(array);
         parent_path = path;
         QString val = "shape [";
-        nix::NDSize extent = array.dataExtent();
-        for (size_t i = 0; i < extent.size(); ++i)
-            val.append((nix::util::numToStr(extent[i]) + (i < extent.size() - 1 ? ", " : "")).c_str());
+        shape = array.dataExtent();
+        for (size_t i = 0; i < shape.size(); ++i)
+            val.append((nix::util::numToStr(shape[i]) + (i < shape.size() - 1 ? ", " : "")).c_str());
         val.append("]");
+        val.append(" dtype: " + dtype.toString());
         value = QVariant(val);
         nix::Section s = array.metadata();
         has_metadata = s != nix::none;
@@ -304,6 +311,7 @@ struct EntityInfo {
         created_at = QVariant(nix::util::timeToStr(feat.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(feat.updatedAt()).c_str());
         description = EntityDescriptor::describe(feat);
+        shape = feat.data().dataExtent();
         max_child_count = 0;
         parent_path = path;
     }
