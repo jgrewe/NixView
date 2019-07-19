@@ -17,14 +17,14 @@ PlotDialog::PlotDialog(QWidget *parent) :
     QObject::connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 }
 
-void PlotDialog::set_entity(QVariant var) {
-    if (var.canConvert<nix::Tag>() || var.canConvert<nix::MultiTag>()) {
-        ui->tag_view->setEntity(var);
+void PlotDialog::dataSource(const EntityInfo &info) {
+    if (info.nix_type == NixType::NIX_TAG || info.nix_type == NixType::NIX_MTAG) {
+        ui->tag_view->dataSource(info);
         ui->stackedWidget->setCurrentIndex(1);
         resize(800, 650);
     } else {
-        ui->plot->setEntity(var);
-        ui->stackedWidget->setCurrentIndex(0);
+       // ui->plot->setEntity(info);
+       // ui->stackedWidget->setCurrentIndex(0);
         resize(640, 240);
     }
 }

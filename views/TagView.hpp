@@ -9,6 +9,7 @@
 #include "model/NixModelItem.hpp"
 #include "utils/entitydescriptor.h"
 #include "utils/tagcontainer.h"
+#include "utils/datacontroller.h"
 
 namespace Ui {
 class TagView;
@@ -24,7 +25,7 @@ public:
     explicit TagView(QWidget *parent = 0);
     ~TagView();
 
-    void setEntity(QVariant var);
+    void dataSource(const EntityInfo &info);
     void clear();
 
 public slots:

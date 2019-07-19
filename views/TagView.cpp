@@ -17,12 +17,15 @@ TagView::~TagView() {
 }
 
 
-void TagView::setEntity(QVariant var) {
-    if (var.canConvert<nix::Tag>() | var.canConvert<nix::MultiTag>()) {
-        this->tag = TagContainer(var);
+void TagView::dataSource(const EntityInfo &info) {
+    if (info.nix_type == NixType::NIX_MTAG || info.nix_type == NixType::NIX_TAG) {
+        this->tag = TagContainer(info);
     }
-    ui->tagLabel->setText(QString::fromStdString(tag.name() + " - " + tag.type()));
-    ui->tagLabel->setToolTip(tag.description().c_str());
+    //if (var.canConvert<nix::Tag>() | var.canConvert<nix::MultiTag>()) {
+    //    this->tag = TagContainer(var);
+    //}
+    ui->tagLabel->setText(QString::fromStdString(info.name + " - " + info.type));
+    ui->tagLabel->setToolTip(info.description.c_str());
     fill_references();
     fill_features();
 }

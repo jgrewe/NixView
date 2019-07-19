@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QSignalMapper>
 #include "../plotter/qcustomplot.h"
+#include "utils/datacontroller.h"
 #include <nix.hpp>
 #include <QModelIndex>
 
@@ -19,7 +20,7 @@ class PlotDialog : public QDialog
 public:
     explicit PlotDialog(QWidget *parent = 0);
 
-    void set_entity(QVariant var);
+    void dataSource(const EntityInfo &info);
 
     ~PlotDialog();
 
