@@ -19,26 +19,24 @@ TagView::~TagView() {
 
 void TagView::dataSource(const EntityInfo &info) {
     if (info.nix_type == NixType::NIX_MTAG || info.nix_type == NixType::NIX_TAG) {
-        this->tag = TagContainer(info);
+        //this->tag = TagContainer(info);
+        this->data_src = info;
+        ui->tagLabel->setText(info.name.toString() + " - " + info.type.toString());
+        ui->tagLabel->setToolTip(info.description.c_str());
+        fillReferences();
+        fillFeatures();
     }
-    //if (var.canConvert<nix::Tag>() | var.canConvert<nix::MultiTag>()) {
-    //    this->tag = TagContainer(var);
-    //}
-    ui->tagLabel->setText(QString::fromStdString(info.name + " - " + info.type));
-    ui->tagLabel->setToolTip(info.description.c_str());
-    fill_references();
-    fill_features();
 }
 
 
 void TagView::clear() {
     ui->tagLabel->setText("");
-    clear_references();
-    clear_features();
+    clearReferences();
+    clearFeatures();
 }
 
 
-void TagView::clear_references() {
+void TagView::clearReferences() {
     ui->referencesCombo->clear();
     reference_map.clear();
     for (int i = ui->referenceStack->count() -1; i == 0; i--) {
@@ -53,7 +51,7 @@ void TagView::clear_references() {
 }
 
 
-void TagView::clear_features() {
+void TagView::clearFeatures() {
     ui->featuresCombo->clear();
     feature_map.clear();
     for (int i = ui->featureStack->count() -1; i == 0; i--) {
@@ -68,28 +66,32 @@ void TagView::clear_features() {
 }
 
 
-void TagView::fill_references() {
-    clear_references();
-    for (nix::DataArray da : tag.references()) {
-        ui->referencesCombo->addItem(QString::fromStdString(da.name() + " [" + da.type() + "]"), QVariant::fromValue(da));
+void TagView::fillReferences() {
+    clearReferences();
+    DataController &dc = DataController::instance();
+
+    for (EntityInfo info : dc.referenceList(this->data_src)) {
+        std::cerr << "info: "  << info.name.toString().toStdString() << std::endl;
+        ui->referencesCombo->addItem(info.name.toString() + " [" + info.type.toString() + "]", QVariant::fromValue(info));
     }
     if (ui->referencesCombo->count() > 0)
         ui->referencesCombo->setCurrentIndex(0);
 }
 
 
-void TagView::fill_features() {
-    clear_features();
-    for (nix::Feature f : this->tag.features()) {
-        nix::DataArray da = f.data();
-        ui->featuresCombo->addItem(QString::fromStdString(da.name() + " [" + da.type() + "]"), QVariant::fromValue(f));
+void TagView::fillFeatures() {
+    clearFeatures();
+    DataController &dc = DataController::instance();
+
+    for (EntityInfo info : dc.featureList(this->data_src)) {
+        ui->referencesCombo->addItem(info.name.toString() + " [" + info.type.toString() + "]", QVariant::fromValue(info));
     }
     if (ui->featuresCombo->count() > 0)
         ui->featuresCombo->setCurrentIndex(0);
 }
 
 
-void TagView::reference_selected(int i) {
+void TagView::referenceSelected(int i) {
     if (reference_map.size() == 0) {
         QWidget *w = ui->referenceStack->widget(0);
         ui->referenceStack->removeWidget(w);
@@ -102,11 +104,13 @@ void TagView::reference_selected(int i) {
         w->setLayout(new QVBoxLayout());
         PlotWidget *pw = new PlotWidget();
         w->layout()->addWidget(pw);
+        /*
         QVariant var = this->tag.getEntity();
         if (var.canConvert<nix::Tag>())
             pw->process(var.value<nix::Tag>(), i);
         else if (var.canConvert<nix::MultiTag>())
             pw->process(var.value<nix::MultiTag>(), i);
+         */
         ui->referenceStack->addWidget(w);
         reference_map[i] = ui->referenceStack->count() - 1;
         ui->referenceStack->setCurrentIndex(reference_map[i]);
@@ -114,7 +118,7 @@ void TagView::reference_selected(int i) {
 }
 
 
-void TagView::feature_selected(int i) {
+void TagView::featureSelected(int i) {
     if (feature_map.size() == 0) {
         QWidget *w = ui->featureStack->widget(0);
         ui->featureStack->removeWidget(w);
@@ -127,11 +131,13 @@ void TagView::feature_selected(int i) {
         w->setLayout(new QVBoxLayout());
         PlotWidget *pw = new PlotWidget();
         w->layout()->addWidget(pw);
+        /*
         QVariant var = this->tag.getEntity();
         if (var.canConvert<nix::Tag>())
             pw->process(this->tag.features()[i], var.value<nix::Tag>());
         else if (var.canConvert<nix::MultiTag>())
             pw->process(this->tag.features()[i], var.value<nix::MultiTag>());
+        */
         ui->featureStack->addWidget(w);
         feature_map[i] = ui->featureStack->count() - 1;
         ui->featureStack->setCurrentIndex(feature_map[i]);
@@ -139,9 +145,9 @@ void TagView::feature_selected(int i) {
 }
 
 
-void TagView::show_tag_info() {
+void TagView::showTagInfo() {
     QMessageBox msgBox;
     msgBox.setWindowFlags(Qt::FramelessWindowHint);
-    msgBox.setText(this->tag.description().c_str());
+    msgBox.setText(data_src.description.c_str());
     msgBox.exec();
 }

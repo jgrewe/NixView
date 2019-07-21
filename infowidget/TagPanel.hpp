@@ -8,6 +8,8 @@
 #include <nix.hpp>
 #include <QtGui>
 
+#include "utils/datacontroller.h"
+
 namespace Ui {
 class TagPanel;
 }
@@ -37,12 +39,13 @@ signals:
 
 private:
     Ui::TagPanel *ui;
-    std::string extract_tag_info(nix::Tag);
-    void extract_multitag_info(nix::MultiTag);
-    std::vector<nix::DataArray> references;
-    std::vector<nix::DataArray> features;
-    QModelIndex current_qml;
-    static void fill_tree(QTreeWidget*, std::vector<nix::DataArray>);
+    std::string extract_tag_info();
+    void extract_multitag_info();
+    std::vector<EntityInfo> references, features;
+    //std::vector<nix::DataArray> features;
+    static void fill_tree(QTreeWidget*, std::vector<EntityInfo>);
+    DataController &dc = DataController::instance();
+    EntityInfo data_src;
 
 // getter
 public:

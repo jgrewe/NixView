@@ -29,19 +29,20 @@ public:
     void clear();
 
 public slots:
-    void reference_selected(int i);
-    void feature_selected(int i);
-    void show_tag_info();
+    void referenceSelected(int i);
+    void featureSelected(int i);
+    void showTagInfo();
 
 private:
     Ui::TagView *ui;
     QMap<int, int> feature_map, reference_map;
-    TagContainer tag;
+    //TagContainer tag;
+    EntityInfo data_src;
 
-    void fill_references();
-    void fill_features();
-    void clear_references();
-    void clear_features();
+    void fillReferences();
+    void fillFeatures();
+    void clearReferences();
+    void clearFeatures();
 };
 
 #endif // TAGVIEW_H
