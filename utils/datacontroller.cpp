@@ -1,7 +1,7 @@
 #include "datacontroller.h"
 #include "model/nixtreemodelitem.h"
 #include "model/nixtreemodel.h"
-
+#include <nix/NDArray.hpp>
 
 DataController::~DataController() {
     delete tree_model;
@@ -260,6 +260,36 @@ QStringList DataController::dimensionLabels(const EntityInfo &info, size_t dim, 
     return headers;
 }
 
+std::vector<EntityInfo> DataController::featureList(const EntityInfo &tag_info) {
+    std::vector<nix::Feature>  feats;
+    std::vector<EntityInfo> feat_info;
+    if (tag_info.nix_type == NixType::NIX_TAG){
+        feats = getTag(tag_info).features();
+    } else if (tag_info.nix_type == NixType::NIX_MTAG) {
+        feats = getMTag(tag_info).features();
+    }
+    for (nix::Feature f : feats) {
+       feat_info.push_back(EntityInfo(f, tag_info.parent_path));
+    }
+    return feat_info;
+}
+
+
+std::vector<EntityInfo> DataController::referenceList(const EntityInfo &tag_info) {
+    std::vector<nix::DataArray>  refs;
+    std::vector<EntityInfo> ref_info;
+    if (tag_info.nix_type == NixType::NIX_TAG){
+        refs = getTag(tag_info).references();
+    } else if (tag_info.nix_type == NixType::NIX_MTAG) {
+        refs = getMTag(tag_info).references();
+    }
+    for (nix::DataArray da : refs) {
+        EntityInfo info(da, tag_info.parent_path);
+        ref_info.push_back(info);
+    }
+    return ref_info;
+}
+
 
 DataArrayInfo DataController::getArrayInfo(const EntityInfo &src) {
     nix::DataArray da = getDataArray(src);
@@ -281,11 +311,101 @@ nix::DataArray DataController::getDataArray(const EntityInfo &info) {
     return da;
 }
 
+nix::Tag DataController::getTag(const EntityInfo &info) {
+    nix::Tag tag;
+    if (info.nix_type == NixType::NIX_TAG) {
+        if (info.parent_path.size() == 1) {
+            nix::Block b = this->file.getBlock(info.parent_path[0]);
+            tag = b.getTag(info.name.toString().toStdString());
+        }
+    }
+    return tag;
+}
+
+nix::MultiTag DataController::getMTag(const EntityInfo &info) {
+    nix::MultiTag tag;
+    if (info.nix_type == NixType::NIX_MTAG) {
+        if (info.parent_path.size() == 1) {
+            nix::Block b = this->file.getBlock(info.parent_path[0]);
+            tag = b.getMultiTag(info.name.toString().toStdString());
+        }
+    }
+    return tag;
+}
+
 
 void DataController::getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset) {
     nix::DataArray array = getDataArray(src);
     if (array)
         array.getData(dtype, buffer, count, offset);
+}
+
+
+std::vector<double> DataController::tagPosition(const EntityInfo &info) {
+    std::vector<double> positions;
+    nix::Tag t = getTag(info);
+    if (t) {
+        positions = t.position();
+    }
+    return positions;
+}
+
+
+std::vector<double> DataController::tagExtent(const EntityInfo &info) {
+    std::vector<double> ext;
+    nix::Tag t = getTag(info);
+    if (t) {
+        ext = t.extent();
+    }
+    return ext;
+}
+
+
+std::vector<std::string> DataController::tagUnits(const EntityInfo &info) {
+    std::vector<std::string> units;
+    nix::Tag t = getTag(info);
+    if  (t) {
+        units = t.units();
+    }
+    return units;
+}
+
+
+nix::NDArray DataController::mtagPositions(const EntityInfo &info) {
+    nix::MultiTag mtag = getMTag(info);
+    nix::NDArray a(nix::DataType::Double,{0});
+    if (mtag) {
+        nix::DataArray array = mtag.positions();
+        a = nix::NDArray(array.dataType(), array.dataExtent());
+        nix::NDSize offset(a.rank(), 0);
+        array.getData(array.dataType(), a.data(), a.size(), offset);
+    }
+    return a;
+}
+
+
+nix::NDArray DataController::mtagExtents(const EntityInfo &info) {
+    nix::MultiTag mtag = getMTag(info);
+    nix::NDArray a(nix::DataType::Double, {0});
+    if (mtag) {
+        nix::DataArray array = mtag.extents();
+        if (array) {
+            a = nix::NDArray(array.dataType(), array.dataExtent());
+            nix::NDSize offset(a.rank(), 0);
+            array.getData(array.dataType(), a.data(), a.size(), offset);
+        }
+    }
+    return a;
+}
+
+
+std::vector<std::string> DataController::mtagUnits(const EntityInfo &info) {
+    std::vector<std::string> units;
+    nix::MultiTag t = getMTag(info);
+    if  (t) {
+        units = t.units();
+    }
+    return units;
 }
 
 
@@ -360,7 +480,7 @@ FileInfo DataController::file_info() {
 template<typename T>
 void DataController::append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
     NixTreeModelItem *p;
-    if (subdir.size() > 0 && entities.size() > 0) {
+    if (subdir.size() > 0 && entities.size() > 0) { // FIXME:incorrect leads to empty nodes
         EntityInfo info(subdir);
         p = new NixTreeModelItem(info, parent);
         parent->appendChild(p);

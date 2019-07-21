@@ -117,6 +117,18 @@ public:
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
     QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index = 0, size_t count = 0);
 
+    std::vector<EntityInfo> featureList(const EntityInfo &tag_info);
+    std::vector<EntityInfo> referenceList(const EntityInfo &tag_info);
+
+    std::vector<double> tagPosition(const EntityInfo &info);
+    std::vector<double> tagExtent(const EntityInfo &info);
+    std::vector<std::string> tagUnits(const EntityInfo &info);
+
+    nix::NDArray mtagPositions(const EntityInfo &info);
+    nix::NDArray mtagExtents(const EntityInfo &info);
+    std::vector<std::string> mtagUnits(const EntityInfo &info);
+
+
 private:
    DataController(){}
    DataController(const DataController&);
@@ -129,6 +141,9 @@ private:
    //void create_tree_model_item();
    std::vector<std::string> sectionPath(const nix::Section &s) const;
    nix::DataArray getDataArray(const EntityInfo &info);
+   nix::Tag getTag(const EntityInfo &info);
+   nix::MultiTag getMTag(const EntityInfo &info);
+
 };
 
 struct DataArrayInfo {
