@@ -52,7 +52,7 @@ void DataController::blocks_to_items(NixTreeModelItem *parent) {
 }
 
 
-void DataController::fetch_block(NixTreeModelItem *parent) {
+void DataController::fetchBlock(NixTreeModelItem *parent) {
     nix::Block b = this->file.getBlock(parent->entityInfo().name.toString().toStdString());
     std::vector<std::string> parent_path = {b.name()};
     append_items(b.dataArrays(), parent, parent_path, "DataArrays");
@@ -63,7 +63,7 @@ void DataController::fetch_block(NixTreeModelItem *parent) {
 }
 
 
-void DataController::fetch_data_array(NixTreeModelItem *parent) {
+void DataController::fetchDataArray(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::DataArray da = b.getDataArray(parent->entityInfo().name.toString().toStdString());
@@ -76,7 +76,7 @@ void DataController::fetch_data_array(NixTreeModelItem *parent) {
 }
 
 
-void DataController::fetch_tag(NixTreeModelItem *parent) {
+void DataController::fetchTag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Tag tag = b.getTag(parent->entityInfo().name.toString().toStdString());
@@ -105,7 +105,7 @@ void DataController::fetch_tag(NixTreeModelItem *parent) {
 }
 
 
-void DataController::fetch_mtag(NixTreeModelItem *parent) {
+void DataController::fetchMtag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name.toString().toStdString());
@@ -132,7 +132,7 @@ void DataController::fetch_mtag(NixTreeModelItem *parent) {
     }
 }
 
-void DataController::fetch_source(NixTreeModelItem *parent) {
+void DataController::fetchSource(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Source s;

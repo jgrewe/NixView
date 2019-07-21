@@ -102,11 +102,11 @@ public:
     void blocks_to_items(NixTreeModelItem *parent);
     void sections_to_items(NixTreeModelItem *parent);
 
-    void fetch_block(NixTreeModelItem *parent);
-    void fetch_data_array(NixTreeModelItem *parent);
-    void fetch_tag(NixTreeModelItem* parent);
-    void fetch_mtag(NixTreeModelItem *parent);
-    void fetch_source(NixTreeModelItem *parent);
+    void fetchBlock(NixTreeModelItem *parent);
+    void fetchDataArray(NixTreeModelItem *parent);
+    void fetchTag(NixTreeModelItem* parent);
+    void fetchMtag(NixTreeModelItem *parent);
+    void fetchSource(NixTreeModelItem *parent);
     void fetchGroup(NixTreeModelItem *parent);
     void fetchSection(NixTreeModelItem *parent);
 
