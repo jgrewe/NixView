@@ -1,4 +1,5 @@
 #include <nix.hpp>
+#include "utils/datacontroller.h"
 
 // declare NIX entitites as QVariant types
 Q_DECLARE_METATYPE(nix::Block)
@@ -11,6 +12,7 @@ Q_DECLARE_METATYPE(nix::MultiTag)
 Q_DECLARE_METATYPE(nix::Feature)
 Q_DECLARE_METATYPE(nix::Source)
 Q_DECLARE_METATYPE(nix::Dimension)
+Q_DECLARE_METATYPE(EntityInfo)
 
 // define model headers
 #define MODEL_HEADER_NAME "Name"

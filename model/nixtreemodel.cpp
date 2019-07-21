@@ -139,23 +139,23 @@ void NixTreeModel::fetchMore(const QModelIndex &parent) {
     DataController &dc = DataController::instance();
     switch (itm->nixType()) {
         case NixType::NIX_BLOCK: {
-            dc.fetch_block(itm);
+            dc.fetchBlock(itm);
             break;
         }
         case NixType::NIX_DATA_ARRAY: {
-            dc.fetch_data_array(itm);
+            dc.fetchDataArray(itm);
             break;
         }
         case NixType::NIX_TAG: {
-            dc.fetch_tag(itm);
+            dc.fetchTag(itm);
             break;
         }
         case NixType::NIX_SOURCE: {
-            dc.fetch_source(itm);
+            dc.fetchSource(itm);
             break;
         }
         case NixType::NIX_MTAG: {
-            dc.fetch_mtag(itm);
+            dc.fetchMtag(itm);
             break;
         }
         case NixType::NIX_GROUP: {

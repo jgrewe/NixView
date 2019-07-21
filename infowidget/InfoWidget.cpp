@@ -31,7 +31,7 @@ void InfoWidget::update_info_widget(QModelIndex qml) {
     mp->updateMetadataPanel(qml);
     tp->update_tag_panel(qml);
     dp->update_description_panel(qml);
-    //tv->setEntity(qml);
+    // tv->setEntity(qml);
 }
 
 
