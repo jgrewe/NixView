@@ -4,14 +4,15 @@
 #include "plotter/lineplotter.h"
 #include "plotter/plotwidget.h"
 
-TagContainer::TagContainer(QVariant entity) {
-    if ( ! entity.canConvert<nix::Tag>() && ! entity.canConvert<nix::MultiTag>()) {
+TagContainer::TagContainer(const EntityInfo &info) {
+    if (info.nix_type != NixType::NIX_MTAG && info.nix_type != NixType::NIX_TAG) {
         std::cerr << "TagContainer() - Exception: None tag entity in TagContainer." << std::endl;
     }
-    this->entity = entity;
+    this->data_src = info;
 }
 
 TagContainer::TagContainer(){}
+
 
 
 std::vector<nix::Feature> TagContainer::features(){
@@ -25,6 +26,8 @@ std::vector<nix::Feature> TagContainer::features(){
 }
 
 
+
+/*
 std::vector<nix::DataArray> TagContainer::references() {
     std::vector<nix::DataArray> vec;
     if (entity.canConvert<nix::Tag>()) {
@@ -34,6 +37,7 @@ std::vector<nix::DataArray> TagContainer::references() {
     }
     return vec;
 }
+*/
 
 
 QVector<double> TagContainer::positions(unsigned int index) {
@@ -191,9 +195,9 @@ unsigned int TagContainer::refCount() {
 
 
 unsigned int TagContainer::tagCount() {
-    if (entity.canConvert<nix::Tag>()) {
+    if (data_src.nix_type == NixType::NIX_TAG) {
         return 1;
-    } else if (entity.canConvert<nix::MultiTag>()) {
+    } else if (data_src.nix_type == NixType::NIX_MTAG) {
         nix::NDSize size = entity.value<nix::MultiTag>().positions().dataExtent();
         if (size.size() == 1) {
             return 1;
@@ -215,6 +219,6 @@ unsigned int TagContainer::featureCount() {
 }
 
 
-QVariant TagContainer::getEntity() {
-    return this->entity;
+EntityInfo TagContainer::dataSource() {
+    return this->data_src;
 }

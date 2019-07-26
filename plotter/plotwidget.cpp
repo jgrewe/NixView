@@ -37,25 +37,28 @@ PlotWidget::~PlotWidget()
 
 
 bool PlotWidget::canDraw() const {
-    return item.canConvert<nix::DataArray>() | item.canConvert<nix::MultiTag>() |
-            item.canConvert<nix::Tag>() | item.canConvert<nix::Feature>();
+    return data_src.nix_type == NixType::NIX_DATA_ARRAY || data_src.nix_type == NixType::NIX_FEAT ||
+            data_src.nix_type == NixType::NIX_MTAG || data_src.nix_type == NixType::NIX_TAG;
 }
 
 
 void PlotWidget::processItem() {
-    if (item.canConvert<nix::DataArray>()) {
+    if (data_src.nix_type == NixType::NIX_DATA_ARRAY) {
         nix::DataArray array = item.value<nix::DataArray>();
-        process(array);
-    } else if (item.canConvert<nix::Tag>()) {
+        processDataArray(array);
+    }
+    /*
+    else if (item.canConvert<nix::Tag>()) {
         nix::Tag tag = item.value<nix::Tag>();
-        process(tag);
+        processDataArray(tag);
     } else if (item.canConvert<nix::MultiTag>()) {
         nix::MultiTag mtag = item.value<nix::MultiTag>();
-        process(mtag);
+        processDataArray(mtag);
     } else if (item.canConvert<nix::Feature>()) {
         nix::Feature feat = item.value<nix::Feature>();
-        process(feat.data());
+        processDataArray(feat.data());
     }
+    */
 }
 
 
@@ -70,8 +73,8 @@ void PlotWidget::deleteWidgetsFromLayout() {
 }
 
 
-Plotter* PlotWidget::process(const nix::DataArray &array) {
-    this->text = QString::fromStdString(EntityDescriptor::describe(array));
+Plotter* PlotWidget::processDataArray() {
+    this->text = QString::fromStdString(this->data_src.description);
     PlotterType suggestion = Plotter::suggested_plotter(array);
     if (suggestion == PlotterType::Line) {
         deleteWidgetsFromLayout();
@@ -95,20 +98,20 @@ Plotter* PlotWidget::process(const nix::DataArray &array) {
         connect(this, SIGNAL(vScrollBarToPlot(double)), lp,   SLOT(changeYAxisPosition(double)) );
 
 
-        lp->draw(array);
+        lp->draw(this->data_src);
         plot = lp;
 
     } else if (suggestion == PlotterType::Category) {
         deleteWidgetsFromLayout();
         CategoryPlotter *cp = new CategoryPlotter();
         ui->scrollAreaWidgetContents->layout()->addWidget(cp);
-        cp->draw(array);
+        cp->draw(this->data_src);
         plot = cp;
     } else if (suggestion == PlotterType::Image) {
         deleteWidgetsFromLayout();
         ImagePlotter *ip = new ImagePlotter();
         ui->scrollAreaWidgetContents->layout()->addWidget(ip);
-        ip->draw(array);
+        ip->draw(this->data_src);
         plot = ip;
     } else if (suggestion == PlotterType::Event) {
         deleteWidgetsFromLayout();
@@ -128,14 +131,15 @@ Plotter* PlotWidget::process(const nix::DataArray &array) {
         connect(ep,   SIGNAL(xAxisChanged(QCPRange, QCPRange)), this, SLOT(changeHScrollBarValue(QCPRange, QCPRange)) );
         connect(this, SIGNAL(hScrollBarToPlot(double)), ep, SLOT(changeXAxisPosition(double)) );
 
-        ep->draw(array);
+        ep->draw(this->data_src);
         plot = ep;
     }
     return plot;
 }
 
 
-void PlotWidget::process(const nix::Tag &tag, nix::ndsize_t ref) {
+void PlotWidget::processTag(const nix::Tag &tag, nix::ndsize_t ref) {
+    /*
     if (tag.referenceCount() == 0) {
         return;
     }
@@ -145,7 +149,7 @@ void PlotWidget::process(const nix::Tag &tag, nix::ndsize_t ref) {
         ref = tag.referenceCount() -1;
     }
 
-    Plotter *currplot = process(tag.getReference(ref));
+    Plotter *currplot = processDataArray(tag.getReference(ref));
     QVector<double> positions, extents;
     positions.push_back(tag.position()[0]);
     if (tag.extent().size() > 0)
@@ -159,12 +163,14 @@ void PlotWidget::process(const nix::Tag &tag, nix::ndsize_t ref) {
         plt->setFixedHeight(200);
         plt->add_segments(positions, extents, QString::fromStdString(tag.name()));
     }
+    */
 }
 
 
-void PlotWidget::process(const nix::Feature & feat, const nix::Tag & tag) {
+void PlotWidget::processFeature(const nix::Feature & feat, const nix::Tag & tag) {
+   /*
     nix::DataArray da = feat.data();
-    Plotter *currplot = process(da);
+    Plotter *currplot = processDataArray(da);
     this->text = QString::fromStdString(EntityDescriptor::describe(feat));
     QVector<double> positions, extents;
     positions.push_back(tag.position()[0]);
@@ -183,12 +189,14 @@ void PlotWidget::process(const nix::Feature & feat, const nix::Tag & tag) {
             plt->add_segments(positions, extents, QString::fromStdString(tag.name()));
         }
     }
+    */
 }
 
 
-void PlotWidget::process(const nix::Feature & feat, const nix::MultiTag & mtag) {
+void PlotWidget::processFeature(const nix::Feature & feat, const nix::MultiTag & mtag) {
+    /*
     nix::DataArray da = feat.data();
-    Plotter *currplot = process(da);
+    Plotter *currplot = processDataArray(da);
     this->text = QString::fromStdString(EntityDescriptor::describe(feat));
     std::vector<double> pos(mtag.positions().dataExtent()[0]);
     std::vector<double> ext;
@@ -215,10 +223,12 @@ void PlotWidget::process(const nix::Feature & feat, const nix::MultiTag & mtag) 
             plt->add_segments(positions, extents, QString::fromStdString(mtag.name()));
         }
     }
+    */
 }
 
 
-void PlotWidget::process(const nix::MultiTag &mtag, nix::ndsize_t ref) {
+void PlotWidget::processMTag(const nix::MultiTag &mtag, nix::ndsize_t ref) {
+    /*
     if (mtag.referenceCount() == 0)
         return;
     this->text = QString::fromStdString(EntityDescriptor::describe(mtag));
@@ -237,7 +247,7 @@ void PlotWidget::process(const nix::MultiTag &mtag, nix::ndsize_t ref) {
     if (ref >= mtag.referenceCount()) {
         ref = mtag.referenceCount() -1;
     }
-    Plotter *currplot = process(mtag.getReference(ref));
+    Plotter *currplot = processDataArray(mtag.getReference(ref));
     if (currplot != nullptr && currplot->plotter_type() == PlotterType::Category) {
         CategoryPlotter* plt = static_cast<CategoryPlotter*>(currplot);
         plt->setFixedHeight(200);
@@ -251,11 +261,12 @@ void PlotWidget::process(const nix::MultiTag &mtag, nix::ndsize_t ref) {
             plt->add_events(positions, name, false);
         }
     }
+    */
 }
 
 
-void PlotWidget::setEntity(QVariant var) {
-    this->item = var;
+void PlotWidget::dataSource(const EntityInfo &info) {
+    this->data_src = info;
     if (canDraw()) {
         processItem();
     }

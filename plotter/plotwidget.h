@@ -8,6 +8,8 @@
 #include "plotter/plotter.h"
 #include "views/MainViewWidget.hpp"
 #include "utils/entitydescriptor.h"
+#include "utils/datacontroller.h"
+
 
 namespace Ui {
 class PlotWidget;
@@ -22,15 +24,15 @@ public:
     ~PlotWidget();
 
     bool canDraw() const;
-    void setEntity(QVariant item);
+    void dataSource(const EntityInfo &info);
 
     void clear();
 
-    Plotter* process(const nix::DataArray &array);
-    void process(const nix::MultiTag &mtag, nix::ndsize_t ref=0);
-    void process(const nix::Tag &tag, nix::ndsize_t ref=0);
-    void process(const nix::Feature &feat, const nix::Tag & tag);
-    void process(const nix::Feature &feat, const nix::MultiTag & mtag);
+    Plotter* processDataArray();
+    void processMTag(const nix::MultiTag &mtag, nix::ndsize_t ref=0);
+    void processTag(const nix::Tag &tag, nix::ndsize_t ref=0);
+    void processFeature(const nix::Feature &feat, const nix::Tag & tag);
+    //void processDataArray(const nix::Feature &feat, const nix::MultiTag & mtag);
 
 public slots:
     void showMore();
@@ -54,7 +56,7 @@ signals:
 
 private:
     Ui::PlotWidget *ui;
-    QVariant item;
+    EntityInfo data_src;
     Plotter *plot;
     QString text;
     double scrollFaktor;
