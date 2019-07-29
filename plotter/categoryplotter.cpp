@@ -16,6 +16,7 @@ CategoryPlotter::~CategoryPlotter()
 
 
 void CategoryPlotter::draw(const nix::DataArray &array) {
+    /*
     if (array.dimensionCount() > 2) {
         std::cerr << "CategoryPlotter::draw cannot draw 3D!" << std::endl;
         return;
@@ -33,6 +34,7 @@ void CategoryPlotter::draw(const nix::DataArray &array) {
     } else {
         draw_2d(array);
     }
+    */
 }
 
 

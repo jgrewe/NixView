@@ -7,10 +7,13 @@
 #include <nix.hpp>
 #include "colormap.hpp"
 #include "utils/loadthread.h"
+#include "utils/datacontroller.h"
 
 namespace Ui {
     class LinePlotter;
 }
+
+struct EntityInfo;
 
 class LinePlotter : public QWidget, public Plotter {
     Q_OBJECT
@@ -19,11 +22,7 @@ public:
     explicit LinePlotter(QWidget *parent = 0, int numofPoints = 100000);
     ~LinePlotter();
 
-    void draw(const nix::DataArray &array);
-
-    bool check_dimensions(const nix::DataArray &array) const;
-
-    int guess_best_xdim(const nix::DataArray &array) const; //tries to find the best x-dimension needs to be optional at some point...
+    void draw(const EntityInfo &info);
 
     void set_label(const std::string &label) override;
 
@@ -51,19 +50,24 @@ private:
     int numOfPoints;
     QCPRange totalXRange;
     QCPRange totalYRange;
+    QVector<EntityInfo> data_sources;
     QVector<nix::DataArray> arrays;
     QVector<LoadThread*> loaders;
     QVector<int> working;
+    DataController &dc = DataController::instance();
 
-    void draw_1d(const nix::DataArray &array);
+    void draw_1d(const EntityInfo &info);
 
-    void draw_2d(const nix::DataArray &array);
+    void draw_2d(const EntityInfo &info);
 
     QCustomPlot* get_plot() override;
-    void expandXRange(const nix::DataArray &array, int xDim);
+    void expandXRange(const EntityInfo &info, int xDim);
     void setXRange(QVector<double> xData);
     void expandYRange(QVector<double> yData);
     void setYRange(QVector<double> yData);
+    bool check_dimensions(const EntityInfo &info) const;
+    int guess_best_xdim(const EntityInfo &info) const; //tries to find the best x-dimension needs to be optional at some point...
+
     //void calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize& extent_size, int xDim);
     //bool checkForMoreData(int arrayIndex, double currentExtreme, bool higher);
 
