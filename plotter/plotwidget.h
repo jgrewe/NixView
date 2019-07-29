@@ -20,7 +20,7 @@ class PlotWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlotWidget(QWidget *parent = 0);
+    explicit PlotWidget(QWidget *parent = nullptr);
     ~PlotWidget();
 
     bool canDraw() const;

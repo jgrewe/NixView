@@ -3,6 +3,7 @@
 #include "utils/datacontroller.h"
 #include <nix/NDArray.hpp>
 #include <QMenu>
+#include <limits>
 
 LinePlotter::LinePlotter(QWidget *parent, int numOfPoints) :
     QWidget(parent), ui(new Ui::LinePlotter), cmap(), totalXRange(0,0), totalYRange(0,0) {
@@ -121,14 +122,14 @@ void LinePlotter::draw_1d(const EntityInfo &info) {
         // plot 1d set data in a meaningfull way.
         //   ?? this->add_line_plot(x_axis, y_axis, QString::fromStdString(array.name()));
     } else {
-        int newGraphIndex = ui->plot->graphCount();
+        // int newGraphIndex = ui->plot->graphCount();
         expandXRange(info, 1);
         ui->plot->addGraph();
         ui->plot->graph()->setPen(QPen(cmap.next()));
         nix::NDSize start(1);
         start[0] = 0;
 
-        int length = info.shape[0];
+        nix::ndsize_t length = info.shape[0];
         if(length > numOfPoints) {
             length = numOfPoints;
         }
@@ -147,16 +148,28 @@ void LinePlotter::draw_1d(const EntityInfo &info) {
 
 
 void LinePlotter::draw_2d(const EntityInfo &info) {
+    QVector<double> x_data, y_data;
+    nix::ndsize_t best_dim = guess_best_xdim(info);
 
-    /*
-    QVector<double> x_axis, y_axis;
-    QVector<QString> labels;
-    get_data_array_axis(array, x_axis, labels, best_dim);
-    get_data_array_axis(array, y_axis, labels, 3-best_dim);
-    for (int i = 0; i < y_axis.size(); i++) {
-        QVector<double> data = get_data_line(array, i, best_dim);
-        add_line_plot(x_axis, data, labels[i]);
+    x_data = dc.axisData(info, best_dim-1);
+    QVector<QString> axis_labels;
+    std::vector<std::string> l = dc.axisLabels(info);
+    for (auto s : l) {
+        axis_labels.push_back(QString::fromStdString(s));
     }
+
+    QVector<QString> line_labels = dc.axisStringData(info, 2-best_dim);
+    nix::NDSize count(2, 1);
+    count[best_dim - 1] = info.shape[best_dim - 1];
+    nix::NDSize offset(2, 0);
+
+    for (nix::ndsize_t i=0; i < info.shape[2-best_dim]; i++) {
+        y_data.resize(info.shape[best_dim - 1]);
+        offset[2-best_dim] = i;
+        dc.getData(info, nix::DataType::Double, y_data.data(), count, offset);
+        add_line_plot(x_data, y_data, line_labels[i]);
+    }
+    /*
     QString y_label;
     QVector<QString> ax_labels;
     data_array_ax_labels(array, y_label, ax_labels);
@@ -164,37 +177,13 @@ void LinePlotter::draw_2d(const EntityInfo &info) {
     this->set_xlabel(ax_labels[best_dim-1]);
     */
 
-    int best_dim = guess_best_xdim(info);
-    int firstGraphIndex = ui->plot->graphCount();
+    //int firstGraphIndex = ui->plot->graphCount();
 
-    expandXRange(info, best_dim);
-
-    for(size_t i=0; i<info.shape[2-best_dim]; i++) {
-        QPen pen;
-        pen.setColor(cmap.next());
-
-        ui->plot->addGraph();
-        ui->plot->graph()->setPen(pen);
-    }
-
-    nix::NDSize start(2);
-    start[0] = 0;
-    start[1] = 0;
-
-    double length = info.shape[best_dim-1];
-    if(length > numOfPoints) {
-        length = numOfPoints;
-    }
-    nix::NDSize extent(2);
-    extent[best_dim-1] = length;
-    extent[2-best_dim] = 1;
-
-    //loaders.last()->setVariables(array, start, extent, array.getDimension(best_dim), std::vector<int>(), best_dim, firstGraphIndex);
+    //expandXRange(info, best_dim);
 }
 
 
-int LinePlotter::guess_best_xdim(const EntityInfo &info) const {
-
+nix::ndsize_t LinePlotter::guess_best_xdim(const EntityInfo &info) const {
     if(info.shape.size() == 0) {
         throw nix::IncompatibleDimensions("Array has dataExtent().size 0.", "guess_best_xdim");
     }
@@ -328,18 +317,16 @@ QCustomPlot* LinePlotter::get_plot() {
     return ui->plot;
 }
 
-void LinePlotter::expandXRange(const EntityInfo &info, int xDim) {
-    int dimI = xDim-1;
+void LinePlotter::expandXRange(const EntityInfo &info, nix::ndsize_t xDim) {
+    nix::ndsize_t dimI = xDim-1;
 
-    int maxLoad = numOfPoints;
-    if(info.shape[dimI] < static_cast<unsigned>(numOfPoints)) {
+    nix::ndsize_t maxLoad = numOfPoints;
+    if (info.shape[dimI] < numOfPoints) {
         maxLoad = info.shape[dimI];
     }
-
-    nix::ndsize_t dimMax = info.shape[dimI];
     double min, max;
     min = dc.axisData(info, dimI, 0)[0];
-    max = dc.axisData(info, dimI, dimMax-1)[0];
+    max = dc.axisData(info, dimI, maxLoad-1)[0];
     QCPRange range(min, max);
     ui->plot->xAxis->setRange(range);
 }
@@ -347,11 +334,15 @@ void LinePlotter::expandXRange(const EntityInfo &info, int xDim) {
 
 void LinePlotter::setXRange(QVector<double> xData) {
     totalXRange.expand(QCPRange(xData[0],xData.last()));
-
-    if(numOfPoints < xData.size() && numOfPoints != 0) {
-        ui->plot->xAxis->setRange(xData[0], xData[numOfPoints]);
+    if (numOfPoints < std::numeric_limits<int>::max()) {
+        int nop = static_cast<int>(numOfPoints);
+        if (nop < xData.size() && nop != 0) {
+            ui->plot->xAxis->setRange(xData[0], xData[nop]);
+        } else {
+            ui->plot->xAxis->setRange(totalXRange);
+        }
     } else {
-        ui->plot->xAxis->setRange(totalXRange);
+        throw std::overflow_error("size_t value cannot be stored in a variable of type int.");
     }
 }
 
@@ -359,7 +350,7 @@ void LinePlotter::setXRange(QVector<double> xData) {
 void LinePlotter::expandYRange(QVector<double> yData) {
     double yMin = *std::min_element(yData.constBegin(), yData.constEnd());
     double yMax = *std::max_element(yData.constBegin(), yData.constEnd());
-    if (yMin == yMax)
+    if (std::abs(yMin - yMax) < std::numeric_limits<double>::epsilon())
         yMin = yMax-1;
 
     totalYRange.expand(QCPRange(yMin, yMax));
@@ -369,7 +360,7 @@ void LinePlotter::expandYRange(QVector<double> yData) {
 void LinePlotter::setYRange(QVector<double> yData) {
     double yMin = *std::min_element(yData.constBegin(), yData.constEnd());
     double yMax = *std::max_element(yData.constBegin(), yData.constEnd());
-    if (yMin == yMax)
+    if (std::abs(yMin - yMax) < std::numeric_limits<double>::epsilon())
         yMin = yMax-1;
 
     totalYRange.expand(QCPRange(yMin, yMax));
@@ -393,11 +384,16 @@ void LinePlotter::printProgress(double progress) {
 
 void LinePlotter::resetView() {
     QCPDataContainer<QCPGraphData> data = *ui->plot->graph()->data().data();
-
+    int nop;
+    if (numOfPoints < std::numeric_limits<int>::max()) {
+        nop = static_cast<int>(numOfPoints);
+    } else {
+        throw std::overflow_error("size_t value cannot be stored in a variable of type int.");
+    }
     // reset x Range
-    if(numOfPoints != 0 && numOfPoints < data.size()) {
+    if(nop != 0 && nop < data.size()) {
         QCPGraphData firstPoint = *data.at(0);
-        QCPGraphData lastPoint = *data.at(numOfPoints);
+        QCPGraphData lastPoint = *data.at(nop);
         QCPRange resetX = QCPRange(firstPoint.sortKey(), lastPoint.sortKey());
         ui->plot->xAxis->setRange(resetX);
     } else {
@@ -415,7 +411,7 @@ void LinePlotter::testThreads(QCPRange range) {
 
     int graphIndex = 0;
     for(int i=0; i<arrays.size(); i++) {
-        int xDim = guess_best_xdim(data_sources[i]);
+        nix::ndsize_t xDim = guess_best_xdim(data_sources[i]);
         QCPGraph *graph = ui->plot->graph(graphIndex);
         EntityInfo src = data_sources[i];
         if(graph->dataCount() == 0) {
@@ -454,14 +450,14 @@ void LinePlotter::yAxisNewRange(QCPRange range) {
 }
 
 void LinePlotter::changeXAxisPosition(double newCenter) {
-    if(ui->plot->xAxis->range().center() != newCenter) {
+    if(std::abs(ui->plot->xAxis->range().center() - newCenter) > std::numeric_limits<double>::epsilon()) {
         ui->plot->xAxis->setRange(newCenter, ui->plot->xAxis->range().size(), Qt::AlignCenter);
         ui->plot->replot();
     }
 }
 
 void LinePlotter::changeYAxisPosition(double newCenter) {
-    if(ui->plot->yAxis->range().center() != newCenter) {
+    if(std::abs(ui->plot->xAxis->range().center() - newCenter) > std::numeric_limits<double>::epsilon()) {
         ui->plot->yAxis->setRange(newCenter, ui->plot->yAxis->range().size(), Qt::AlignCenter);
         ui->plot->replot();
     }
@@ -469,8 +465,7 @@ void LinePlotter::changeYAxisPosition(double newCenter) {
 
 void LinePlotter::changeXAxisSize(double ratio) {
     double xNewSize = totalXRange.size() * ratio;
-
-    if(xNewSize != ui->plot->xAxis->range().size()) {
+    if(std::abs(ui->plot->xAxis->range().size() - xNewSize) > std::numeric_limits<double>::epsilon()) {
         ui->plot->xAxis->setRange(ui->plot->xAxis->range().center(), xNewSize, Qt::AlignCenter);
         ui->plot->replot();
     }

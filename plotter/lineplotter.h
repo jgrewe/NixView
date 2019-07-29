@@ -19,7 +19,7 @@ class LinePlotter : public QWidget, public Plotter {
     Q_OBJECT
 
 public:
-    explicit LinePlotter(QWidget *parent = 0, int numofPoints = 100000);
+    explicit LinePlotter(QWidget *parent = 0, int numOfPoints = 100000);
     ~LinePlotter();
 
     void draw(const EntityInfo &info);
@@ -47,7 +47,7 @@ public:
 private:
     Ui::LinePlotter *ui;
     ColorMap cmap;
-    int numOfPoints;
+    nix::ndsize_t numOfPoints;
     QCPRange totalXRange;
     QCPRange totalYRange;
     QVector<EntityInfo> data_sources;
@@ -61,12 +61,12 @@ private:
     void draw_2d(const EntityInfo &info);
 
     QCustomPlot* get_plot() override;
-    void expandXRange(const EntityInfo &info, int xDim);
+    void expandXRange(const EntityInfo &info, nix::ndsize_t xDim);
     void setXRange(QVector<double> xData);
     void expandYRange(QVector<double> yData);
     void setYRange(QVector<double> yData);
     bool check_dimensions(const EntityInfo &info) const;
-    int guess_best_xdim(const EntityInfo &info) const; //tries to find the best x-dimension needs to be optional at some point...
+    nix::ndsize_t guess_best_xdim(const EntityInfo &info) const; //tries to find the best x-dimension needs to be optional at some point...
 
     //void calcStartExtent(const nix::DataArray &array, nix::NDSize &start_size, nix::NDSize& extent_size, int xDim);
     //bool checkForMoreData(int arrayIndex, double currentExtreme, bool higher);

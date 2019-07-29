@@ -62,7 +62,7 @@ void PlotWidget::processItem() {
 
 
 void PlotWidget::deleteWidgetsFromLayout() {
-    if ((ui->scrollAreaWidgetContents->layout() != NULL) && (!ui->scrollAreaWidgetContents->layout()->isEmpty())) {
+    if ((ui->scrollAreaWidgetContents->layout() != nullptr) && (!ui->scrollAreaWidgetContents->layout()->isEmpty())) {
         QLayoutItem *item = ui->scrollAreaWidgetContents->layout()->itemAt(0);
         if (item->widget()) {
             ui->scrollAreaWidgetContents->layout()->removeItem(item);
