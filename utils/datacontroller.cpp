@@ -79,8 +79,6 @@ void DataController::fetchTag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Tag tag = b.getTag(parent->entityInfo().name.toString().toStdString());
-    p.push_back(tag.name());
-
     if (tag.referenceCount() > 0) {
         EntityInfo rinfo("References");
         NixTreeModelItem *refs = new NixTreeModelItem(rinfo, parent);
@@ -108,7 +106,6 @@ void DataController::fetchMtag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name.toString().toStdString());
-    p.push_back(tag.name());
     if (tag.referenceCount() > 0) {
         EntityInfo rinfo("References");
         NixTreeModelItem *refs = new NixTreeModelItem(rinfo, parent);
@@ -287,6 +284,7 @@ std::vector<std::string> DataController::axisLabels(const EntityInfo &info) {
 QVector<double> DataController::axisData(const EntityInfo &info, nix::ndsize_t dim, nix::ndsize_t start, nix::ndsize_t count) {
     QVector<double> xdata;
     nix::DataArray da = getDataArray(info);
+
     if (da && dim <= da.dimensionCount()) {
         nix::Dimension d = da.getDimension(dim + 1);  //FIXME this would probably not work for any other than the first dimension...
         if (d.dimensionType() == nix::DimensionType::Sample) {
@@ -311,7 +309,6 @@ QVector<double> DataController::axisData(const EntityInfo &info, nix::ndsize_t d
                     xdata.push_back(static_cast<double>(i));
                 }
             }
-
         } else {
             std::cerr << "unsupported dimension type" << std::endl;
         }
@@ -323,6 +320,29 @@ QVector<double> DataController::axisData(const EntityInfo &info, nix::ndsize_t d
 QVector<double> DataController::axisData(const EntityInfo &info, nix::ndsize_t dim) {
     nix::ndsize_t count = info.shape[dim];
     return axisData(info, dim, 0, count);
+}
+
+
+QVector<QString> DataController::axisStringData(const EntityInfo &info, nix::ndsize_t dim) {
+    QVector<QString> data;
+    nix::DataArray da = getDataArray(info);
+    if (da && dim <= da.dimensionCount()) {
+        nix::Dimension d = da.getDimension(dim + 1);
+        if (d.dimensionType() != nix::DimensionType::Set) {
+            return data;
+        }
+        nix::SetDimension sd = d.asSetDimension();
+        std::vector<std::string> sd_labels = sd.labels();
+        if (sd_labels.size() > 0) {
+            for (auto s : sd_labels) {
+                data.push_back(QString::fromStdString(s));
+            }
+        } else {
+            for (nix::ndsize_t i = 0; i < da.dataExtent()[dim]; ++i)
+                data.push_back(QString::fromStdString(nix::util::numToStr(i)));
+        }
+    }
+    return data;
 }
 
 

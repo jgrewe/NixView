@@ -122,6 +122,7 @@ public:
 
     QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim);
     QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim, nix::ndsize_t start, nix::ndsize_t count=1);
+    QVector<QString> axisStringData(const EntityInfo &info, nix::ndsize_t dim);
 
     std::vector<EntityInfo> featureList(const EntityInfo &tag_info);
     std::vector<EntityInfo> referenceList(const EntityInfo &tag_info);
