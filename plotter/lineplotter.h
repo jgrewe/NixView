@@ -4,9 +4,7 @@
 #include <QWidget>
 #include <QVector>
 #include "plotter.h"
-#include <nix.hpp>
 #include "colormap.hpp"
-#include "utils/loadthread.h"
 #include "utils/datacontroller.h"
 
 namespace Ui {
@@ -19,7 +17,7 @@ class LinePlotter : public QWidget, public Plotter {
     Q_OBJECT
 
 public:
-    explicit LinePlotter(QWidget *parent = 0, int numOfPoints = 100000);
+    explicit LinePlotter(QWidget *parent = 0, size_t numOfPoints = 100000);
     ~LinePlotter();
 
     void draw(const EntityInfo &info);
@@ -47,12 +45,10 @@ public:
 private:
     Ui::LinePlotter *ui;
     ColorMap cmap;
-    nix::ndsize_t numOfPoints;
+    size_t numOfPoints;
     QCPRange totalXRange;
     QCPRange totalYRange;
     QVector<EntityInfo> data_sources;
-    QVector<nix::DataArray> arrays;
-    QVector<LoadThread*> loaders;
     QVector<int> working;
     DataController &dc = DataController::instance();
 

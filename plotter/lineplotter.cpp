@@ -5,7 +5,7 @@
 #include <QMenu>
 #include <limits>
 
-LinePlotter::LinePlotter(QWidget *parent, int numOfPoints) :
+LinePlotter::LinePlotter(QWidget *parent, size_t numOfPoints) :
     QWidget(parent), ui(new Ui::LinePlotter), cmap(), totalXRange(0,0), totalYRange(0,0) {
     ui->setupUi(this);
     // connect slot that ties some axis selections together (especially opposite axes):
@@ -33,12 +33,7 @@ LinePlotter::LinePlotter(QWidget *parent, int numOfPoints) :
 
 LinePlotter::~LinePlotter()
 {
-    for (int i=loaders.size()-1; i >= 0; i--) {
-        delete loaders[i];
-    }
-
     delete ui;
-
 }
 
 
@@ -408,7 +403,7 @@ void LinePlotter::testThreads(QCPRange range) {
     if(ui->plot->graphCount() == 0) {
         return;
     }
-
+    /*
     int graphIndex = 0;
     for(int i=0; i<arrays.size(); i++) {
         nix::ndsize_t xDim = guess_best_xdim(data_sources[i]);
@@ -438,6 +433,7 @@ void LinePlotter::testThreads(QCPRange range) {
             graphIndex += src.shape[2-xDim];
         }
     }
+    */
 }
 
 
