@@ -73,7 +73,6 @@ void PlotWidget::deleteWidgetsFromLayout() {
 
 
 Plotter* PlotWidget::processDataArray() {
-    std::cerr << "Plotwidget << process data array" << std::endl;
     this->text = QString::fromStdString(this->data_src.description);
     PlotterType suggestion = this->data_src.suggested_plotter;
     if (suggestion == PlotterType::Line) {
@@ -130,7 +129,7 @@ Plotter* PlotWidget::processDataArray() {
         connect(ep,   SIGNAL(xAxisChanged(QCPRange, QCPRange)), this, SLOT(changeHScrollBarValue(QCPRange, QCPRange)) );
         connect(this, SIGNAL(hScrollBarToPlot(double)), ep, SLOT(changeXAxisPosition(double)) );
 
-        //ep->draw(this->data_src);
+        ep->draw(this->data_src);
         plot = ep;
     }
     return plot;

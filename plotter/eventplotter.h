@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "plotter.h"
 //#include "../utils/loadthread.h"
+#include "utils/datacontroller.h"
 #include <nix.hpp>
 #include "colormap.hpp"
 
@@ -11,18 +12,19 @@ namespace Ui {
     class EventPlotter;
 }
 
+
 class EventPlotter : public QWidget , public Plotter {
     Q_OBJECT
 
 public:
-    explicit EventPlotter(QWidget *parent = 0, int numOfPoints=100000);
+    explicit EventPlotter(QWidget *parent = 0, size_t numOfPoints=100000);
     ~EventPlotter();
 
-    void draw(const nix::DataArray &array);
+    void draw(const EntityInfo &data_source);
     void draw(const QVector<double> &positions, const QString &ylabel, const QVector<QString> &xlabels);
     void draw(const QVector<double> &positions, const QVector<double> &extents, const QString &ylabel, const QVector<QString> &xlabels);
 
-    bool check_dimension(const nix::DataArray &array) const;
+    bool check_dimension(const EntityInfo &data_source) const;
 
     void set_label(const std::string &label) override;
 
@@ -45,12 +47,14 @@ public:
 private:
     Ui::EventPlotter *ui;
     ColorMap cmap;
+    EntityInfo data_src;
+    DataController &dc = DataController::instance();
     //nix::DataArray array;
     //LoadThread thread;
     QCPRange totalRange;
-    int numOfPoints;
+    size_t numOfPoints;
 
-    bool testArray(const nix::DataArray &array);
+    bool testArray(const EntityInfo &data_source);
 
     void plot(const QVector<double> &positions);
     void plot(const QVector<double> &positions, const QVector<double> &extends);
@@ -60,7 +64,7 @@ signals:
 
 
 public slots:
-    void drawThreadData(const QVector<double> &data, const QVector<double> &axis, int graphIndex);
+    //void drawThreadData(const QVector<double> &data, const QVector<double> &axis, int graphIndex);
     void xRangeChanged(QCPRange newRange); // send new info to thread to load if needed.
 
     void changeXAxisPosition(double newCenter); // react to signals from plotwidget.

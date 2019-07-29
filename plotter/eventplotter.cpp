@@ -1,7 +1,7 @@
 #include "eventplotter.h"
 #include "ui_eventplotter.h"
 
-EventPlotter::EventPlotter(QWidget *parent, int numOfPoints) :
+EventPlotter::EventPlotter(QWidget *parent, size_t numOfPoints) :
   QWidget(parent), ui(new Ui::EventPlotter) {
     ui->setupUi(this);
     // connect slot that ties some axis selections together (especially opposite axes):
@@ -81,59 +81,64 @@ QCustomPlot* EventPlotter::get_plot() {
 }
 
 
-void EventPlotter::draw(const nix::DataArray &array) {
-    if(! testArray(array)) {
+void EventPlotter::draw(const EntityInfo &data_source) {
+    if(! testArray(data_source)) {
         return;
     }
-    ui->plot->addGraph();
+    this->data_src = data_source;
+
+    /* ui->plot->addGraph();
     QPen pen;
     pen.setColor(cmap.next());
     ui->plot->graph()->setPen(pen);
     ui->plot->graph()->setLineStyle(QCPGraph::LineStyle::lsImpulse);
-
-    set_ylabel(array.name());
+    */
+    set_ylabel(data_src.name.toString());
 
     nix::NDSize start(1), extent(1);
     start[0] = 0;
-    unsigned int length = numOfPoints;
-    if(array.dataExtent()[0] < length) {
-        length = array.dataExtent()[0];
+    size_t length = numOfPoints;
+    if(data_src.shape[0] < numOfPoints) {
+        length = data_src.shape[0];
     }
-        extent[0] = length;
+    extent[0] = length;
 
-    nix::Dimension d = array.getDimension(1);
+    double min, max;
+    min = dc.axisData(data_src, 0, 0)[0];
+    max = dc.axisData(data_src, 0, length-1)[0];
+    QCPRange range(min, max);
 
-    connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
-    this->totalRange.expand(QCPRange(d.asRangeDimension().axis(1,0)[0], d.asRangeDimension().axis(1,array.dataExtent()[0]-1)[0]));
-    ui->plot->xAxis->setRange(QCPRange(d.asRangeDimension().axis(1,0)[0],d.asRangeDimension().axis(1,length-1)[0]));
+    this->totalRange.expand(range);
+    ui->plot->xAxis->setRange(range);
 
-    // connect(&thread, SIGNAL(dataReady(const QVector<double> &, const QVector<double> &, int)), this, SLOT(drawThreadData(const QVector<double> &, const QVector<double> &, int)));
-    // thread.setVariables1D(array, start, extent, array.getDimension(1), 0 );
-
+    QVector<double> xValues(static_cast<int>(length), 0.);
+    dc.getData(data_src, nix::DataType::Double, xValues.data(), extent, start);
+    plot(xValues);
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xRangeChanged(QCPRange)));
 }
 
 
-bool EventPlotter::testArray(const nix::DataArray &array) {
-    if(array.dataExtent().size() > 1) {
+bool EventPlotter::testArray(const EntityInfo &data_source) {
+    if(data_source.shape.size() > 1) {
         std::cerr << "Eventplotter::testArray() - Eventplotter can't handle 2D data." << std::endl;
         return false;
     }
 
-    if(array.dataExtent().size() == 0) {
+    if(data_source.shape.size() == 0) {
         std::cerr << "Eventplotter::testArray() - array with dimCount: 0." << std::endl;
         return false;
     }
 
-    nix::Dimension d = array.getDimension(1);
-    if(d.dimensionType() != nix::DimensionType::Range) {
+    if(data_source.dim_types[0] != nix::DimensionType::Range) {
         std::cerr << "Eventplotter::testArray() - Eventplotter can't handle other dimensions than alias ranged." << std::endl;
         return false;
     }
-    if( ! d.asRangeDimension().alias()) {
+
+    if( ! dc.axisIsAlias(data_source, 0)) {
         std::cerr << "Eventplotter::testArray() - Eventplotter ranged dimension is not an alias ranged." << std::endl;
         return false;
     }
+
     return true;
 }
 
@@ -208,7 +213,7 @@ void EventPlotter::plot(const QVector<double> &positions, const QVector<double> 
     ui->plot->replot();
 }
 
-
+/*
 void EventPlotter::drawThreadData(const QVector<double> &positions, const QVector<double> &axis, int graphIndex) {
 
     QVector<double> yValues(positions.size());
@@ -217,6 +222,7 @@ void EventPlotter::drawThreadData(const QVector<double> &positions, const QVecto
     ui->plot->graph(graphIndex)->setData(positions, yValues, true);
     ui->plot->replot();
 }
+*/
 
 void EventPlotter::xRangeChanged(QCPRange newRange) {
     //assumption has exactly one graph.
@@ -257,7 +263,7 @@ void EventPlotter::resetView() {
     // reset x Range
     if(numOfPoints != 0 && numOfPoints < data.size()) {
         QCPGraphData firstPoint = *data.at(0);
-        QCPGraphData lastPoint = *data.at(numOfPoints);
+        QCPGraphData lastPoint = *data.at(static_cast<int>(numOfPoints));
         QCPRange resetX = QCPRange(firstPoint.sortKey(), lastPoint.sortKey());
         ui->plot->xAxis->setRange(resetX);
     } else {

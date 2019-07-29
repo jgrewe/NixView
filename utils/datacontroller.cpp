@@ -346,6 +346,17 @@ QVector<QString> DataController::axisStringData(const EntityInfo &info, nix::nds
 }
 
 
+bool DataController::axisIsAlias(const EntityInfo &info, nix::ndsize_t dim) {
+    if (dim >= info.dim_types.size() || info.dim_types[dim] != nix::DimensionType::Range)
+        return false;
+    nix::DataArray da = getDataArray(info);
+    if (da) {
+        nix::RangeDimension d = da.getDimension(dim + 1).asRangeDimension();
+        return d.alias();
+    }
+}
+
+
 std::vector<EntityInfo> DataController::featureList(const EntityInfo &tag_info) {
     std::vector<nix::Feature>  feats;
     std::vector<EntityInfo> feat_info;

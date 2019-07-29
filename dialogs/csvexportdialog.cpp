@@ -276,7 +276,7 @@ void CSVExportDialog::export2DHeader(QStringList& hheader, QTextStream&  outStre
     DataController &dc = DataController::instance();
     outStream << " " << sep;
     hheader = dc.dimensionLabels(this->data_src, 2, start[1], extent[1]);
-    for (int i = 0; i < extent[1]; i++) {
+    for (int i = 0; i < static_cast<int>(extent[1]); i++) {
         outStream << hheader[i] << sep;
     }
     outStream << "\n";
