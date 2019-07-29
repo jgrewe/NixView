@@ -23,9 +23,9 @@ void PlotDialog::dataSource(const EntityInfo &info) {
         ui->stackedWidget->setCurrentIndex(1);
         resize(800, 650);
     } else {
-       // ui->plot->setEntity(info);
-       // ui->stackedWidget->setCurrentIndex(0);
-        resize(640, 240);
+       ui->plot->dataSource(info);
+       ui->stackedWidget->setCurrentIndex(0);
+       resize(640, 240);
     }
 }
 

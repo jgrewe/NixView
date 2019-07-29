@@ -123,7 +123,7 @@ void MainWindow::show_about() {
 
 void MainWindow::show_plot() {
     PlotDialog d(this);
-    //d.set_entity(selected_item);
+    d.dataSource(selected_item->entityInfo());
     d.exec();
 }
 

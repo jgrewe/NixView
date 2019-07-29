@@ -32,6 +32,7 @@ public:
     void processMTag(const nix::MultiTag &mtag, nix::ndsize_t ref=0);
     void processTag(const nix::Tag &tag, nix::ndsize_t ref=0);
     void processFeature(const nix::Feature &feat, const nix::Tag & tag);
+    void processFeature(const nix::Feature &feat, const nix::MultiTag & tag);
     //void processDataArray(const nix::Feature &feat, const nix::MultiTag & mtag);
 
 public slots:

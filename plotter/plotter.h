@@ -207,19 +207,21 @@ public:
     }
 
 
-    static bool check_plottable_dtype(const nix::DataArray &array) {
+    static bool check_plottable_dtype(nix::DataType &dtype) {
         bool plottable = true;
-        plottable = plottable && array.dataType() != nix::DataType::Bool;
-        plottable = plottable && array.dataType() != nix::DataType::String;
-        plottable = plottable && array.dataType() != nix::DataType::Char;
-        plottable = plottable && array.dataType() != nix::DataType::Opaque;
-        plottable = plottable && array.dataType() != nix::DataType::Nothing;
+        plottable = plottable && dtype != nix::DataType::Bool;
+        plottable = plottable && dtype != nix::DataType::String;
+        plottable = plottable && dtype != nix::DataType::Char;
+        plottable = plottable && dtype != nix::DataType::Opaque;
+        plottable = plottable && dtype != nix::DataType::Nothing;
         return plottable;
     }
 
 
     static PlotterType suggested_plotter(const nix::DataArray &array) {
+        std::cerr << array << std::endl;
         size_t dim_count = array.dimensionCount();
+
         switch (dim_count) {
         case 1:
             if (array.getDimension(1).dimensionType() == nix::DimensionType::Sample) {

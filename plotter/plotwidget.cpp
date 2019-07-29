@@ -44,8 +44,7 @@ bool PlotWidget::canDraw() const {
 
 void PlotWidget::processItem() {
     if (data_src.nix_type == NixType::NIX_DATA_ARRAY) {
-        nix::DataArray array = item.value<nix::DataArray>();
-        processDataArray(array);
+        processDataArray();
     }
     /*
     else if (item.canConvert<nix::Tag>()) {
@@ -74,8 +73,9 @@ void PlotWidget::deleteWidgetsFromLayout() {
 
 
 Plotter* PlotWidget::processDataArray() {
+    std::cerr << "Plotwidget << process data array" << std::endl;
     this->text = QString::fromStdString(this->data_src.description);
-    PlotterType suggestion = Plotter::suggested_plotter(array);
+    PlotterType suggestion = this->data_src.suggested_plotter;
     if (suggestion == PlotterType::Line) {
         deleteWidgetsFromLayout();
         LinePlotter *lp = new LinePlotter();
@@ -97,7 +97,6 @@ Plotter* PlotWidget::processDataArray() {
         connect(this, SIGNAL(hScrollBarToPlot(double)), lp,   SLOT(changeXAxisPosition(double)) );
         connect(this, SIGNAL(vScrollBarToPlot(double)), lp,   SLOT(changeYAxisPosition(double)) );
 
-
         lp->draw(this->data_src);
         plot = lp;
 
@@ -105,13 +104,13 @@ Plotter* PlotWidget::processDataArray() {
         deleteWidgetsFromLayout();
         CategoryPlotter *cp = new CategoryPlotter();
         ui->scrollAreaWidgetContents->layout()->addWidget(cp);
-        cp->draw(this->data_src);
+        //cp->draw(this->data_src);
         plot = cp;
     } else if (suggestion == PlotterType::Image) {
         deleteWidgetsFromLayout();
         ImagePlotter *ip = new ImagePlotter();
         ui->scrollAreaWidgetContents->layout()->addWidget(ip);
-        ip->draw(this->data_src);
+        //ip->draw(this->data_src);
         plot = ip;
     } else if (suggestion == PlotterType::Event) {
         deleteWidgetsFromLayout();
@@ -131,7 +130,7 @@ Plotter* PlotWidget::processDataArray() {
         connect(ep,   SIGNAL(xAxisChanged(QCPRange, QCPRange)), this, SLOT(changeHScrollBarValue(QCPRange, QCPRange)) );
         connect(this, SIGNAL(hScrollBarToPlot(double)), ep, SLOT(changeXAxisPosition(double)) );
 
-        ep->draw(this->data_src);
+        //ep->draw(this->data_src);
         plot = ep;
     }
     return plot;
