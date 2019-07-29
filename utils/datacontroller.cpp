@@ -34,7 +34,6 @@ bool DataController::valid() {
     return !this->file.isNone() && this->file.isOpen();
 }
 
-
 nix::ndsize_t DataController::block_count() {
     return this->valid() ? this->file.blockCount() : 0;
 }
@@ -259,6 +258,73 @@ QStringList DataController::dimensionLabels(const EntityInfo &info, size_t dim, 
     }
     return headers;
 }
+
+std::vector<std::string> DataController::axisLabels(const EntityInfo &info) {
+    std::vector<std::string> labels;
+    nix::DataArray array = getDataArray(info);
+
+    if (array) {
+        for (nix::Dimension d : array.dimensions()) {
+            std::string dlabel;
+            if (d.dimensionType() == nix::DimensionType::Range) {
+                nix::RangeDimension rd = d.asRangeDimension();
+                dlabel = rd.label() ? *rd.label() : "";
+                if (rd.unit())
+                    dlabel += (" [" + *rd.unit() + "]");
+            } else if (d.dimensionType() == nix::DimensionType::Sample) {
+                nix::SampledDimension sd = d.asSampledDimension();
+                dlabel = sd.label() ? *sd.label() : "";
+                if (sd.unit())
+                    dlabel += (" [" + *sd.unit() + "]");
+            }
+            labels.push_back(dlabel);
+        }
+    }
+    return labels;
+}
+
+
+QVector<double> DataController::axisData(const EntityInfo &info, nix::ndsize_t dim, nix::ndsize_t start, nix::ndsize_t count) {
+    QVector<double> xdata;
+    nix::DataArray da = getDataArray(info);
+    if (da && dim <= da.dimensionCount()) {
+        nix::Dimension d = da.getDimension(dim + 1);  //FIXME this would probably not work for any other than the first dimension...
+        if (d.dimensionType() == nix::DimensionType::Sample) {
+            nix::SampledDimension dim = d.asSampledDimension();
+            std::vector<double> ax = dim.axis(count, start);
+            xdata = QVector<double>::fromStdVector(ax);
+        } else if (d.dimensionType() == nix::DimensionType::Range) {
+            nix::RangeDimension dim = d.asRangeDimension();
+            std::vector<double> ax = dim.axis(count, start);
+            xdata = QVector<double>::fromStdVector(ax);
+        } else if (d.dimensionType() == nix::DimensionType::Set) {
+            nix::SetDimension dim = d.asSetDimension();
+            std::vector<std::string> labels = dim.labels();
+            for (size_t i = start; i < start + count; ++i) {
+                if (i < labels.size())
+                    xdata.push_back(static_cast<double>(i));
+                else
+                    break;
+            }
+            if (labels.size() == 0) {
+                for (nix::ndsize_t i = start; i < start + count; ++i) {
+                    xdata.push_back(static_cast<double>(i));
+                }
+            }
+
+        } else {
+            std::cerr << "unsupported dimension type" << std::endl;
+        }
+    }
+    return xdata;
+}
+
+
+QVector<double> DataController::axisData(const EntityInfo &info, nix::ndsize_t dim) {
+    nix::ndsize_t count = info.shape[dim];
+    return axisData(info, dim, 0, count);
+}
+
 
 std::vector<EntityInfo> DataController::featureList(const EntityInfo &tag_info) {
     std::vector<nix::Feature>  feats;

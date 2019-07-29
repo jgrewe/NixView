@@ -6,6 +6,7 @@
 #include <QVariant>
 #include <boost/filesystem.hpp>
 #include "utils/entitydescriptor.h"
+#include "plotter/plotter.h"
 
 class NixTreeModelItem;
 class NixTreeModel;
@@ -117,6 +118,11 @@ public:
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
     QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index = 0, size_t count = 0);
 
+    std::vector<std::string> axisLabels(const EntityInfo &info);
+
+    QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim);
+    QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim, nix::ndsize_t start, nix::ndsize_t count=1);
+
     std::vector<EntityInfo> featureList(const EntityInfo &tag_info);
     std::vector<EntityInfo> referenceList(const EntityInfo &tag_info);
 
@@ -150,6 +156,7 @@ struct DataArrayInfo {
     nix::NDSize shape;
     nix::DataType dtype;
     std::string name, id, unit, label;
+    std::vector<std::string> dimension_labels;
 
     DataArrayInfo() {}
     DataArrayInfo(const nix::DataArray &array) {
@@ -159,6 +166,21 @@ struct DataArrayInfo {
         id = array.id();
         unit = array.unit() ? array.unit().get() : "";
         label = array.label() ? array.label().get() : "";
+        for (nix::Dimension d : array.dimensions()) {
+            std::string dlabel;
+            if (d.dimensionType() == nix::DimensionType::Range) {
+                nix::RangeDimension rd = d.asRangeDimension();
+                dlabel = rd.label() ? *rd.label() : "";
+                if (rd.unit())
+                    dlabel += (" [" + *rd.unit() + "]");
+            } else if (d.dimensionType() == nix::DimensionType::Sample) {
+                nix::SampledDimension sd = d.asSampledDimension();
+                dlabel = sd.label() ? *sd.label() : "";
+                if (sd.unit())
+                    dlabel += (" [" + *sd.unit() + "]");
+            }
+            dimension_labels.push_back(dlabel);
+        }
     }
 };
 
@@ -170,8 +192,16 @@ struct EntityInfo {
     nix::ndsize_t max_child_count;
     std::vector<std::string> parent_path;
     std::string description, metadata_name, metadata_id;
+    PlotterType suggested_plotter;
+    std::vector<nix::DimensionType> dim_types;
 
-    EntityInfo() {}
+    EntityInfo() {
+        name = "";
+        parent_path = {};
+        nix_type = NixType::NIX_UNKNOWN;
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
+    }
 
     EntityInfo(const QString &nam){
         name = QVariant(nam);
@@ -186,6 +216,8 @@ struct EntityInfo {
         } else if (name == "Metadata") {
             max_child_count = dc.section_count();
         }
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::Section &section, std::vector<std::string> path) {
@@ -199,6 +231,8 @@ struct EntityInfo {
         max_child_count = section.sectionCount() + section.propertyCount();
         description = EntityDescriptor::describe(section);
         parent_path = path;
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     QVariant getPropertyValue(const nix::Property &p) {
@@ -227,6 +261,8 @@ struct EntityInfo {
         value = getPropertyValue(property);
         description = EntityDescriptor::describe(property);
         parent_path = path;
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::DataArray &array, std::vector<std::string> path) {
@@ -253,6 +289,10 @@ struct EntityInfo {
             metadata_name = s.name();
             metadata_id = s.id();
         }
+        suggested_plotter = Plotter::suggested_plotter(array);
+        for (nix::Dimension d : array.dimensions())
+            dim_types.push_back(d.dimensionType());
+
     }
 
     EntityInfo(const nix::Block &block, std::vector<std::string> path) {
@@ -273,6 +313,8 @@ struct EntityInfo {
             metadata_name = s.name();
             metadata_id = s.id();
         }
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::Group &group, std::vector<std::string> path) {
@@ -293,6 +335,8 @@ struct EntityInfo {
             metadata_id = s.id();
             metadata_name = s.name();
         }
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::Tag &tag, std::vector<std::string> path) {
@@ -313,6 +357,8 @@ struct EntityInfo {
             metadata_id = s.id();
             metadata_name = s.name();
         }
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::MultiTag &mtag, std::vector<std::string> path) {
@@ -333,6 +379,8 @@ struct EntityInfo {
             metadata_id = s.id();
             metadata_name = s.name();
         }
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::Feature &feat, std::vector<std::string> path) {
@@ -347,6 +395,9 @@ struct EntityInfo {
         shape = feat.data().dataExtent();
         max_child_count = 0;
         parent_path = path;
+        suggested_plotter = Plotter::suggested_plotter(feat.data());
+        for (nix::Dimension d : feat.data().dimensions())
+            dim_types.push_back(d.dimensionType());
     }
 
     EntityInfo(const nix::Dimension &dimension, std::vector<std::string> path) {
@@ -371,6 +422,8 @@ struct EntityInfo {
         updated_at = QVariant("");
         max_child_count = 0;
         parent_path = path;
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 
     EntityInfo(const nix::Source &src, std::vector<std::string> path) {
@@ -391,6 +444,8 @@ struct EntityInfo {
             metadata_id = s.id();
             metadata_name = s.name();
         }
+        suggested_plotter = PlotterType::Unsupported;
+        dim_types = {};
     }
 };
 
