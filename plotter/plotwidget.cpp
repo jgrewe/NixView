@@ -103,7 +103,7 @@ Plotter* PlotWidget::processDataArray() {
         deleteWidgetsFromLayout();
         CategoryPlotter *cp = new CategoryPlotter();
         ui->scrollAreaWidgetContents->layout()->addWidget(cp);
-        //cp->draw(this->data_src);
+        cp->draw(this->data_src);
         plot = cp;
     } else if (suggestion == PlotterType::Image) {
         deleteWidgetsFromLayout();

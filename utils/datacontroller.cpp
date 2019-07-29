@@ -354,6 +354,7 @@ bool DataController::axisIsAlias(const EntityInfo &info, nix::ndsize_t dim) {
         nix::RangeDimension d = da.getDimension(dim + 1).asRangeDimension();
         return d.alias();
     }
+    return false;
 }
 
 
@@ -577,7 +578,7 @@ FileInfo DataController::file_info() {
 template<typename T>
 void DataController::append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
     NixTreeModelItem *p;
-    if (subdir.size() > 0 && entities.size() > 0) { // FIXME:incorrect leads to empty nodes
+    if (subdir.size() > 0 && entities.size() > 0) {
         EntityInfo info(subdir);
         p = new NixTreeModelItem(info, parent);
         parent->appendChild(p);

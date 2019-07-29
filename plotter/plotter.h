@@ -207,7 +207,7 @@ public:
     }
 
 
-    static bool check_plottable_dtype(nix::DataType &dtype) {
+    static bool check_plottable_dtype(nix::DataType dtype) {
         bool plottable = true;
         plottable = plottable && dtype != nix::DataType::Bool;
         plottable = plottable && dtype != nix::DataType::String;

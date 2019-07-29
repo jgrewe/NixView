@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "plotter.h"
 #include "colormap.hpp"
+#include "utils/datacontroller.h"
 
 namespace Ui {
 class CategoryPlotter;
@@ -16,15 +17,7 @@ public:
     explicit CategoryPlotter(QWidget *parent = 0);
     ~CategoryPlotter();
 
-    void draw(const nix::DataArray &array);
-
-    void draw_1d(const nix::DataArray &array);
-
-    void draw_2d(const nix::DataArray &array);
-
-    bool check_dimensions(const nix::DataArray &array) const;
-
-    int guess_best_xdim(const nix::DataArray &array) const;
+    void draw(const EntityInfo &data_source);
 
     void set_label(const std::string &label) override;
 
@@ -47,9 +40,13 @@ public:
 private:
     Ui::CategoryPlotter *ui;
     ColorMap cmap;
+    DataController &dc = DataController::instance();
 
     QCustomPlot* get_plot() override;
-
+    void draw_1d(const EntityInfo &data_source);
+    void draw_2d(const EntityInfo &data_source);
+    bool check_dimensions(const EntityInfo &data_source) const;
+    size_t guess_best_xdim(const EntityInfo &data_source) const;
 };
 
 #endif // CATEGORYPLOTTER_H

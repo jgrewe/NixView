@@ -1,5 +1,6 @@
 #include "categoryplotter.h"
 #include "ui_categoryplotter.h"
+#include <nix.hpp>
 
 CategoryPlotter::CategoryPlotter(QWidget *parent) :
     QWidget(parent),
@@ -15,55 +16,63 @@ CategoryPlotter::~CategoryPlotter()
 }
 
 
-void CategoryPlotter::draw(const nix::DataArray &array) {
-    /*
-    if (array.dimensionCount() > 2) {
+void CategoryPlotter::draw(const EntityInfo &data_source) {
+    if (data_source.shape.size() > 2) {
         std::cerr << "CategoryPlotter::draw cannot draw 3D!" << std::endl;
         return;
     }
-    if (!Plotter::check_plottable_dtype(array)) {
-        std::cerr << "CategoryPlotter::draw cannot handle data type " << array.dataType() << std::endl;
+    if (!Plotter::check_plottable_dtype(nix::string_to_data_type((data_source.dtype.toString().toStdString())))) {
+        std::cerr << "CategoryPlotter::draw cannot handle data type " << data_source.dtype.toString().toStdString() << std::endl;
         return;
     }
-    if (!check_dimensions(array)) {
+    if (!check_dimensions(data_source)) {
         std::cerr << "CategroyPlotter::draw cannot handle dimensionality of the data" << std::endl;
         return;
     }
-    if (array.dimensionCount() == 1) {
-        draw_1d(array);
+    if (data_source.shape.size() == 1) {
+        draw_1d(data_source);
     } else {
-        draw_2d(array);
+        draw_2d(data_source);
     }
-    */
 }
 
 
-void CategoryPlotter::draw_1d(const nix::DataArray &array) {
-    nix::Dimension d = array.getDimension(1);
-    QVector<double> x_axis, y_axis;
+void CategoryPlotter::draw_1d(const EntityInfo &data_source) {
+    QVector<double> x_axis = dc.axisData(data_source, 0);
+    QVector<double> values(static_cast<int>(data_source.shape.nelms()), 0.0);
+    nix::NDSize offset(data_source.shape.size(), 0);
+    dc.getData(data_source, nix::DataType::Double, values.data(), data_source.shape, offset);
     QVector<QString> x_tick_labels;
-    data_array_to_qvector(array, x_axis, y_axis, x_tick_labels, 1);
+    if (data_source.dim_types[0] == nix::DimensionType::Set) {
+        x_tick_labels = dc.axisStringData(data_source, 0);
+    }
 
+    std::vector<std::string> labels = dc.axisLabels(data_source);
     QString y_label;
     QVector<QString> ax_labels;
-    Plotter::data_array_ax_labels(array, y_label, ax_labels);
-    add_bar_plot(x_tick_labels, y_axis, QString::fromStdString(array.name()));
-    set_label(array.name());
-    set_ylabel((array.label() ? *array.label() : "") + (array.unit() ? (" [" + *array.unit() + "]") : ""));
+    add_bar_plot(x_tick_labels, values, QString::fromStdString(data_source.name.toString().toStdString()));
+    set_label(data_source.name.toString().toStdString());
+    //set_ylabel(data_source.(array.label() ? *array.label() : "") + (array.unit() ? (" [" + *array.unit() + "]") : ""));
 }
 
 
-void CategoryPlotter::draw_2d(const nix::DataArray &array) {
-    int best_dim = guess_best_xdim(array);
-    QVector<double> xaxis, yaxis;
-    QVector<QString> xlabels, ylabels;
-    get_data_array_axis(array, xaxis, xlabels, best_dim);
-    get_data_array_axis(array, yaxis, ylabels, 3-best_dim);
+void CategoryPlotter::draw_2d(const EntityInfo &data_source) {
+    size_t best_dim = guess_best_xdim(data_source);
+    std::vector<std::string> axis_labels = dc.axisLabels(data_source);
+    QVector<double> xaxis = dc.axisData(data_source, best_dim);
+    QVector<double> yaxis = dc.axisData(data_source, 1-best_dim);
+
     double ymin = 0.0;
     double ymax = 0.0;
     QCPBarsGroup *group = new QCPBarsGroup(ui->plot);
-    for (int i = 0; i < yaxis.size(); i++) {
-        QVector<double> data = get_data_line(array, i, best_dim);
+    nix::NDSize count(2, 1);
+    count[best_dim] = data_source.shape[best_dim];
+    nix::NDSize offset(2, 0);
+    for (size_t i = 0; i < data_source.shape[1-best_dim]; i++) {
+        offset[1-best_dim] = i;
+        QVector<double> data(static_cast<int>(count[best_dim]), 0.0);
+        dc.getData(data_source, nix::DataType::Double, data.data(), count, offset);
+
         QCPBars *bars = new QCPBars(ui->plot->xAxis, ui->plot->yAxis);
         bars->setData(xaxis, data);
         QColor c = cmap.next();
@@ -72,7 +81,7 @@ void CategoryPlotter::draw_2d(const nix::DataArray &array) {
         bars->setBrush(c);
         bars->setWidth(0.15);
         bars->setBarsGroup(group);
-        bars->setName(ylabels[i]);
+        //bars->setName(ylabels[i]);
         double mi = *std::min_element(std::begin(data), std::end(data));
         double ma = *std::max_element(std::begin(data), std::end(data));
         if (mi < ymin)
@@ -81,11 +90,10 @@ void CategoryPlotter::draw_2d(const nix::DataArray &array) {
             ymax= ma;
     }
 
-
-    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
-    textTicker->setSubTickCount(0);
-    textTicker->addTicks(xaxis,xlabels);
-    ui->plot->xAxis->setTicker(textTicker);
+    //QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+    //textTicker->setSubTickCount(0);
+    //textTicker->addTicks(xaxis,xlabels);
+    //ui->plot->xAxis->setTicker(textTicker);
 
     ui->plot->xAxis->grid()->setVisible(true);
     ui->plot->legend->setVisible(true);
@@ -95,23 +103,31 @@ void CategoryPlotter::draw_2d(const nix::DataArray &array) {
     ui->plot->xAxis->setTickLength(0, 4);
     ui->plot->xAxis->setTickLabelRotation(60);
 
-    set_label(array.name());
-    nix::Dimension dim = array.getDimension(3-best_dim);
+    set_label(data_source.name.toString().toStdString());
+
+    /*
     std::string unit = "";
     if (array.label())
         set_ylabel(*array.label() + (array.unit() ? (" [" + *array.unit() + "]") : ""));
+        */
+        /*
+    QVector<QString> xlabels, ylabels;
+    get_data_array_axis(array, xaxis, xlabels, best_dim);
+    get_data_array_axis(array, yaxis, ylabels, 3-best_dim);
+
+        */
 }
 
 
-bool CategoryPlotter::check_dimensions(const nix::DataArray &array) const {
-    if (array.dimensionCount() == 0) {
+bool CategoryPlotter::check_dimensions(const EntityInfo &data_source) const {
+    if (data_source.dim_types.size() == 0) {
         return false;
     }
-    if (array.dimensionCount() == 1) {
+    if (data_source.dim_types.size() == 1) {
         return true;
     }
-    nix::DimensionType dt_1 = array.getDimension(1).dimensionType();
-    nix::DimensionType dt_2 = array.getDimension(2).dimensionType();
+    nix::DimensionType dt_1 = data_source.dim_types[0];
+    nix::DimensionType dt_2 = data_source.dim_types[1];
     if (((dt_1 == nix::DimensionType::Sample || dt_1 == nix::DimensionType::Range) && dt_2 == nix::DimensionType::Set) ||
             (dt_1 == nix::DimensionType::Set && (dt_2 == nix::DimensionType::Range || dt_2 == nix::DimensionType::Range))) {
         std::cerr << "CategoryPlotter should draw 2D data with Range or SampleDimension? You serious? I can do this, but seems suboptimal..." << std::endl;
@@ -124,11 +140,10 @@ bool CategoryPlotter::check_dimensions(const nix::DataArray &array) const {
 }
 
 
-int CategoryPlotter::guess_best_xdim(const nix::DataArray &array) const {
-    nix::NDSize shape = array.dataExtent();
-    if (shape[0] > shape[1])
-        return 1;
-    return 2;
+size_t CategoryPlotter::guess_best_xdim(const EntityInfo &data_source) const {
+    if (data_source.shape[0] > data_source.shape[1])
+        return 0;
+    return 1;
 }
 
 
