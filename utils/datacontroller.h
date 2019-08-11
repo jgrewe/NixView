@@ -203,6 +203,7 @@ struct EntityInfo {
         nix_type = NixType::NIX_UNKNOWN;
         suggested_plotter = PlotterType::Unsupported;
         dim_types = {};
+        max_child_count = 0;
     }
 
     EntityInfo(const QString &nam){
@@ -306,8 +307,13 @@ struct EntityInfo {
         updated_at = QVariant(nix::util::timeToStr(block.updatedAt()).c_str());
         dtype = QVariant("n.a.");
         description = EntityDescriptor::describe(block);
-        max_child_count = block.dataArrayCount() + block.groupCount() + block.tagCount() + block.multiTagCount() +
-                block.sourceCount();
+        max_child_count = 0;
+        max_child_count += block.tagCount() > 0 ? 1 : 0;
+        max_child_count += block.multiTagCount() > 0 ? 1 : 0;
+        max_child_count += block.dataArrayCount() > 0 ? 1 : 0;
+        max_child_count += block.sourceCount() > 0 ? 1 : 0;
+        max_child_count += block.groupCount() > 0 ? 1 : 0;
+
         parent_path = path;
         nix::Section s = block.metadata();
         has_metadata = s != nix::none;
@@ -328,7 +334,11 @@ struct EntityInfo {
         updated_at = QVariant(nix::util::timeToStr(group.updatedAt()).c_str());
         dtype = QVariant("n.a.");
         description = EntityDescriptor::describe(group);
-        max_child_count = group.dataArrayCount() + group.multiTagCount() + group.tagCount() + group.sourceCount();
+        max_child_count = 0;
+        max_child_count += group.tagCount() > 0 ? 1 : 0;
+        max_child_count += group.multiTagCount() > 0 ? 1 : 0;
+        max_child_count += group.sourceCount() > 0 ? 1 : 0;
+        max_child_count += group.dataArrayCount() > 0 ? 1 : 0;
         parent_path = path;
 
         nix::Section s = group.metadata();
@@ -349,7 +359,9 @@ struct EntityInfo {
         created_at = QVariant(nix::util::timeToStr(tag.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(tag.updatedAt()).c_str());
         dtype = QVariant("n.a.");
-        max_child_count = tag.referenceCount() + tag.featureCount();
+        max_child_count = 0;
+        max_child_count += tag.referenceCount() > 0 ? 1 : 0;
+        max_child_count += tag.featureCount() > 0 ? 1 : 0;
         description = EntityDescriptor::describe(tag);
         parent_path = path;
 
@@ -371,7 +383,9 @@ struct EntityInfo {
         created_at = QVariant(nix::util::timeToStr(mtag.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(mtag.updatedAt()).c_str());
         dtype = QVariant("n.a.");
-        max_child_count = mtag.referenceCount() + mtag.featureCount();
+        max_child_count = 0;
+        max_child_count += mtag.referenceCount() > 0 ? 1 : 0;
+        max_child_count += mtag.featureCount() > 0 ? 1 : 0;
         description = EntityDescriptor::describe(mtag);
         parent_path = path;
 
@@ -426,6 +440,7 @@ struct EntityInfo {
         parent_path = path;
         suggested_plotter = PlotterType::Unsupported;
         dim_types = {};
+        std::cerr << name.toString().toStdString() << " " << ""<< std::endl;
     }
 
     EntityInfo(const nix::Source &src, std::vector<std::string> path) {

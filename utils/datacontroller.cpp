@@ -67,11 +67,7 @@ void DataController::fetchDataArray(NixTreeModelItem *parent) {
     nix::Block b = this->file.getBlock(p[0]);
     nix::DataArray da = b.getDataArray(parent->entityInfo().name.toString().toStdString());
     p.push_back(da.name());
-    for (nix::Dimension d : da.dimensions()) {
-        EntityInfo ei(d, p);
-        NixTreeModelItem *itm = new NixTreeModelItem(ei, parent);
-        parent->appendChild(itm);
-    }
+    append_items(da.dimensions(), parent, p, "Dimensions");
 }
 
 
@@ -79,26 +75,8 @@ void DataController::fetchTag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::Tag tag = b.getTag(parent->entityInfo().name.toString().toStdString());
-    if (tag.referenceCount() > 0) {
-        EntityInfo rinfo("References");
-        NixTreeModelItem *refs = new NixTreeModelItem(rinfo, parent);
-        parent->appendChild(refs);
-        for (nix::DataArray d : tag.references()) {
-            EntityInfo ei(d, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(ei, refs);
-            refs->appendChild(itm);
-        }
-    }
-    if (tag.featureCount() > 0) {
-        EntityInfo finfo("Features");
-        NixTreeModelItem *feats = new NixTreeModelItem(finfo, parent);
-        parent->appendChild(feats);
-        for (nix::Feature f : tag.features()) {
-            EntityInfo fi(f, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(fi, feats);
-            feats->appendChild(itm);
-        }
-    }
+    append_items(tag.references(), parent, p, "References");
+    append_items(tag.features(), parent, p, "Features");
 }
 
 
@@ -106,26 +84,8 @@ void DataController::fetchMtag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
     nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name.toString().toStdString());
-    if (tag.referenceCount() > 0) {
-        EntityInfo rinfo("References");
-        NixTreeModelItem *refs = new NixTreeModelItem(rinfo, parent);
-        parent->appendChild(refs);
-        for (nix::DataArray d : tag.references()) {
-            EntityInfo ei(d, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(ei, refs);
-            refs->appendChild(itm);
-        }
-    }
-    if (tag.featureCount() > 0) {
-        EntityInfo finfo("Features");
-        NixTreeModelItem *feats = new NixTreeModelItem(finfo, parent);
-        parent->appendChild(feats);
-        for (nix::Feature f : tag.features()) {
-            EntityInfo fi(f, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(fi, feats);
-            feats->appendChild(itm);
-        }
-    }
+    append_items(tag.references(), parent, p, "References");
+    append_items(tag.features(), parent, p, "Features");
 }
 
 void DataController::fetchSource(NixTreeModelItem *parent) {
@@ -152,43 +112,16 @@ void DataController::fetchSource(NixTreeModelItem *parent) {
 void DataController::fetchGroup(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::Group g = b.getGroup(p[0]);
-    if ( g.dataArrayCount() > 0) {
-        EntityInfo info("Data arrays");
-        NixTreeModelItem *arrays = new NixTreeModelItem(info, parent);
-        for (nix::DataArray d : g.dataArrays()) {
-            EntityInfo i(d, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(i, arrays);
-            parent->appendChild(itm);
-        }
-    }
-    if ( g.tagCount() > 0 ) {
-        EntityInfo info("Tags");
-        NixTreeModelItem *tags = new NixTreeModelItem(info, parent);
-        for (nix::Tag t : g.tags()) {
-            EntityInfo i(t, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(i, tags);
-            parent->appendChild(itm);
-        }
-    }
-    if ( g.multiTagCount() > 0 ) {
-        EntityInfo info("MultiTags");
-        NixTreeModelItem *mtags = new NixTreeModelItem(info, parent);
-        for (nix::MultiTag mt : g.multiTags()) {
-            EntityInfo i(mt, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(i, mtags);
-            parent->appendChild(itm);
-        }
-    }
-    if ( g.sourceCount() > 0 ) {
-        EntityInfo info("Sources");
-        NixTreeModelItem *src = new NixTreeModelItem(info, parent);
-        for (nix::Source s : g.sources()) {
-            EntityInfo i(s, p);
-            NixTreeModelItem *itm = new NixTreeModelItem(i, src);
-            parent->appendChild(itm);
-        }
-    }
+    std::cerr << b << std::endl;
+    for (auto s : parent->entityInfo().parent_path)
+        std::cerr << s<< std::endl;
+    std::cerr << "group name " << parent->entityInfo().name.toString().toStdString() << std::endl;
+    nix::Group g = b.getGroup(parent->entityInfo().name.toString().toStdString());
+
+    append_items(g.dataArrays(), parent, p, "DataArrays");
+    append_items(g.tags(), parent, p, "Tags");
+    append_items(g.multiTags(), parent, p, "MultiTrags");
+    append_items(g.sources(), parent, p, "Sources");
 }
 
 
@@ -580,6 +513,7 @@ void DataController::append_items(const std::vector<T> &entities, NixTreeModelIt
     NixTreeModelItem *p;
     if (subdir.size() > 0 && entities.size() > 0) {
         EntityInfo info(subdir);
+        info.max_child_count = entities.size();
         p = new NixTreeModelItem(info, parent);
         parent->appendChild(p);
     } else {

@@ -219,7 +219,6 @@ public:
 
 
     static PlotterType suggested_plotter(const nix::DataArray &array) {
-        std::cerr << array << std::endl;
         size_t dim_count = array.dimensionCount();
 
         switch (dim_count) {
@@ -262,7 +261,6 @@ public:
             }
             break;
         default:
-            std::cerr << "Sorry, cannot plot data with more than 2d!" << std::endl;
             break;
         }
 
