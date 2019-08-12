@@ -3,7 +3,12 @@
 #include "model/nixtreemodel.h"
 #include <nix/NDArray.hpp>
 
+DataController::DataController() {
+    this->info_buffer = new std::unordered_map<std::string, EntityInfo>();
+}
+
 DataController::~DataController() {
+    delete info_buffer;
     delete tree_model;
 }
 
@@ -12,7 +17,7 @@ bool DataController::nix_file(const QString &nix_file) {
         this->file.close();
     this->filename = nix_file;
     this->file = nix::File::open(filename.toStdString(), nix::FileMode::ReadOnly);
-
+    this->info_buffer->clear();
     return this->file.isOpen();
 }
 
@@ -141,13 +146,24 @@ void DataController::fetchSection(NixTreeModelItem *parent) {
     p.push_back(parent->entityInfo().name.toString().toStdString());
 
     if (s) {
+        std::string id;
         for (nix::Section sec : s.sections()) {
-            EntityInfo si(sec, p);
+            EntityInfo si;
+            id = sec.id();
+            if (!findEntityInfo(id, si)) {
+                si = EntityInfo(sec, p);
+                addEntityInfo(id, si);
+            }
             NixTreeModelItem *itm = new NixTreeModelItem(si, parent);
             parent->appendChild(itm);
         }
         for (nix::Property prop : s.properties()) {
-            EntityInfo pi(prop, p);
+            EntityInfo pi;
+            id = prop.id();
+            if (!findEntityInfo(id, pi)) {
+                pi = EntityInfo(prop, p);
+                addEntityInfo(id, pi);
+            }
             NixTreeModelItem *itm = new NixTreeModelItem(pi, parent);
             parent->appendChild(itm);
         }
@@ -442,7 +458,11 @@ std::vector<std::string> DataController::mtagUnits(const EntityInfo &info) {
 
 void DataController::sections_to_items(NixTreeModelItem *parent) {
     for (nix::Section s : this->file.sections()) {
-        EntityInfo info(s, {});
+        EntityInfo info;
+        if (!findEntityInfo(s.id(), info)) {
+            info = EntityInfo(s, {});
+            addEntityInfo(s.id(), info);
+        }
         NixTreeModelItem *itm = new NixTreeModelItem(info, parent);
         parent->appendChild(itm);
     }
@@ -489,7 +509,12 @@ NixTreeModel *DataController::create_metadata_treemodel(NixTreeModelItem *parent
         }
         if (section != nix::none) {
             std::vector<std::string> path = sectionPath(section);
-            EntityInfo info(section, path);
+            EntityInfo info;
+            if (!findEntityInfo(section.id(), info)) {
+                info = EntityInfo(section, path);
+                addEntityInfo(section.id(), info);
+            }
+            //EntityInfo info(section, path);
             NixTreeModelItem *itm = new NixTreeModelItem(info);
             mdata_tree = new NixTreeModel(itm, nullptr);
         }
@@ -508,9 +533,64 @@ FileInfo DataController::file_info() {
 }
 
 
+void DataController::append_items(const std::vector<nix::Dimension> &dimensions, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
+    NixTreeModelItem *p;
+    if (subdir.size() > 0 && dimensions.size() > 0) {
+        EntityInfo info(subdir);
+        info.max_child_count = dimensions.size();
+        p = new NixTreeModelItem(info, parent);
+        parent->appendChild(p);
+    } else {
+        p = parent;
+    }
+    std::string parent_id = parent->entityInfo().id.toString().toStdString();
+    std::string dim_id;
+    for (size_t i = 0; i< dimensions.size(); ++i) {
+        nix::Dimension dim = dimensions[i];
+        EntityInfo info;
+        dim_id = parent_id + "_" + nix::util::numToStr(i);
+        if (!findEntityInfo(dim_id, info)) {
+            info = EntityInfo(dim, parent_path);
+            addEntityInfo(dim_id, info);
+        }
+        NixTreeModelItem *itm = new NixTreeModelItem(info, p);
+        p->appendChild(itm);
+    }
+}
+
+
+void DataController::append_items(const std::vector<nix::Feature> &features, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
+    NixTreeModelItem *p;
+    std::string id;
+    if (subdir.size() > 0 && features.size() > 0) {
+        EntityInfo info(subdir);
+        info.max_child_count = features.size();
+        p = new NixTreeModelItem(info, parent);
+        parent->appendChild(p);
+    } else {
+        p = parent;
+    }
+    std::string parent_id = parent->entityInfo().id.toString().toStdString();
+    std::string feat_id;
+    for (size_t i = 0; i< features.size(); ++i) {
+        nix::Feature feat = features[i];
+        EntityInfo info;
+        feat_id = parent_id + "_" + nix::util::numToStr(i);
+        if (!findEntityInfo(feat_id, info)) {
+            info = EntityInfo(feat, parent_path);
+            addEntityInfo(feat_id, info);
+        }
+        NixTreeModelItem *itm = new NixTreeModelItem(info, p);
+        p->appendChild(itm);
+    }
+
+}
+
+
 template<typename T>
 void DataController::append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
     NixTreeModelItem *p;
+    std::string id;
     if (subdir.size() > 0 && entities.size() > 0) {
         EntityInfo info(subdir);
         info.max_child_count = entities.size();
@@ -520,8 +600,27 @@ void DataController::append_items(const std::vector<T> &entities, NixTreeModelIt
         p = parent;
     }
     for (T entity : entities) {
-        EntityInfo info(entity, parent_path);
+        EntityInfo info;
+        id = entity.id();
+        if (!findEntityInfo(id, info)) {
+            info = EntityInfo(entity, parent_path);
+            addEntityInfo(id, info);
+        }
         NixTreeModelItem *itm = new NixTreeModelItem(info, p);
         p->appendChild(itm);
     }
+}
+
+bool DataController::findEntityInfo(const std::string &id, EntityInfo &info) {
+    std::unordered_map<std::string, EntityInfo>::iterator it = this->info_buffer->find(id);
+    if (it == this->info_buffer->end()) {
+        return false;
+    } else {
+        info = it->second;
+        return true;
+    }
+}
+
+void DataController::addEntityInfo(const std::string &id, EntityInfo &info) {
+    this->info_buffer->insert(std::pair<std::string, EntityInfo>(id, info));
 }

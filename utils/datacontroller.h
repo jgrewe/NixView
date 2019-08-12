@@ -4,6 +4,7 @@
 #include <nix.hpp>
 #include <QString>
 #include <QVariant>
+#include <unordered_map>
 #include <boost/filesystem.hpp>
 #include "utils/entitydescriptor.h"
 #include "plotter/plotter.h"
@@ -113,6 +114,8 @@ public:
 
     template<typename T>
     void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
+    void append_items(const std::vector<nix::Dimension> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
+    void append_items(const std::vector<nix::Feature> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
 
     DataArrayInfo getArrayInfo(const EntityInfo &src);
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
@@ -136,12 +139,20 @@ public:
     nix::NDArray mtagExtents(const EntityInfo &info);
     std::vector<std::string> mtagUnits(const EntityInfo &info);
 
+    /*
+    * find buffered entity info for the passed entity id.
+    *
+    * returns: bool, if the information was found in buffer, false otherwise.
+    */
+    bool findEntityInfo(const std::string &id, EntityInfo &info);
+    void addEntityInfo(const std::string &id, EntityInfo &info);
 
 private:
-   DataController(){}
+   DataController();
    DataController(const DataController&);
    DataController& operator = (const DataController &);
 
+   std::unordered_map<std::string, EntityInfo> *info_buffer;
    QString filename;
    nix::File file;
    NixTreeModel *tree_model, *mdata_tree;
