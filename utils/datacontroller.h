@@ -115,7 +115,6 @@ public:
     template<typename T>
     void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
     void append_items(const std::vector<nix::Dimension> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
-    void append_items(const std::vector<nix::Feature> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
 
     DataArrayInfo getArrayInfo(const EntityInfo &src);
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);

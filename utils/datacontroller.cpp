@@ -555,34 +555,6 @@ void DataController::append_items(const std::vector<nix::Dimension> &dimensions,
 }
 
 
-void DataController::append_items(const std::vector<nix::Feature> &features, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
-    NixTreeModelItem *p;
-    std::string id;
-    if (subdir.size() > 0 && features.size() > 0) {
-        EntityInfo info(subdir.toStdString());
-        info.max_child_count = features.size();
-        p = new NixTreeModelItem(info, parent);
-        parent->appendChild(p);
-    } else {
-        p = parent;
-    }
-    std::string parent_id = parent->entityInfo().id;
-    std::string feat_id;
-    for (size_t i = 0; i< features.size(); ++i) {
-        nix::Feature feat = features[i];
-        EntityInfo info;
-        feat_id = parent_id + "_" + nix::util::numToStr(i);
-        if (!findEntityInfo(feat_id, info)) {
-            info = EntityInfo(feat, parent_path);
-            addEntityInfo(feat_id, info);
-        }
-        NixTreeModelItem *itm = new NixTreeModelItem(info, p);
-        p->appendChild(itm);
-    }
-
-}
-
-
 template<typename T>
 void DataController::append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
     NixTreeModelItem *p;
