@@ -198,7 +198,8 @@ struct DataArrayInfo {
 };
 
 struct EntityInfo {
-    QVariant created_at, updated_at, name, dtype, id, type, value;
+    std::string name, type, id;
+    QVariant created_at, updated_at, dtype, value;
     nix::NDSize shape;
     NixType nix_type;
     bool has_metadata = false;
@@ -210,6 +211,8 @@ struct EntityInfo {
 
     EntityInfo() {
         name = "";
+        type = "";
+        id = "";
         parent_path = {};
         nix_type = NixType::NIX_UNKNOWN;
         suggested_plotter = PlotterType::Unsupported;
@@ -217,8 +220,10 @@ struct EntityInfo {
         max_child_count = 0;
     }
 
-    EntityInfo(const QString &nam){
-        name = QVariant(nam);
+    EntityInfo(const std::string &nam){
+        name = nam;
+        type = "";
+        id = "";
         parent_path = {};
         nix_type = NixType::NIX_UNKNOWN;
 
@@ -235,10 +240,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::Section &section, std::vector<std::string> path) {
-        name = QVariant(section.name().c_str());
-        type = QVariant(section.type().c_str());
+        name = section.name();
+        type = section.type();
         nix_type = NixType::NIX_SECTION;
-        id = QVariant(section.id().c_str());
+        id = section.id();
         created_at = QVariant(nix::util::timeToStr(section.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(section.updatedAt()).c_str());
         dtype = QVariant("n.a.");
@@ -264,10 +269,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::Property &property, std::vector<std::string> path) {
-        name = QVariant(property.name().c_str());
-        type = QVariant("");
+        name = property.name();
+        type = "";
         nix_type = NixType::NIX_PROPERTY;
-        id = QVariant(property.id().c_str());
+        id = property.id();
         created_at = QVariant(nix::util::timeToStr(property.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(property.updatedAt()).c_str());
         dtype = QVariant(nix::data_type_to_string(property.dataType()).c_str());
@@ -280,10 +285,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::DataArray &array, std::vector<std::string> path) {
-        name = QVariant(array.name().c_str());
-        type = QVariant(array.type().c_str());
+        name = array.name();
+        type = array.type();
         nix_type = NixType::NIX_DATA_ARRAY;
-        id = QVariant(array.id().c_str());
+        id = array.id();
         created_at = QVariant(nix::util::timeToStr(array.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(array.updatedAt()).c_str());
         dtype = QVariant(nix::data_type_to_string(array.dataType()).c_str());
@@ -310,10 +315,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::Block &block, std::vector<std::string> path) {
-        name = QVariant(block.name().c_str());
-        type = QVariant(block.type().c_str());
+        name = block.name();
+        type = block.type();
         nix_type = NixType::NIX_BLOCK;
-        id = QVariant(block.id().c_str());
+        id = block.id();
         created_at = QVariant(nix::util::timeToStr(block.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(block.updatedAt()).c_str());
         dtype = QVariant("n.a.");
@@ -337,10 +342,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::Group &group, std::vector<std::string> path) {
-        name = QVariant(group.name().c_str());
-        type = QVariant(group.type().c_str());
+        name = group.name();
+        type = group.type();
         nix_type = NixType::NIX_GROUP;
-        id = QVariant(group.id().c_str());
+        id = group.id();
         created_at = QVariant(nix::util::timeToStr(group.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(group.updatedAt()).c_str());
         dtype = QVariant("n.a.");
@@ -363,10 +368,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::Tag &tag, std::vector<std::string> path) {
-        name = QVariant(tag.name().c_str());
-        type = QVariant(tag.type().c_str());
+        name = tag.name();
+        type = tag.type();
         nix_type = NixType::NIX_TAG;
-        id = QVariant(tag.id().c_str());
+        id = tag.id();
         created_at = QVariant(nix::util::timeToStr(tag.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(tag.updatedAt()).c_str());
         dtype = QVariant("n.a.");
@@ -387,10 +392,10 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::MultiTag &mtag, std::vector<std::string> path) {
-        name = QVariant(mtag.name().c_str());
-        type = QVariant(mtag.type().c_str());
+        name = mtag.name();
+        type = mtag.type();
         nix_type = NixType::NIX_MTAG;
-        id = QVariant(mtag.id().c_str());
+        id = mtag.id();
         created_at = QVariant(nix::util::timeToStr(mtag.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(mtag.updatedAt()).c_str());
         dtype = QVariant("n.a.");
@@ -411,11 +416,11 @@ struct EntityInfo {
     }
 
     EntityInfo(const nix::Feature &feat, std::vector<std::string> path) {
-        name = QVariant(feat.data().name().c_str());
-        type = QVariant(feat.data().type().c_str());
+        name = feat.data().name();
+        type = feat.data().type();
         nix_type = NixType::NIX_FEAT;
         dtype = QVariant(nix::data_type_to_string(feat.data().dataType()).c_str());
-        id = QVariant(feat.id().c_str());
+        id = feat.id();
         created_at = QVariant(nix::util::timeToStr(feat.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(feat.updatedAt()).c_str());
         description = EntityDescriptor::describe(feat);
@@ -430,20 +435,20 @@ struct EntityInfo {
     EntityInfo(const nix::Dimension &dimension, std::vector<std::string> path) {
         if (dimension.dimensionType() == nix::DimensionType::Sample) {
             nix::SampledDimension sdim = dimension.asSampledDimension();
-            name = QVariant(sdim.label() ? sdim.label()->c_str() : "");
-            type = QVariant("Sampled dimension");
+            name = sdim.label() ? *sdim.label() : "";
+            type = "Sampled dimension";
         } else if (dimension.dimensionType() == nix::DimensionType::Range) {
             nix::RangeDimension rdim = dimension.asRangeDimension();
-            name = QVariant(rdim.label() ? rdim.label()->c_str() : "");
-            type = QVariant("Range dimension");
+            name = rdim.label() ? *rdim.label() : "";
+            type = "Range dimension";
         } else {
-            name = QVariant("");
-            type = QVariant("Set dimension");
+            name = "";
+            type = "Set dimension";
         }
         description = EntityDescriptor::describe(dimension);
         nix_type = NixType::NIX_DIMENSION;
         dtype = QVariant("n.a.");
-        id = QVariant("n.a.");
+        id = "n.a.";
 
         created_at = QVariant("");
         updated_at = QVariant("");
@@ -451,15 +456,14 @@ struct EntityInfo {
         parent_path = path;
         suggested_plotter = PlotterType::Unsupported;
         dim_types = {};
-        std::cerr << name.toString().toStdString() << " " << ""<< std::endl;
     }
 
     EntityInfo(const nix::Source &src, std::vector<std::string> path) {
-        name = QVariant(src.name().c_str());
-        type = QVariant(src.type().c_str());
+        name = src.name();
+        type = src.type();
         nix_type = NixType::NIX_SOURCE;
         dtype = QVariant("n.a.");
-        id = QVariant(src.id().c_str());
+        id = src.id();
         created_at = QVariant(nix::util::timeToStr(src.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(src.updatedAt()).c_str());
         max_child_count = src.sourceCount();

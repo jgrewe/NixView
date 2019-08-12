@@ -93,7 +93,7 @@ void EventPlotter::draw(const EntityInfo &data_source) {
     ui->plot->graph()->setPen(pen);
     ui->plot->graph()->setLineStyle(QCPGraph::LineStyle::lsImpulse);
     */
-    set_ylabel(data_src.name.toString());
+    set_ylabel(data_src.name);
 
     nix::NDSize start(1), extent(1);
     start[0] = 0;

@@ -188,8 +188,8 @@ void TagPanel::extract_multitag_info() {
 
 void TagPanel::fill_tree(QTreeWidget* tree, std::vector<EntityInfo> ar) {
     for (auto i : ar) {
-        QTreeWidgetItem* item = new QTreeWidgetItem(tree, QStringList(i.name.toString()));
-        item->setText(1, i.type.toString());
+        QTreeWidgetItem* item = new QTreeWidgetItem(tree, QStringList(QString::fromStdString(i.name)));
+        item->setText(1, QString::fromStdString(i.type));
         item->setText(2, QString::fromStdString("Data Array"));
         item->setText(3, i.dtype.toString());
         std::stringstream s;

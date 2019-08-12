@@ -50,8 +50,8 @@ void CategoryPlotter::draw_1d(const EntityInfo &data_source) {
     std::vector<std::string> labels = dc.axisLabels(data_source);
     QString y_label;
     QVector<QString> ax_labels;
-    add_bar_plot(x_tick_labels, values, QString::fromStdString(data_source.name.toString().toStdString()));
-    set_label(data_source.name.toString().toStdString());
+    add_bar_plot(x_tick_labels, values, QString::fromStdString(data_source.name));
+    set_label(data_source.name);
     //set_ylabel(data_source.(array.label() ? *array.label() : "") + (array.unit() ? (" [" + *array.unit() + "]") : ""));
 }
 
@@ -103,7 +103,7 @@ void CategoryPlotter::draw_2d(const EntityInfo &data_source) {
     ui->plot->xAxis->setTickLength(0, 4);
     ui->plot->xAxis->setTickLabelRotation(60);
 
-    set_label(data_source.name.toString().toStdString());
+    set_label(data_source.name);
 
     /*
     std::string unit = "";

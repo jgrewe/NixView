@@ -113,7 +113,7 @@ void LinePlotter::draw_1d(const EntityInfo &info) {
         QVector<double> x_data = dc.axisData(info, 0);
         QVector<double> y_data(x_data.size(), 0.0);
         QVector<QString> x_tick_labels;
-        this->add_line_plot(x_data, y_data, info.name.toString());
+        this->add_line_plot(x_data, y_data, QString::fromStdString(info.name));
         // plot 1d set data in a meaningfull way.
         //   ?? this->add_line_plot(x_axis, y_axis, QString::fromStdString(array.name()));
     } else {
@@ -137,7 +137,7 @@ void LinePlotter::draw_1d(const EntityInfo &info) {
         QVector<double> xdata = dc.axisData(info, 0);
         QVector<double> ydata = QVector<double>::fromStdVector(data);
 
-        this->add_line_plot(xdata, ydata, info.name.toString());
+        this->add_line_plot(xdata, ydata, QString::fromStdString(info.name));
     }
 }
 

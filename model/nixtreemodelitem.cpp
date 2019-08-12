@@ -61,9 +61,9 @@ QVariant NixTreeModelItem::data(int column) const {
     if (column < this->columns.count()) {
         switch (column) {
             case 0:
-                return info.name;
+                return QVariant(QString::fromStdString(info.name));
             case 1:
-                return info.type;
+                return QVariant(QString::fromStdString(info.type));
             case 2:
                 if (info.nix_type != NixType::NIX_UNKNOWN)
                     return QVariant(type_name_map.at(info.nix_type));
@@ -72,7 +72,7 @@ QVariant NixTreeModelItem::data(int column) const {
             case 3:
                 return info.dtype;
             case 4:
-                return info.id;
+                return QVariant(QString::fromStdString(info.id));
             case 5:
                 return info.value;
             case 6:

@@ -21,7 +21,7 @@ void TagView::dataSource(const EntityInfo &info) {
     if (info.nix_type == NixType::NIX_MTAG || info.nix_type == NixType::NIX_TAG) {
         //this->tag = TagContainer(info);
         this->data_src = info;
-        ui->tagLabel->setText(info.name.toString() + " - " + info.type.toString());
+        ui->tagLabel->setText(QString::fromStdString(info.name + " - " + info.type));
         ui->tagLabel->setToolTip(info.description.c_str());
         fillReferences();
         fillFeatures();
@@ -71,8 +71,7 @@ void TagView::fillReferences() {
     DataController &dc = DataController::instance();
 
     for (EntityInfo info : dc.referenceList(this->data_src)) {
-        std::cerr << "info: "  << info.name.toString().toStdString() << std::endl;
-        ui->referencesCombo->addItem(info.name.toString() + " [" + info.type.toString() + "]", QVariant::fromValue(info));
+        ui->referencesCombo->addItem(QString::fromStdString(info.name + " [" + info.type + "]"), QVariant::fromValue(info));
     }
     if (ui->referencesCombo->count() > 0)
         ui->referencesCombo->setCurrentIndex(0);
@@ -84,7 +83,7 @@ void TagView::fillFeatures() {
     DataController &dc = DataController::instance();
 
     for (EntityInfo info : dc.featureList(this->data_src)) {
-        ui->referencesCombo->addItem(info.name.toString() + " [" + info.type.toString() + "]", QVariant::fromValue(info));
+        ui->referencesCombo->addItem(QString::fromStdString(info.name + " [" + info.type + "]"), QVariant::fromValue(info));
     }
     if (ui->featuresCombo->count() > 0)
         ui->featuresCombo->setCurrentIndex(0);

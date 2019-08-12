@@ -57,7 +57,7 @@ void DataController::blocks_to_items(NixTreeModelItem *parent) {
 
 
 void DataController::fetchBlock(NixTreeModelItem *parent) {
-    nix::Block b = this->file.getBlock(parent->entityInfo().name.toString().toStdString());
+    nix::Block b = this->file.getBlock(parent->entityInfo().name);
     std::vector<std::string> parent_path = {b.name()};
     append_items(b.dataArrays(), parent, parent_path, "DataArrays");
     append_items(b.groups(), parent, parent_path, "Groups");
@@ -70,7 +70,7 @@ void DataController::fetchBlock(NixTreeModelItem *parent) {
 void DataController::fetchDataArray(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::DataArray da = b.getDataArray(parent->entityInfo().name.toString().toStdString());
+    nix::DataArray da = b.getDataArray(parent->entityInfo().name);
     p.push_back(da.name());
     append_items(da.dimensions(), parent, p, "Dimensions");
 }
@@ -79,7 +79,7 @@ void DataController::fetchDataArray(NixTreeModelItem *parent) {
 void DataController::fetchTag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::Tag tag = b.getTag(parent->entityInfo().name.toString().toStdString());
+    nix::Tag tag = b.getTag(parent->entityInfo().name);
     append_items(tag.references(), parent, p, "References");
     append_items(tag.features(), parent, p, "Features");
 }
@@ -88,7 +88,7 @@ void DataController::fetchTag(NixTreeModelItem *parent) {
 void DataController::fetchMtag(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
     nix::Block b = this->file.getBlock(p[0]);
-    nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name.toString().toStdString());
+    nix::MultiTag tag = b.getMultiTag(parent->entityInfo().name);
     append_items(tag.references(), parent, p, "References");
     append_items(tag.features(), parent, p, "Features");
 }
@@ -102,26 +102,22 @@ void DataController::fetchSource(NixTreeModelItem *parent) {
         for (size_t i = 2; i< p.size(); ++i) {
             s = s.getSource(p[i]);
         }
-        s = s.getSource(parent->entityInfo().name.toString().toStdString());
+        s = s.getSource(parent->entityInfo().name);
     } else {
-       s = b.getSource(parent->entityInfo().name.toString().toStdString());
+       s = b.getSource(parent->entityInfo().name);
     }
     if (s) {
         EntityInfo si(s, p);
         NixTreeModelItem *itm = new NixTreeModelItem(si, parent);
         parent->appendChild(itm);
-    }//TODO is this correct? Do we need to update the parent?
+    }
 }
 
 
 void DataController::fetchGroup(NixTreeModelItem *parent) {
     std::vector<std::string> p = parent->entityInfo().parent_path;
-    nix::Block b = this->file.getBlock(p[0]);
-    std::cerr << b << std::endl;
-    for (auto s : parent->entityInfo().parent_path)
-        std::cerr << s<< std::endl;
-    std::cerr << "group name " << parent->entityInfo().name.toString().toStdString() << std::endl;
-    nix::Group g = b.getGroup(parent->entityInfo().name.toString().toStdString());
+    nix::Block b = this->file.getBlock(p[0]);    
+    nix::Group g = b.getGroup(parent->entityInfo().name);
 
     append_items(g.dataArrays(), parent, p, "DataArrays");
     append_items(g.tags(), parent, p, "Tags");
@@ -139,11 +135,11 @@ void DataController::fetchSection(NixTreeModelItem *parent) {
         for (size_t i = 1; i < p.size(); ++i) {
             s = s.getSection(p[i]);
         }
-        s = s.getSection(parent->entityInfo().name.toString().toStdString());
+        s = s.getSection(parent->entityInfo().name);
     } else {
-        s = this->file.getSection(parent->entityInfo().name.toString().toStdString());
+        s = this->file.getSection(parent->entityInfo().name);
     }
-    p.push_back(parent->entityInfo().name.toString().toStdString());
+    p.push_back(parent->entityInfo().name);
 
     if (s) {
         std::string id;
@@ -352,7 +348,7 @@ nix::DataArray DataController::getDataArray(const EntityInfo &info) {
     if (info.nix_type == NixType::NIX_DATA_ARRAY || info.nix_type == NixType::NIX_FEAT) {
         if (info.parent_path.size() == 1) {
             nix::Block b = this->file.getBlock(info.parent_path[0]);
-            da = b.getDataArray(info.name.toString().toStdString());
+            da = b.getDataArray(info.name);
         }
     }
     return da;
@@ -363,7 +359,7 @@ nix::Tag DataController::getTag(const EntityInfo &info) {
     if (info.nix_type == NixType::NIX_TAG) {
         if (info.parent_path.size() == 1) {
             nix::Block b = this->file.getBlock(info.parent_path[0]);
-            tag = b.getTag(info.name.toString().toStdString());
+            tag = b.getTag(info.name);
         }
     }
     return tag;
@@ -374,7 +370,7 @@ nix::MultiTag DataController::getMTag(const EntityInfo &info) {
     if (info.nix_type == NixType::NIX_MTAG) {
         if (info.parent_path.size() == 1) {
             nix::Block b = this->file.getBlock(info.parent_path[0]);
-            tag = b.getMultiTag(info.name.toString().toStdString());
+            tag = b.getMultiTag(info.name);
         }
     }
     return tag;
@@ -536,14 +532,14 @@ FileInfo DataController::file_info() {
 void DataController::append_items(const std::vector<nix::Dimension> &dimensions, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir) {
     NixTreeModelItem *p;
     if (subdir.size() > 0 && dimensions.size() > 0) {
-        EntityInfo info(subdir);
+        EntityInfo info(subdir.toStdString());
         info.max_child_count = dimensions.size();
         p = new NixTreeModelItem(info, parent);
         parent->appendChild(p);
     } else {
         p = parent;
     }
-    std::string parent_id = parent->entityInfo().id.toString().toStdString();
+    std::string parent_id = parent->entityInfo().id;
     std::string dim_id;
     for (size_t i = 0; i< dimensions.size(); ++i) {
         nix::Dimension dim = dimensions[i];
@@ -563,14 +559,14 @@ void DataController::append_items(const std::vector<nix::Feature> &features, Nix
     NixTreeModelItem *p;
     std::string id;
     if (subdir.size() > 0 && features.size() > 0) {
-        EntityInfo info(subdir);
+        EntityInfo info(subdir.toStdString());
         info.max_child_count = features.size();
         p = new NixTreeModelItem(info, parent);
         parent->appendChild(p);
     } else {
         p = parent;
     }
-    std::string parent_id = parent->entityInfo().id.toString().toStdString();
+    std::string parent_id = parent->entityInfo().id;
     std::string feat_id;
     for (size_t i = 0; i< features.size(); ++i) {
         nix::Feature feat = features[i];
@@ -592,7 +588,7 @@ void DataController::append_items(const std::vector<T> &entities, NixTreeModelIt
     NixTreeModelItem *p;
     std::string id;
     if (subdir.size() > 0 && entities.size() > 0) {
-        EntityInfo info(subdir);
+        EntityInfo info(subdir.toStdString());
         info.max_child_count = entities.size();
         p = new NixTreeModelItem(info, parent);
         parent->appendChild(p);
