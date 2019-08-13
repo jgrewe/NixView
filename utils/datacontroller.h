@@ -79,7 +79,12 @@ struct FileInfo {
 
 struct DataArrayInfo;
 struct EntityInfo;
-
+/*
+ *
+ * DataController singleton class. The controller should be the only class that interacts with the nix file to avoid parallel access to the file.
+ * It provides lots of convenience methods to access data dimension descriptors etc.
+ *
+ */
 class DataController
 {
 public:
@@ -101,9 +106,11 @@ public:
     NixTreeModel *create_tree_model();
     NixTreeModel *create_metadata_treemodel(NixTreeModelItem *parent);
 
+    /*
+     * Methods to build the tree model
+     */
     void blocks_to_items(NixTreeModelItem *parent);
     void sections_to_items(NixTreeModelItem *parent);
-
     void fetchBlock(NixTreeModelItem *parent);
     void fetchDataArray(NixTreeModelItem *parent);
     void fetchTag(NixTreeModelItem* parent);
@@ -116,6 +123,9 @@ public:
     void append_items(const std::vector<T> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
     void append_items(const std::vector<nix::Dimension> &entities, NixTreeModelItem *parent, std::vector<std::string> parent_path, QString subdir);
 
+    /*
+     *
+     */
     DataArrayInfo getArrayInfo(const EntityInfo &src);
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
     QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index = 0, size_t count = 0);
