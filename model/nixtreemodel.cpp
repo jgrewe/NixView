@@ -9,6 +9,7 @@ NixTreeModel::NixTreeModel(QObject *parent)
     EntityInfo dinfo("Data");
     EntityInfo minfo("Metadata");
 
+    tool_tips = false;
     root_node = new NixTreeModelItem(rinfo);
     data_node = new NixTreeModelItem(dinfo, root_node);
     metadata_node = new NixTreeModelItem(minfo, root_node);
@@ -23,6 +24,8 @@ NixTreeModel::NixTreeModel(QObject *parent)
 NixTreeModel::NixTreeModel(NixTreeModelItem *root_item, QObject *parent)
     :QAbstractItemModel(parent) {
     EntityInfo rinfo("Root");
+
+    tool_tips = false;
     root_node = new NixTreeModelItem(rinfo);
     EntityInfo section_info = root_item->entityInfo();
     NixTreeModelItem *section_node = new NixTreeModelItem(section_info, root_node);
@@ -109,7 +112,9 @@ QVariant NixTreeModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole) {
         return item->data(index.column());
     }
-    return item->toolTip();
+    if (role == Qt::ToolTipRole && this->tool_tips)
+        return item->toolTip();
+    return QVariant();
 }
 
 
@@ -168,4 +173,8 @@ void NixTreeModel::fetchMore(const QModelIndex &parent) {
         default:
             break;
     }
+}
+
+void NixTreeModel::toggleToolTips() {
+    this->tool_tips = !this->tool_tips;
 }

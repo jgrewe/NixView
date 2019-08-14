@@ -32,10 +32,12 @@ public:
     bool canFetchMore(const QModelIndex &parent) const override;
     void fetchMore(const QModelIndex &parent) override;
 
+    void toggleToolTips();
 private:
     NixTreeModelItem *root_node;
     NixTreeModelItem *data_node;
     NixTreeModelItem *metadata_node;
+    bool tool_tips;
 };
 
 #endif // NIXTREEMODEL_H
