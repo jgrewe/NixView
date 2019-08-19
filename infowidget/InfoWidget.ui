@@ -28,7 +28,9 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="plotWidget" native="true"/>
+     <widget class="QWidget" name="plotWidget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_3"/>
+     </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="accessibleName">
        <string/>

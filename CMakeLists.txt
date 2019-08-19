@@ -41,9 +41,11 @@ include_directories (BEFORE
   ${Qt5Core_INCLUDE_DIRS}
   ${Qt5Widgets_INCLUDE_DIRS}
   ${Qt5PrintSupport_INCLUDE_DIRS}
-  ${Qt5Sql_INCLUDE_DIRS})
+  ${Qt5Sql_INCLUDE_DIRS}
+  ${Qt5Charts_INCLUDE_DIRS}
+)
 
-add_definitions (${Qt5Core_DEFINITIONS})
+add_definitions (${Qt5Core_DEFINITIONS} ${Qt5Charts_Definitions})
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
@@ -114,7 +116,7 @@ else ()
     ${NIXVIEW_SOURCES} ${NIXVIEW_RES_SOURCES} ${META_FILES_TO_INCLUDE})
 endif ()
 
-target_link_libraries (nixview Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Sql
+target_link_libraries (nixview Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Sql Qt5::Charts
   ${NIX_LIBRARIES} ${Boost_LIBRARIES})
 
 install (TARGETS nixview BUNDLE DESTINATION . RUNTIME  DESTINATION

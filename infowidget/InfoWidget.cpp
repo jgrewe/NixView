@@ -5,6 +5,9 @@
 #include "views/MainViewWidget.hpp"
 #include <QDebug>
 #include "utils/datacontroller.h"
+#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
+
 
 InfoWidget::InfoWidget(QWidget *parent) :
     QWidget(parent), ui(new Ui::InfoWidget) {
@@ -44,7 +47,14 @@ void InfoWidget::metadata_column_state_change(QString column, bool visible){
 
 
 void InfoWidget::plotEntity(const EntityInfo &info) {
-    ui->plotWidget->dataSource(info);
+    QtCharts::QChartView *cv = new QtCharts::QChartView();
+    //QChartView *cv = new QChartView();
+    ui->plotWidget->layout()->addWidget(cv);//dataSource(info);
+    QtCharts::QLineSeries* series = new QtCharts::QLineSeries();
+    series->append(0, 6);
+    series->append(2, 4);
+    cv->chart()->addSeries(series);
+    cv->chart()->createDefaultAxes();
 }
 
 

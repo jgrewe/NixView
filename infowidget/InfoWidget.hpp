@@ -12,7 +12,6 @@
 #include "TagPanel.hpp"
 #include "views/TagView.hpp"
 #include "model/nixtreemodel.h"
-#include <QtCharts>
 
 //#include "utils/datacontroller.h"
 
