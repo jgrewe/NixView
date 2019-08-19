@@ -5,6 +5,8 @@
 #include "imageplotter.h"
 #include "eventplotter.h"
 #include "common/Common.hpp"
+#include "utils/datacontroller.h"
+
 
 PlotWidget::PlotWidget(QWidget *parent) :
     QWidget(parent),

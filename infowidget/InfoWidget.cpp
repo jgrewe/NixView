@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "views/MainViewWidget.hpp"
 #include <QDebug>
+#include "utils/datacontroller.h"
 
 InfoWidget::InfoWidget(QWidget *parent) :
     QWidget(parent), ui(new Ui::InfoWidget) {
@@ -21,6 +22,8 @@ InfoWidget::InfoWidget(QWidget *parent) :
     dp = new DescriptionPanel(this);
     ui->verticalLayout_page_info->addWidget(dp);
 
+    //pw = new PlotWidget(this);
+
     ui->tabWidget->setCurrentIndex(2);
 
     connect_widgets();
@@ -37,6 +40,11 @@ void InfoWidget::update_info_widget(QModelIndex qml) {
 
 void InfoWidget::metadata_column_state_change(QString column, bool visible){
     mp->setColumnState(column, visible);
+}
+
+
+void InfoWidget::plotEntity(const EntityInfo &info) {
+    ui->plotWidget->dataSource(info);
 }
 
 

@@ -7,9 +7,8 @@
 #include <QModelIndex>
 #include "plotter/plotter.h"
 #include "views/MainViewWidget.hpp"
-#include "utils/entitydescriptor.h"
-#include "utils/datacontroller.h"
 
+struct EntityInfo;
 
 namespace Ui {
 class PlotWidget;

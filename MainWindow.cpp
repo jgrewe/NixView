@@ -122,9 +122,11 @@ void MainWindow::show_about() {
 
 
 void MainWindow::show_plot() {
-    PlotDialog d(this);
-    d.dataSource(selected_item->entityInfo());
-    d.exec();
+    //this->ui->info_view->
+    //PlotDialog d(this);
+    //d.dataSource(selected_item->entityInfo());
+    //d.exec();
+    this->ui->info_view->plotEntity(selected_item->entityInfo());
 }
 
 

@@ -12,6 +12,11 @@
 #include "TagPanel.hpp"
 #include "views/TagView.hpp"
 #include "model/nixtreemodel.h"
+#include <QtCharts>
+
+//#include "utils/datacontroller.h"
+
+struct EntityInfo;
 
 namespace Ui {
 class InfoWidget;
@@ -28,6 +33,7 @@ public:
 public slots:
     void update_info_widget(QModelIndex qml);
     void metadata_column_state_change(QString column, bool visible);
+    void plotEntity(const EntityInfo &info);
 
 private:
     Ui::InfoWidget *ui;

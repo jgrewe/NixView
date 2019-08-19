@@ -35,6 +35,7 @@ find_package (Qt5Core REQUIRED)
 find_package (Qt5Widgets REQUIRED)
 find_package (Qt5PrintSupport QUIET)
 find_package (Qt5Sql REQUIRED)
+find_package (Qt5Charts REQUIRED)
 
 include_directories (BEFORE
   ${Qt5Core_INCLUDE_DIRS}
