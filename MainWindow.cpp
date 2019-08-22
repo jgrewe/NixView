@@ -131,9 +131,12 @@ void MainWindow::show_plot() {
 
 
 void MainWindow::show_table() {
+    /*
     TableDialog d(this);
     d.dataSource(selected_item->entityInfo());
     d.exec();
+    */
+    this->ui->info_view->showData(selected_item->entityInfo());
 }
 
 

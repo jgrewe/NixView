@@ -46,15 +46,44 @@ void InfoWidget::metadata_column_state_change(QString column, bool visible){
 }
 
 
+QVector<QPointF> toPoints(std::vector<double> &xdata, std::vector<double> &ydata) {
+    assert(xdata.size() == ydata.size());
+    QVector<QPointF> points(xdata.size());
+
+    for (size_t i = 0; i < xdata.size(); ++i) {
+        points.push_back({xdata[i], ydata[i]});
+    }
+    return points;
+}
+
+
 void InfoWidget::plotEntity(const EntityInfo &info) {
-    QtCharts::QChartView *cv = new QtCharts::QChartView();
-    //QChartView *cv = new QChartView();
+    /*
+     * QtCharts::QChartView *cv = new QtCharts::QChartView();
     ui->plotWidget->layout()->addWidget(cv);//dataSource(info);
     QtCharts::QLineSeries* series = new QtCharts::QLineSeries();
-    series->append(0, 6);
-    series->append(2, 4);
+    DataController &dc = DataController::instance();
+    std::vector<double> data(info.shape.nelms(), 0.0);
+    nix::NDSize count = info.shape;
+    nix::NDSize offset(info.shape.size(), 0);
+    dc.getData(info, info.dtype, data.data(), count, offset);
+    std::vector<double> xdata = dc.axisData(info, 0).toStdVector();
+    QVector<QPointF> points = toPoints(xdata, data);
+
+    series->replace(points);
     cv->chart()->addSeries(series);
     cv->chart()->createDefaultAxes();
+    */
+}
+
+void InfoWidget::showData(const EntityInfo &info) {
+    std::cerr << "show data table\n";
+
+    if (ui->table_page->canDraw(info)) {
+        std::cerr << "show data table\n";
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->table_page->dataSource(info);
+    }
 }
 
 

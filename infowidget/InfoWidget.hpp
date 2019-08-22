@@ -33,6 +33,7 @@ public slots:
     void update_info_widget(QModelIndex qml);
     void metadata_column_state_change(QString column, bool visible);
     void plotEntity(const EntityInfo &info);
+    void showData(const EntityInfo &info);
 
 private:
     Ui::InfoWidget *ui;

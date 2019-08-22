@@ -24,13 +24,16 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <widget class="QWidget" name="page"/>
+     <widget class="DataTable" name="table_page"/>
+    </widget>
+   </item>
+   <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="plotWidget" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_3"/>
-     </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="accessibleName">
        <string/>
@@ -112,6 +115,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DataTable</class>
+   <extends>QWidget</extends>
+   <header>views/datatable.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
