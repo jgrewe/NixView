@@ -27,12 +27,21 @@ DataTable::~DataTable()
 
 
 bool DataTable::canDraw(const EntityInfo &info) const {
-    if (info.nix_type != NixType::NIX_DATA_ARRAY || info.nix_type != NixType::NIX_FEAT)
+    std::cerr << "can I show data!" << info.name << std::endl;
+
+    if (info.nix_type != NixType::NIX_DATA_ARRAY && info.nix_type != NixType::NIX_FEAT) {
+        std::cerr << "nixtype does not match"  << std::endl;
         return false;
-    if (info.shape.size() > 3)
+    }
+    if (info.shape.size() > 3){
+        std::cerr << "shape does not match" << std::endl;
         return false;
-    if (!nix::data_type_is_numeric(nix::string_to_data_type(info.dtype.toString().toStdString())))
+    }
+    if (!nix::data_type_is_numeric(info.dtype)) {
+        std::cerr << info.dtype << std::endl;
         return false;
+    }
+    std::cerr << "can show data!" << std::endl;
     return true;
 }
 

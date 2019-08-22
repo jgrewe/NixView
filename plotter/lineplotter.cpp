@@ -70,9 +70,9 @@ void LinePlotter::set_ylabel(const QString &label){
 
 
 void LinePlotter::draw(const EntityInfo &info) {
-    nix::DataType dt = nix::string_to_data_type(info.dtype.toString().toStdString());
+    nix::DataType dt = info.dtype;
     if (!Plotter::check_plottable_dtype(dt)) {
-        std::cerr << "LinePlotter::draw cannot handle data type " << info.dtype.toString().toStdString() << std::endl;
+        std::cerr << "LinePlotter::draw cannot handle data type " << nix::data_type_to_string(info.dtype) << std::endl;
         return;
     }
     if (!check_dimensions(info)) {
@@ -133,7 +133,7 @@ void LinePlotter::draw_1d(const EntityInfo &info) {
         std::vector<double> data(info.shape.nelms(), 0.0);
         nix::NDSize count = info.shape;
         nix::NDSize offset(info.shape.size(), 0);
-        dc.getData(info, nix::string_to_data_type(info.dtype.toString().toStdString()), data.data(), count, offset);
+        dc.getData(info, info.dtype, data.data(), count, offset);
         QVector<double> xdata = dc.axisData(info, 0);
         QVector<double> ydata = QVector<double>::fromStdVector(data);
 

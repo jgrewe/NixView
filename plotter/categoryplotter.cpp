@@ -21,8 +21,8 @@ void CategoryPlotter::draw(const EntityInfo &data_source) {
         std::cerr << "CategoryPlotter::draw cannot draw 3D!" << std::endl;
         return;
     }
-    if (!Plotter::check_plottable_dtype(nix::string_to_data_type((data_source.dtype.toString().toStdString())))) {
-        std::cerr << "CategoryPlotter::draw cannot handle data type " << data_source.dtype.toString().toStdString() << std::endl;
+    if (!Plotter::check_plottable_dtype(data_source.dtype)) {
+        std::cerr << "CategoryPlotter::draw cannot handle data type " << nix::data_type_to_string(data_source.dtype) << std::endl;
         return;
     }
     if (!check_dimensions(data_source)) {

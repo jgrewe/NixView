@@ -208,7 +208,8 @@ struct DataArrayInfo {
 
 struct EntityInfo {
     std::string name, type, id;
-    QVariant created_at, updated_at, dtype, value;
+    QVariant created_at, updated_at, value;
+    nix::DataType dtype;
     nix::NDSize shape;
     NixType nix_type;
     bool has_metadata = false;
@@ -255,7 +256,7 @@ struct EntityInfo {
         id = section.id();
         created_at = QVariant(nix::util::timeToStr(section.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(section.updatedAt()).c_str());
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         max_child_count = section.sectionCount() + section.propertyCount();
         description = EntityDescriptor::describe(section);
         parent_path = path;
@@ -284,7 +285,7 @@ struct EntityInfo {
         id = property.id();
         created_at = QVariant(nix::util::timeToStr(property.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(property.updatedAt()).c_str());
-        dtype = QVariant(nix::data_type_to_string(property.dataType()).c_str());
+        dtype = property.dataType();
         max_child_count = 0;
         value = getPropertyValue(property);
         description = EntityDescriptor::describe(property);
@@ -300,7 +301,7 @@ struct EntityInfo {
         id = array.id();
         created_at = QVariant(nix::util::timeToStr(array.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(array.updatedAt()).c_str());
-        dtype = QVariant(nix::data_type_to_string(array.dataType()).c_str());
+        dtype = array.dataType();
         max_child_count = array.dimensionCount();
         description = EntityDescriptor::describe(array);
         parent_path = path;
@@ -309,7 +310,7 @@ struct EntityInfo {
         for (size_t i = 0; i < shape.size(); ++i)
             val.append((nix::util::numToStr(shape[i]) + (i < shape.size() - 1 ? ", " : "")).c_str());
         val.append("]");
-        val.append(" dtype: " + dtype.toString());
+        val.append(" dtype: " + QString::fromStdString(nix::data_type_to_string(dtype)));
         value = QVariant(val);
         nix::Section s = array.metadata();
         has_metadata = s != nix::none;
@@ -330,7 +331,7 @@ struct EntityInfo {
         id = block.id();
         created_at = QVariant(nix::util::timeToStr(block.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(block.updatedAt()).c_str());
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         description = EntityDescriptor::describe(block);
         max_child_count = 0;
         max_child_count += block.tagCount() > 0 ? 1 : 0;
@@ -357,7 +358,7 @@ struct EntityInfo {
         id = group.id();
         created_at = QVariant(nix::util::timeToStr(group.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(group.updatedAt()).c_str());
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         description = EntityDescriptor::describe(group);
         max_child_count = 0;
         max_child_count += group.tagCount() > 0 ? 1 : 0;
@@ -383,7 +384,7 @@ struct EntityInfo {
         id = tag.id();
         created_at = QVariant(nix::util::timeToStr(tag.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(tag.updatedAt()).c_str());
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         max_child_count = 0;
         max_child_count += tag.referenceCount() > 0 ? 1 : 0;
         max_child_count += tag.featureCount() > 0 ? 1 : 0;
@@ -407,7 +408,7 @@ struct EntityInfo {
         id = mtag.id();
         created_at = QVariant(nix::util::timeToStr(mtag.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(mtag.updatedAt()).c_str());
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         max_child_count = 0;
         max_child_count += mtag.referenceCount() > 0 ? 1 : 0;
         max_child_count += mtag.featureCount() > 0 ? 1 : 0;
@@ -428,7 +429,7 @@ struct EntityInfo {
         name = feat.data().name();
         type = feat.data().type();
         nix_type = NixType::NIX_FEAT;
-        dtype = QVariant(nix::data_type_to_string(feat.data().dataType()).c_str());
+        dtype = feat.data().dataType();
         id = feat.id();
         created_at = QVariant(nix::util::timeToStr(feat.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(feat.updatedAt()).c_str());
@@ -456,7 +457,7 @@ struct EntityInfo {
         }
         description = EntityDescriptor::describe(dimension);
         nix_type = NixType::NIX_DIMENSION;
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         id = "n.a.";
 
         created_at = QVariant("");
@@ -471,7 +472,7 @@ struct EntityInfo {
         name = src.name();
         type = src.type();
         nix_type = NixType::NIX_SOURCE;
-        dtype = QVariant("n.a.");
+        dtype = nix::DataType::Nothing;
         id = src.id();
         created_at = QVariant(nix::util::timeToStr(src.createdAt()).c_str());
         updated_at = QVariant(nix::util::timeToStr(src.updatedAt()).c_str());

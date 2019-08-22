@@ -191,7 +191,7 @@ void TagPanel::fill_tree(QTreeWidget* tree, std::vector<EntityInfo> ar) {
         QTreeWidgetItem* item = new QTreeWidgetItem(tree, QStringList(QString::fromStdString(i.name)));
         item->setText(1, QString::fromStdString(i.type));
         item->setText(2, QString::fromStdString("Data Array"));
-        item->setText(3, i.dtype.toString());
+        item->setText(3, QString::fromStdString(nix::data_type_to_string(i.dtype)));
         std::stringstream s;
         s << i.shape;
         std::string shape = s.str();

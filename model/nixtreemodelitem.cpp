@@ -70,7 +70,7 @@ QVariant NixTreeModelItem::data(int column) const {
                 else
                     return QVariant();
             case 3:
-                return info.dtype;
+                return QVariant(QString::fromStdString(nix::data_type_to_string(info.dtype)));
             case 4:
                 return QVariant(QString::fromStdString(info.id));
             case 5:
