@@ -46,7 +46,7 @@ void InfoWidget::metadata_column_state_change(QString column, bool visible){
 }
 
 
-QVector<QPointF> toPoints(std::vector<double> &xdata, std::vector<double> &ydata) {
+/*QVector<QPointF> toPoints(std::vector<double> &xdata, std::vector<double> &ydata) {
     assert(xdata.size() == ydata.size());
     QVector<QPointF> points(xdata.size());
 
@@ -54,10 +54,15 @@ QVector<QPointF> toPoints(std::vector<double> &xdata, std::vector<double> &ydata
         points.push_back({xdata[i], ydata[i]});
     }
     return points;
-}
+}*/
 
 
 void InfoWidget::plotEntity(const EntityInfo &info) {
+    if (ui->charts_page->can_draw(info)) {
+        ui->charts_page->add_data(info);
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+
     /*
      * QtCharts::QChartView *cv = new QtCharts::QChartView();
     ui->plotWidget->layout()->addWidget(cv);//dataSource(info);

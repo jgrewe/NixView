@@ -24,12 +24,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QStackedWidget" name="stackedWidget">
-     <widget class="QWidget" name="page"/>
-     <widget class="DataTable" name="table_page"/>
-    </widget>
-   </item>
-   <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -42,7 +36,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabWidgetPage1">
        <attribute name="title">
@@ -113,6 +107,12 @@
      </widget>
     </widget>
    </item>
+   <item>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <widget class="ChartWidget" name="charts_page"/>
+     <widget class="DataTable" name="table_page"/>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -120,6 +120,12 @@
    <class>DataTable</class>
    <extends>QWidget</extends>
    <header>views/datatable.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ChartWidget</class>
+   <extends>QWidget</extends>
+   <header>chartwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
