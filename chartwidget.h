@@ -32,9 +32,9 @@ private:
     void plot_series_1D(const EntityInfo &data_source, QtCharts::QChartView *cv);
     void plot_series_2D(const EntityInfo &data_source, QtCharts::QChartView *cv);
     void plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim,
-                          nix::NDSize count, nix::NDSize offset, std::string &series_label);
+                          nix::NDSize count, nix::NDSize offset, const std::string &series_label);
     void plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim,
-                          nix::NDSize count, nix::NDSize offset, std::vector<double> xdata, std::string &series_label);
+                          nix::NDSize count, nix::NDSize offset, std::vector<double> xdata, const std::string &series_label);
 
     void plot_events(const EntityInfo &data_source);
 

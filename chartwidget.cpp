@@ -114,7 +114,7 @@ void ChartWidget::plot_series(const EntityInfo &data_source) {
 
 
 void ChartWidget::plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim, nix::NDSize count,
-                                   nix::NDSize offset, std::string &series_label) {
+                                   nix::NDSize offset, const std::string &series_label) {
     std::vector<double> data(count.nelms(), 0.0);
     std::vector<double> xdata = dc.axisData(data_source, dim -1 ).toStdVector();
 
@@ -131,7 +131,7 @@ void ChartWidget::plot_series_data(const EntityInfo &data_source, QtCharts::QCha
 
 
 void ChartWidget::plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim, nix::NDSize count,
-                                   nix::NDSize offset, std::vector<double> xdata, std::string &series_label) {
+                                   nix::NDSize offset, std::vector<double> xdata, const std::string &series_label) {
     std::vector<double> data(count.nelms(), 0.0);
     dc.getData(data_source, data_source.dtype, data.data(), count, offset);
     QVector<QPointF> points = toPoints(xdata, data);
@@ -162,7 +162,7 @@ void ChartWidget::plot_series_2D(const EntityInfo &data_source, QtCharts::QChart
 
     for (nix::ndsize_t i = 0; i < data_source.shape[2 - dim]; i++) {
         offset[2 - dim] = i;
-        label = data_source.name + "" + nix::util::numToStr(i); // FIXME is SET Dimension with labels? Use them
+        std::string label = data_source.name + "" + nix::util::numToStr(i); // FIXME is SET Dimension with labels? Use them
         plot_series_data(data_source, cv, dim, count, offset, xdata, label);
     }
 }
