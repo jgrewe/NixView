@@ -23,6 +23,18 @@
    <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -36,7 +48,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabWidgetPage1">
        <attribute name="title">
@@ -105,12 +117,10 @@
        </layout>
       </widget>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QStackedWidget" name="stackedWidget">
-     <widget class="ChartWidget" name="charts_page"/>
-     <widget class="DataTable" name="table_page"/>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="ChartWidget" name="charts_page"/>
+      <widget class="DataTable" name="table_page"/>
+     </widget>
     </widget>
    </item>
   </layout>

@@ -5,8 +5,6 @@
 #include "views/MainViewWidget.hpp"
 #include <QDebug>
 #include "utils/datacontroller.h"
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
 
 
 InfoWidget::InfoWidget(QWidget *parent) :
@@ -25,8 +23,6 @@ InfoWidget::InfoWidget(QWidget *parent) :
     dp = new DescriptionPanel(this);
     ui->verticalLayout_page_info->addWidget(dp);
 
-    //pw = new PlotWidget(this);
-
     ui->tabWidget->setCurrentIndex(2);
 
     connect_widgets();
@@ -37,6 +33,7 @@ void InfoWidget::update_info_widget(QModelIndex qml) {
     mp->updateMetadataPanel(qml);
     tp->update_tag_panel(qml);
     dp->update_description_panel(qml);
+    ui->stackedWidget->hide();
     // tv->setEntity(qml);
 }
 
@@ -46,48 +43,20 @@ void InfoWidget::metadata_column_state_change(QString column, bool visible){
 }
 
 
-/*QVector<QPointF> toPoints(std::vector<double> &xdata, std::vector<double> &ydata) {
-    assert(xdata.size() == ydata.size());
-    QVector<QPointF> points(xdata.size());
-
-    for (size_t i = 0; i < xdata.size(); ++i) {
-        points.push_back({xdata[i], ydata[i]});
-    }
-    return points;
-}*/
-
-
 void InfoWidget::plotEntity(const EntityInfo &info) {
     if (ui->charts_page->can_draw(info)) {
         ui->charts_page->add_data(info);
         ui->stackedWidget->setCurrentIndex(0);
+        ui->stackedWidget->show();
     }
-
-    /*
-     * QtCharts::QChartView *cv = new QtCharts::QChartView();
-    ui->plotWidget->layout()->addWidget(cv);//dataSource(info);
-    QtCharts::QLineSeries* series = new QtCharts::QLineSeries();
-    DataController &dc = DataController::instance();
-    std::vector<double> data(info.shape.nelms(), 0.0);
-    nix::NDSize count = info.shape;
-    nix::NDSize offset(info.shape.size(), 0);
-    dc.getData(info, info.dtype, data.data(), count, offset);
-    std::vector<double> xdata = dc.axisData(info, 0).toStdVector();
-    QVector<QPointF> points = toPoints(xdata, data);
-
-    series->replace(points);
-    cv->chart()->addSeries(series);
-    cv->chart()->createDefaultAxes();
-    */
 }
 
-void InfoWidget::showData(const EntityInfo &info) {
-    std::cerr << "show data table\n";
 
+void InfoWidget::showData(const EntityInfo &info) {
     if (ui->table_page->canDraw(info)) {
-        std::cerr << "show data table\n";
         ui->stackedWidget->setCurrentIndex(1);
         ui->table_page->dataSource(info);
+        ui->stackedWidget->show();
     }
 }
 
