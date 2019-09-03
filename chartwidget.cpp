@@ -165,7 +165,7 @@ void ChartWidget::plot_series_2D(const EntityInfo &data_source, QtCharts::QChart
     count[dim - 1] = data_source.shape[dim - 1];
     nix::NDSize offset(2, 0);
     std::vector<double> xdata = dc.axisData(data_source, dim - 1).toStdVector();
-    std::vector<std::string> tick_labels = dc.axisData(data_source, dim);// FIXME ! Check this
+    //std::vector<std::string> tick_labels = dc.axisData(data_source, dim);// FIXME ! Check this
     for (nix::ndsize_t i = 0; i < data_source.shape[2 - dim]; i++) {
         offset[2 - dim] = i;
         std::string label = data_source.name + "" + nix::util::numToStr(i); // FIXME is SET Dimension with labels? Use them
