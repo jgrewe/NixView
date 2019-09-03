@@ -6,10 +6,21 @@ NixChartView::NixChartView(QWidget *parent) :
     setContentsMargins(0,0,0,0);
 }
 
+
 NixChartView::NixChartView(QChart *chart, QWidget *parent) :
     QChartView(chart, parent)
 {
     setContentsMargins(0,0,0,0);
+}
+
+
+void NixChartView::set_series(QAbstractSeries *series) {
+    this->chart()->removeAllSeries();
+    this->chart()->addSeries(series);
+}
+
+void NixChartView::add_series(QAbstractSeries *series) {
+    this->chart()->addSeries(series);
 }
 
 /*

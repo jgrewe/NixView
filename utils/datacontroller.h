@@ -142,6 +142,9 @@ public:
 
     QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim);
     QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim, nix::ndsize_t start, nix::ndsize_t count=1);
+    /*
+     *Returns a vector of Strings that can be used for categories, labels etc.
+     */
     QVector<QString> axisStringData(const EntityInfo &info, nix::ndsize_t dim);
     bool axisIsAlias(const EntityInfo &info, nix::ndsize_t dim);
 

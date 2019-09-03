@@ -130,28 +130,29 @@ QtCharts::QLineSeries* ChartWidget::do_plot_series_data(std::vector<double> &xda
 }
 
 
-void ChartWidget::plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim, nix::NDSize count,
+void ChartWidget::plot_series_data(const EntityInfo &data_source, NixChartView *cv, nix::ndsize_t dim, nix::NDSize count,
                                    nix::NDSize offset, const std::string &series_label) {
     std::vector<double> data(count.nelms(), 0.0);
-    std::vector<double> xdata = dc.axisData(data_source, dim -1 ).toStdVector();
+    std::vector<double> xdata = dc.axisData(data_source, dim - 1 ).toStdVector();
 
     dc.getData(data_source, data_source.dtype, data.data(), count, offset);
     cv->chart()->addSeries(do_plot_series_data(xdata, data, series_label));
     cv->chart()->createDefaultAxes();
+    //cv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 }
 
 
-void ChartWidget::plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim, nix::NDSize count,
+void ChartWidget::plot_series_data(const EntityInfo &data_source, NixChartView *cv, nix::NDSize count,
                                    nix::NDSize offset, std::vector<double> xdata, const std::string &series_label) {
     std::vector<double> data(count.nelms(), 0.0);
     dc.getData(data_source, data_source.dtype, data.data(), count, offset);
 
-    cv->chart()->addSeries(do_plot_series_data(xdata, data, series_label));
+    cv->add_series(do_plot_series_data(xdata, data, series_label));
     cv->chart()->createDefaultAxes();
 }
 
 
-void ChartWidget::plot_series_1D(const EntityInfo &data_source, QtCharts::QChartView *cv) {
+void ChartWidget::plot_series_1D(const EntityInfo &data_source, NixChartView *cv) {
     nix::ndsize_t dim = guess_best_xdim(data_source);
     nix::NDSize count = data_source.shape;
     nix::NDSize offset(data_source.shape.size(), 0);
@@ -159,21 +160,48 @@ void ChartWidget::plot_series_1D(const EntityInfo &data_source, QtCharts::QChart
 }
 
 
-void ChartWidget::plot_series_2D(const EntityInfo &data_source, QtCharts::QChartView *cv) {
+void ChartWidget::plot_series_2D(const EntityInfo &data_source, NixChartView *cv) {
     nix::ndsize_t dim = guess_best_xdim(data_source);
     nix::NDSize count(2, 1);
     count[dim - 1] = data_source.shape[dim - 1];
     nix::NDSize offset(2, 0);
     std::vector<double> xdata = dc.axisData(data_source, dim - 1).toStdVector();
-    //std::vector<std::string> tick_labels = dc.axisData(data_source, dim);// FIXME ! Check this
+    QVector<QString> labels = dc.axisStringData(data_source, 2 - dim);
     for (nix::ndsize_t i = 0; i < data_source.shape[2 - dim]; i++) {
         offset[2 - dim] = i;
-        std::string label = data_source.name + "" + nix::util::numToStr(i); // FIXME is SET Dimension with labels? Use them
-        plot_series_data(data_source, cv, dim, count, offset, xdata, label);
+        plot_series_data(data_source, cv, count, offset, xdata, labels[static_cast<int>(i)].toStdString());
     }
 }
 
 
 void ChartWidget::plot_events(const EntityInfo &data_source) {
+    /*
+    if (data_source.shape.size() > 2) {
+         std::cerr << "chartwidget cannot scatter more than 2D" << std::endl;
+         return;
+    }
+    if (!check_dimensions(data_source)) {
+        std::cerr << "problem with data dimensionality" << std::endl;
+        return;
+    }
+    NixChartView *cv = new NixChartView();
+    cv->setRubberBand(QtCharts::QChartView::RubberBand::RectangleRubberBand);
+    cv->chart()->legend()->setFont(QFont("Helvetica [Cronyx]", 9));
+    cv->chart()->legend()->setAlignment(Qt::AlignBottom);
 
+    ui->charts->layout()->addWidget(cv);
+    this->widgets.push_back(cv);
+
+    if (data_source.shape.size() == 1) {
+        plot_series_1D(data_source, cv);
+    } else if (data_source.shape.size() == 2) {
+        plot_series_2D(data_source, cv);
+    }
+
+    DataArrayInfo ai = dc.getArrayInfo(data_source);
+    std::vector<std::string> labels = dc.axisLabels(data_source);
+    cv->chart()->axes(Qt::Orientation::Horizontal)[0]->setTitleText(QString::fromStdString(labels[0]));
+    QString l = QString::fromStdString(ai.label + (ai.unit.size() > 0 ? (" [" + ai.unit + "]"): ""));
+    cv->chart()->axes(Qt::Orientation::Vertical)[0]->setTitleText(l);
+    */
 }

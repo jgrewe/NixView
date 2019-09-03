@@ -16,7 +16,7 @@ class ChartWidget : public QStackedWidget
     Q_OBJECT
 
 public:
-    explicit ChartWidget(QWidget *parent = 0);
+    explicit ChartWidget(QWidget *parent = nullptr);
     ~ChartWidget();
 
     bool can_draw(const EntityInfo &data_source);
@@ -30,13 +30,13 @@ private:
     DataController &dc = DataController::instance();
 
     void plot_series(const EntityInfo &data_source);
-    void plot_series_1D(const EntityInfo &data_source, QtCharts::QChartView *cv);
-    void plot_series_2D(const EntityInfo &data_source, QtCharts::QChartView *cv);
+    void plot_series_1D(const EntityInfo &data_source, NixChartView *cv);
+    void plot_series_2D(const EntityInfo &data_source, NixChartView *cv);
     QtCharts::QLineSeries* do_plot_series_data(std::vector<double> &xdata, std::vector<double> &ydata, const std::string & series_label);
-    void plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim,
+    void plot_series_data(const EntityInfo &data_source, NixChartView *cv, nix::ndsize_t dim,
                           nix::NDSize count, nix::NDSize offset, const std::string &series_label);
-    void plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim,
-                          nix::NDSize count, nix::NDSize offset, std::vector<double> xdata, const std::string &series_label);
+    void plot_series_data(const EntityInfo &data_source, NixChartView *cv, nix::NDSize count, nix::NDSize offset,
+                          std::vector<double> xdata, const std::string &series_label);
 
     void plot_events(const EntityInfo &data_source);
 

@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QtCharts/QChartView>
+#include <QtCharts/QScatterSeries>
+#include <QtCharts/QLineSeries>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -10,10 +12,14 @@ class NixChartView : public QChartView
 {
 
 public:
-    NixChartView(QWidget *parent = 0);
+    NixChartView(QWidget *parent = nullptr);
 
-    NixChartView(QChart *chart, QWidget *parent = 0);
+    NixChartView(QChart *chart, QWidget *parent = nullptr);
 
+    void set_series(QAbstractSeries *series);
+    void add_series(QAbstractSeries *series);
+
+//private:
 
 
 };
