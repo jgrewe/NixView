@@ -2,9 +2,10 @@
 #define CHARTWIDGET_H
 
 #include <QStackedWidget>
-#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
 
 #include "utils/datacontroller.h"
+#include "nixchartview.h"
 
 namespace Ui {
 class ChartWidget;
@@ -31,10 +32,11 @@ private:
     void plot_series(const EntityInfo &data_source);
     void plot_series_1D(const EntityInfo &data_source, QtCharts::QChartView *cv);
     void plot_series_2D(const EntityInfo &data_source, QtCharts::QChartView *cv);
+    QtCharts::QLineSeries* do_plot_series_data(std::vector<double> &xdata, std::vector<double> &ydata, const std::string & series_label);
     void plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim,
-                          nix::NDSize count, nix::NDSize offset, std::string &series_label);
+                          nix::NDSize count, nix::NDSize offset, const std::string &series_label);
     void plot_series_data(const EntityInfo &data_source, QtCharts::QChartView *cv, nix::ndsize_t dim,
-                          nix::NDSize count, nix::NDSize offset, std::vector<double> xdata, std::string &series_label);
+                          nix::NDSize count, nix::NDSize offset, std::vector<double> xdata, const std::string &series_label);
 
     void plot_events(const EntityInfo &data_source);
 

@@ -130,6 +130,14 @@ public:
     void getData(const EntityInfo &src, nix::DataType dtype, void *buffer, const nix::NDSize &count, const nix::NDSize &offset);
     QStringList dimensionLabels(const EntityInfo &info, size_t dim, size_t start_index = 0, size_t count = 0);
 
+    /*
+     * Returns a axis label for each dimension of the data.
+     *
+     * @parameter: EntityInfo
+     *
+     * returns: std::vector<std::string>
+     *
+     */
     std::vector<std::string> axisLabels(const EntityInfo &info);
 
     QVector<double> axisData(const EntityInfo &info, nix::ndsize_t dim);
