@@ -10,6 +10,7 @@ NixChartView::NixChartView(QWidget *parent) :
 NixChartView::NixChartView(QChart *chart, QWidget *parent) :
     QChartView(chart, parent)
 {
+    this->setRenderHint(QPainter::Antialiasing);
     setContentsMargins(0,0,0,0);
     /*
      * setRubberBand(QtCharts::QChartView::RubberBand::RectangleRubberBand);

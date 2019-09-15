@@ -43,6 +43,8 @@ private:
     void plot_tag(const EntityInfo &data_source);
 
     void plot_bars(const EntityInfo &data_source);
+    void plot_bars_1D(const EntityInfo &data_source, NixChartView *cv);
+    void plot_bars_2D(const EntityInfo &data_source, NixChartView *cv);
 
     nix::ndsize_t guess_best_xdim(const EntityInfo &info) const {
         if(info.shape.size() == 0) {
@@ -69,8 +71,7 @@ private:
                 } else if (d_1 == nix::DimensionType::Range && d_2 == nix::DimensionType::Set){
                     return 1;
                 } else {
-                    std::cerr << "How did you get with 2D Set Data to guess_best_xdims() in the Lineplotter?" << std::endl;
-                    throw nix::IncompatibleDimensions("Array contains 2D set data.", "guess_best_xdim");
+                    return info.shape[0] >= info.shape[1] ? 1 : 2;
                 }
             }
         }
