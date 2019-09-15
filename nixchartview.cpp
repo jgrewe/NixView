@@ -11,6 +11,11 @@ NixChartView::NixChartView(QChart *chart, QWidget *parent) :
     QChartView(chart, parent)
 {
     setContentsMargins(0,0,0,0);
+    /*
+     * setRubberBand(QtCharts::QChartView::RubberBand::RectangleRubberBand);
+    this->chart()->legend()->setFont(QFont("Helvetica [Cronyx]", 9));
+    this->chart()->legend()->setAlignment(Qt::AlignBottom);
+    */
 }
 
 

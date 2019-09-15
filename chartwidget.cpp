@@ -175,15 +175,11 @@ void ChartWidget::plot_series_2D(const EntityInfo &data_source, NixChartView *cv
 
 
 void ChartWidget::plot_events(const EntityInfo &data_source) {
-    /*
-    if (data_source.shape.size() > 2) {
-         std::cerr << "chartwidget cannot scatter more than 2D" << std::endl;
+    if (data_source.shape.size() > 1) {
+         std::cerr << "chartwidget cannot scatter more than 1D" << std::endl;
          return;
     }
-    if (!check_dimensions(data_source)) {
-        std::cerr << "problem with data dimensionality" << std::endl;
-        return;
-    }
+
     NixChartView *cv = new NixChartView();
     cv->setRubberBand(QtCharts::QChartView::RubberBand::RectangleRubberBand);
     cv->chart()->legend()->setFont(QFont("Helvetica [Cronyx]", 9));
@@ -192,16 +188,31 @@ void ChartWidget::plot_events(const EntityInfo &data_source) {
     ui->charts->layout()->addWidget(cv);
     this->widgets.push_back(cv);
 
-    if (data_source.shape.size() == 1) {
-        plot_series_1D(data_source, cv);
-    } else if (data_source.shape.size() == 2) {
-        plot_series_2D(data_source, cv);
+    nix::NDSize offset(1, 0), count(1, data_source.shape[0]);
+
+    std::vector<double> xdata, ydata;
+    if (dc.axisIsAlias(data_source, 0)) {
+        xdata.resize(data_source.shape[0], 0.0);
+        ydata.resize(xdata.size(), 0.0);
+        dc.getData(data_source, data_source.dtype, xdata.data(), count, offset);
+    } else {
+        ydata.resize(data_source.shape[0], 0.0);
+        xdata = dc.axisData(data_source, 0).toStdVector();
+        dc.getData(data_source, data_source.dtype, ydata.data(), count, offset);
     }
+    QScatterSeries *s = new QScatterSeries();
+    for (size_t i = 0; i < xdata.size(); ++i) {
+        s->append(xdata[i], ydata[i]);
+    }
+    cv->set_series(s);
+    cv->chart()->createDefaultAxes();
+
 
     DataArrayInfo ai = dc.getArrayInfo(data_source);
     std::vector<std::string> labels = dc.axisLabels(data_source);
     cv->chart()->axes(Qt::Orientation::Horizontal)[0]->setTitleText(QString::fromStdString(labels[0]));
-    QString l = QString::fromStdString(ai.label + (ai.unit.size() > 0 ? (" [" + ai.unit + "]"): ""));
-    cv->chart()->axes(Qt::Orientation::Vertical)[0]->setTitleText(l);
-    */
+    if (!dc.axisIsAlias(data_source, 0)) {
+        QString l = QString::fromStdString(ai.label + (ai.unit.size() > 0 ? (" [" + ai.unit + "]"): ""));
+        cv->chart()->axes(Qt::Orientation::Vertical)[0]->setTitleText(l);
+    }
 }
