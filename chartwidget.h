@@ -46,6 +46,8 @@ private:
     void plot_bars_1D(const EntityInfo &data_source, NixChartView *cv);
     void plot_bars_2D(const EntityInfo &data_source, NixChartView *cv);
 
+    void plot_image(const EntityInfo &data_source);
+
     nix::ndsize_t guess_best_xdim(const EntityInfo &info) const {
         if(info.shape.size() == 0) {
             throw nix::IncompatibleDimensions("Array has dataExtent().size 0.", "guess_best_xdim");

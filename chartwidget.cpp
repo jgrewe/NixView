@@ -5,6 +5,7 @@
 #include <QBarCategoryAxis>
 #include <QBarSeries>
 #include <QValueAxis>
+#include "plotter/imageplotter.h"
 
 ChartWidget::ChartWidget(QWidget *parent) :
     QStackedWidget(parent),
@@ -69,6 +70,10 @@ bool ChartWidget::add_data(const EntityInfo &data_source) {
             break;
         case PlotterType::Category:
             plot_bars(data_source);
+            break;
+        case PlotterType::Image:
+            plot_image(data_source);
+            this->setCurrentIndex(3);
             break;
         default:
             setCurrentIndex(0);
@@ -328,4 +333,12 @@ void ChartWidget::plot_events(const EntityInfo &data_source) {
         QString l = QString::fromStdString(ai.label + (ai.unit.size() > 0 ? (" [" + ai.unit + "]"): ""));
         cv->chart()->axes(Qt::Orientation::Vertical)[0]->setTitleText(l);
     }
+}
+
+
+void ChartWidget::plot_image(const EntityInfo &data_source) {
+    ImagePlotter *ip = new ImagePlotter();
+    ui->image_content->layout()->addWidget(ip);
+    ip->
+    //plot = ip;
 }
